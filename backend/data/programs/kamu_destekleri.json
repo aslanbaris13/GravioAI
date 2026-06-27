@@ -1,0 +1,29 @@
+[
+  {
+    "id": "tubitak-bigg-1512",
+    "kategori": "Kamu Destekleri",
+    "alt_kategori": "TÜBİTAK",
+    "program_adi": "BİGG 1512 — Girişimcilik Destek Programı",
+    "kurum": "TÜBİTAK",
+    "destek_türü": "Hibe",
+    "destek_miktari": "900.000'e kadar",
+    "para_birimi": "TRY",
+    "destek_orani": "%100",
+    "başvuru_durumu": "Açık",
+    "başvuru_baslangici": null,
+    "son_basvuru": "2026-07-15",
+    "başvuru_linki": "https://www.tubitak.gov.tr/tr/destekler/girisimcilik/bigg",
+    "resmi_kaynak": "https://www.tubitak.gov.tr",
+    "açıklama": "Bireysel girişimcilere iş fikrini şirkete dönüştürme aşamasında geri ödemesiz sermaye desteği sağlar.",
+    "hedef_kitle": "Öğrenci ve mezun girişimciler",
+    "sektör": "Teknoloji",
+    "şirket_gerekli": "Hayır",
+    "minimum_çalışan": null,
+    "maksimum_çalışan": null,
+    "yaş_sınırı": null,
+    "kadın_girişimci": "Hayır",
+    "öğrenci": "Evet",
+    "teknopark": "Hayır",
+    "şehir": null
+  }
+]

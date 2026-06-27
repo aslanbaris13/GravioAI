@@ -1,0 +1,29 @@
+[
+  {
+    "id": "aws-activate",
+    "kategori": "Özel Sektör Bulut ve Yazılım Kredileri",
+    "alt_kategori": "AWS",
+    "program_adi": "AWS Activate",
+    "kurum": "Amazon Web Services",
+    "destek_türü": "Bulut Kredisi",
+    "destek_miktari": "1.000 - 300.000",
+    "para_birimi": "USD",
+    "destek_orani": null,
+    "başvuru_durumu": "Açık",
+    "başvuru_baslangici": null,
+    "son_basvuru": null,
+    "başvuru_linki": "https://aws.amazon.com/activate/",
+    "resmi_kaynak": "https://aws.amazon.com/activate/",
+    "açıklama": "Erken aşama girişimlere AWS bulut altyapısı kredisi, teknik destek ve eğitim sağlar.",
+    "hedef_kitle": "Erken aşama teknoloji girişimleri",
+    "sektör": "Teknoloji",
+    "şirket_gerekli": "Evet",
+    "minimum_çalışan": null,
+    "maksimum_çalışan": null,
+    "yaş_sınırı": null,
+    "kadın_girişimci": "Hayır",
+    "öğrenci": "Hayır",
+    "teknopark": "Hayır",
+    "şehir": null
+  }
+]

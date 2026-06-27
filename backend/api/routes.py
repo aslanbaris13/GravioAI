@@ -1,8 +1,10 @@
 """HTTP uç noktaları."""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
+from ..data.loader import filter_programs, get_program
+from ..models import Category, SupportProgram
 
 router = APIRouter()
 
@@ -10,6 +12,20 @@ router = APIRouter()
 @router.get("/health")
 async def health() -> dict:
     return {"status": "ok"}
+
+
+@router.get("/programs", response_model=list[SupportProgram])
+async def list_programs(category: Category | None = None) -> list[SupportProgram]:
+    """Destek programlarını listeler; opsiyonel kategori filtresi."""
+    return filter_programs(category)
+
+
+@router.get("/programs/{program_id}", response_model=SupportProgram)
+async def read_program(program_id: str) -> SupportProgram:
+    program = get_program(program_id)
+    if program is None:
+        raise HTTPException(status_code=404, detail="Program bulunamadı")
+    return program
 
 
 class ChatRequest(BaseModel):
