@@ -2,8 +2,7 @@
 import { useEffect, useRef } from "react";
 import Ms from "./Ms";
 import { toVM } from "@/lib/viewmodel";
-import { getProgram } from "@/lib/programs";
-import type { ChatMessage, FollowUp } from "@/lib/types";
+import type { ChatMessage, FollowUp, Program } from "@/lib/types";
 
 const SUGGESTIONS: { key: string; icon: string; label: string }[] = [
   { key: "profile", icon: "storefront", label: "Düzce'de yeni bir AI yazılım girişimi kurdum, 3 kişiyiz" },
@@ -25,6 +24,7 @@ export default function ChatView({
   onOpenProgram,
   onApplyProgram,
   onCtaAction,
+  resolveProgram,
 }: {
   messages: ChatMessage[];
   typing: boolean;
@@ -38,6 +38,7 @@ export default function ChatView({
   onOpenProgram: (id: string) => void;
   onApplyProgram: (id: string) => void;
   onCtaAction: (action: "go-matches" | "apply-bigg") => void;
+  resolveProgram: (id: string) => Program;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const showEmpty = messages.length === 0 && !typing;
@@ -161,6 +162,7 @@ export default function ChatView({
                 onOpenProgram={onOpenProgram}
                 onApplyProgram={onApplyProgram}
                 onCtaAction={onCtaAction}
+                resolveProgram={resolveProgram}
               />
             ))}
 
@@ -283,11 +285,13 @@ function MessageRow({
   onOpenProgram,
   onApplyProgram,
   onCtaAction,
+  resolveProgram,
 }: {
   m: ChatMessage;
   onOpenProgram: (id: string) => void;
   onApplyProgram: (id: string) => void;
   onCtaAction: (action: "go-matches" | "apply-bigg") => void;
+  resolveProgram: (id: string) => Program;
 }) {
   const rowStyle = {
     display: "flex",
@@ -381,7 +385,7 @@ function MessageRow({
       <div style={rowStyle}>
         <div style={{ marginLeft: 41, width: "calc(100% - 41px)", display: "flex", flexDirection: "column", gap: 10 }}>
           {m.programIds.map((id) => {
-            const c = toVM(getProgram(id));
+            const c = toVM(resolveProgram(id));
             return (
               <button
                 key={id}
@@ -421,6 +425,60 @@ function MessageRow({
               </button>
             );
           })}
+        </div>
+      </div>
+    );
+  }
+
+  // loading — API bekleme göstergesi
+  if (m.kind === "loading") {
+    return (
+      <div style={rowStyle}>
+        <div style={{ display: "flex", gap: 11, maxWidth: "88%" }}>
+          <AssistantAvatar />
+          <div
+            style={{
+              background: "#fff",
+              border: "1px solid #ebe8e0",
+              padding: "15px 17px",
+              borderRadius: "4px 16px 16px 16px",
+              display: "flex",
+              gap: 5,
+              alignItems: "center",
+            }}
+          >
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f97316", animation: "blink 1.2s infinite 0s" }} />
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f97316", animation: "blink 1.2s infinite .2s" }} />
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f97316", animation: "blink 1.2s infinite .4s" }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // error
+  if (m.kind === "error") {
+    return (
+      <div style={rowStyle}>
+        <div style={{ display: "flex", gap: 11, maxWidth: "88%" }}>
+          <AssistantAvatar />
+          <div
+            style={{
+              background: "#fff8f6",
+              border: "1px solid #f9cfc5",
+              padding: "12px 16px",
+              borderRadius: "4px 16px 16px 16px",
+              fontSize: 14,
+              lineHeight: 1.6,
+              color: "#b94040",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <Ms name="error_outline" size={18} color="#e05050" />
+            {m.text}
+          </div>
         </div>
       </div>
     );
