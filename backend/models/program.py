@@ -50,7 +50,8 @@ class SupportProgram(BaseModel):
     program_name: str = Field(alias="program_adi")
     institution: str | None = Field(default=None, alias="kurum")
     support_type: SupportType | None = Field(default=None, alias="destek_türü")
-    support_amount: str | None = Field(default=None, alias="destek_miktari")
+    amount_min: float | None = Field(default=None, alias="tutar_min")
+    amount_max: float | None = Field(default=None, alias="tutar_max")
     currency: Currency | None = Field(default=None, alias="para_birimi")
     support_rate: str | None = Field(default=None, alias="destek_orani")
     application_status: ApplicationStatus | None = Field(default=None, alias="başvuru_durumu")
@@ -89,4 +90,16 @@ class SupportProgram(BaseModel):
     def _normalize_currency(cls, v):
         if isinstance(v, str) and v.strip().upper() == "TL":
             return "TRY"
+        return v
+
+    @field_validator("amount_min", "amount_max", mode="before")
+    @classmethod
+    def _parse_amount(cls, v):
+        """Türkçe binlik ayraçlı metinleri (örn. "300.000") sayıya çevirir."""
+        if isinstance(v, str):
+            s = v.strip()
+            if not s:
+                return None
+            s = s.replace(".", "").replace(",", ".")
+            return float(s)
         return v
