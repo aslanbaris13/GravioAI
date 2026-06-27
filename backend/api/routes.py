@@ -3,11 +3,17 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
-from ..agents import EligibilityAgent, Orchestrator, ProfileExtractor
+from ..agents import (
+    ApplicationAgent,
+    EligibilityAgent,
+    Orchestrator,
+    ProfileExtractor,
+)
 from ..core.embeddings import embed_text
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
 from ..data import repo
 from ..models import (
+    ApplicationDraft,
     AssistResult,
     Category,
     EligibilityResult,
@@ -77,6 +83,21 @@ async def evaluate_eligibility(body: EligibilityRequest) -> EligibilityResult:
     if program is None:
         raise HTTPException(status_code=404, detail="Program bulunamadı")
     agent = EligibilityAgent()
+    return await agent.run(body.profile, program)
+
+
+class ApplicationRequest(BaseModel):
+    profile: UserProfile
+    program_id: str
+
+
+@router.post("/application", response_model=ApplicationDraft)
+async def draft_application(body: ApplicationRequest) -> ApplicationDraft:
+    """Bir profil + program için başvuru taslağı üretir (Başvuru Ajanı)."""
+    program = await run_in_threadpool(repo.get_program, body.program_id)
+    if program is None:
+        raise HTTPException(status_code=404, detail="Program bulunamadı")
+    agent = ApplicationAgent()
     return await agent.run(body.profile, program)
 
 
