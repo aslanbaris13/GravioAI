@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Toast from "@/components/Toast";
 import ChatView from "@/components/ChatView";
@@ -9,18 +9,20 @@ import EligibilityView from "@/components/EligibilityView";
 import ApplicationView from "@/components/ApplicationView";
 import DashboardView from "@/components/DashboardView";
 import { getProgram } from "@/lib/programs";
-import type { ChatMessage, ChatMessageDraft, DocItem, FollowUp, ProgramCategory, ViewName } from "@/lib/types";
+import { assist, fetchApplicationDraft } from "@/lib/api";
+import type { BackendUserProfile } from "@/lib/api";
+import { adaptAssistResult, adaptApplicationDraft, profileToChips } from "@/lib/adapter";
+import type {
+  ApplicationDraft,
+  ChatMessage,
+  ChatMessageDraft,
+  DocItem,
+  FollowUp,
+  Program,
+  ProgramCategory,
+  ViewName,
+} from "@/lib/types";
 
-const INITIAL_DOCS: DocItem[] = [
-  { id: "d1", label: "Nüfus kayıt örneği", done: true },
-  { id: "d2", label: "Öğrenci/mezuniyet belgesi", done: true },
-  { id: "d3", label: "İş planı / Gravio taslağı", done: true, auto: true },
-  { id: "d4", label: "Proje sunumu (10 slayt)", done: false, auto: true },
-  { id: "d5", label: "Tahmini bütçe tablosu", done: true, auto: true },
-  { id: "d6", label: "KVKK açık rıza metni", done: false },
-];
-
-const TYPING_MS = 1150;
 const TOAST_MS = 2200;
 
 export default function Home() {
@@ -31,9 +33,15 @@ export default function Home() {
   const [typing, setTyping] = useState(false);
   const [input, setInput] = useState("");
   const [followups, setFollowups] = useState<FollowUp[]>([]);
-  const [docs, setDocs] = useState<DocItem[]>(INITIAL_DOCS);
+  const [docs, setDocs] = useState<DocItem[]>([]);
   const [toastShow, setToastShow] = useState(false);
   const [toastText, setToastText] = useState("");
+
+  // Gerçek API'den gelen veriler
+  const [currentProfile, setCurrentProfile] = useState<BackendUserProfile | null>(null);
+  const [apiPrograms, setApiPrograms] = useState<Program[]>([]);
+  const [applicationDraft, setApplicationDraft] = useState<ApplicationDraft | null>(null);
+  const [applyLoading, setApplyLoading] = useState(false);
 
   const idRef = useRef(1);
   const nextId = () => String(idRef.current++);
@@ -42,107 +50,19 @@ export default function Home() {
     setMessages((prev) => [...prev, { ...msg, id: nextId() } as ChatMessage]);
   }
 
-  function pushMany(msgs: ChatMessageDraft[]) {
-    setMessages((prev) => [
-      ...prev,
-      ...msgs.map((m, i) => ({ ...m, id: nextId(), delay: i * 90 } as ChatMessage)),
-    ]);
-  }
-
-  function startTyping(cb: () => void) {
-    setTyping(true);
-    setTimeout(() => {
-      setTyping(false);
-      cb();
-    }, TYPING_MS);
-  }
-
-  function userThen(text: string, cb: () => void) {
-    push({ role: "user", text });
-    setInput("");
-    setFollowups([]);
-    startTyping(cb);
-  }
-
-  function respondProfile() {
-    push({
-      role: "assistant",
-      kind: "profile",
-      chips: [
-        { label: "Sektör", value: "AI / Yazılım" },
-        { label: "İl", value: "Düzce" },
-        { label: "Ekip", value: "3 kişi" },
-        { label: "Kuruluş", value: "< 1 yıl" },
-        { label: "Hedef", value: "Ar-Ge + İstihdam" },
-        { label: "Altyapı", value: "Bulut / sunucusuz" },
-      ],
-    });
-    pushMany([{ role: "assistant", kind: "cards", programIds: ["bigg", "aws", "google", "nvidia", "marka"] }]);
-    setFollowups([
-      { key: "bigg", label: "BİGG başvurusunu hazırla" },
-      { key: "cloud", label: "Bulut kredisi seçeneklerini göster" },
-    ]);
-  }
-
-  function respondCloud() {
-    push({ role: "assistant", kind: "cards", programIds: ["aws", "google", "nvidia"] });
-    setFollowups([{ key: "profile", label: "Tüm uygun destekleri göster" }]);
-  }
-
-  function respondBigg() {
-    push({
-      role: "assistant",
-      kind: "cta",
-      label: "TÜBİTAK 1512 BİGG başvurusunu hazırla",
-      icon: "rocket_launch",
-      action: "apply-bigg",
+  function replaceLastWith(msgs: ChatMessageDraft[]) {
+    setMessages((prev) => {
+      // Son "loading" mesajını kaldır, yenilerini ekle
+      const withoutLoading = prev.filter((m) => !(m.role === "assistant" && m.kind === "loading"));
+      return [
+        ...withoutLoading,
+        ...msgs.map((m, i) => ({ ...m, id: nextId(), delay: i * 90 } as ChatMessage)),
+      ];
     });
   }
 
-  function respondGeneric() {
-    push({
-      role: "assistant",
-      kind: "text",
-      text:
-        "İşletmeni biraz daha anlatır mısın? Sektör, ekip büyüklüğü, kuruluş tarihi ve hedefin (örn. Ar-Ge, bulut altyapısı) hakkında bilgi verirsen sana en uygun destekleri çıkarabilirim.",
-    });
-    setFollowups([
-      { key: "profile", label: "Düzce'de yeni bir AI yazılım girişimi kurdum, 3 kişiyiz" },
-      { key: "cloud", label: "Bulut altyapısı için kredi arıyorum" },
-    ]);
-  }
-
-  function onSuggestion(key: string) {
-    const labelMap: Record<string, string> = {
-      profile: "Düzce'de yeni bir AI yazılım girişimi kurdum, 3 kişiyiz",
-      cloud: "Bulut altyapısı için kredi arıyorum",
-      arge: "Ar-Ge hibesine uygun muyum?",
-      all: "Yeni şirketim için tüm destekleri göster",
-    };
-    const fn = key === "cloud" ? respondCloud : respondProfile;
-    userThen(labelMap[key] ?? key, fn);
-  }
-
-  function onFollowup(key: string) {
-    const labelMap: Record<string, string> = {
-      bigg: "BİGG başvurusunu hazırla",
-      cloud: "Bulut kredisi seçeneklerini göster",
-      profile: "Tüm uygun destekleri göster",
-    };
-    const fn = key === "bigg" ? respondBigg : key === "cloud" ? respondCloud : respondProfile;
-    userThen(labelMap[key] ?? key, fn);
-  }
-
-  function onSend() {
-    const text = input.trim();
-    if (!text) return;
-    const lower = text.toLowerCase();
-    const hasHistory = messages.length > 0;
-    let fn = respondGeneric;
-    if (lower.includes("bigg") || lower.includes("başvuru")) fn = respondBigg;
-    else if (lower.includes("bulut") || lower.includes("kredi") || lower.includes("aws")) fn = respondCloud;
-    else if (!hasHistory || lower.includes("uygun") || lower.includes("destek")) fn = respondProfile;
-    userThen(text, fn);
+  function removeLastLoading() {
+    setMessages((prev) => prev.filter((m) => !(m.role === "assistant" && m.kind === "loading")));
   }
 
   function onNewChat() {
@@ -150,6 +70,166 @@ export default function Home() {
     setTyping(false);
     setInput("");
     setFollowups([]);
+    setCurrentProfile(null);
+    setApiPrograms([]);
+    setApplicationDraft(null);
+  }
+
+  /** Ana gönderme fonksiyonu — gerçek API çağrısı yapar */
+  const onSend = useCallback(async () => {
+    const text = input.trim();
+    if (!text || typing) return;
+
+    // Kullanıcı mesajını ekle
+    setMessages((prev) => [
+      ...prev,
+      { id: nextId(), role: "user", text } as ChatMessage,
+    ]);
+    setInput("");
+    setFollowups([]);
+    setTyping(true);
+
+    // Yükleniyor göstergesi
+    setMessages((prev) => [
+      ...prev,
+      { id: nextId(), role: "assistant", kind: "loading" } as ChatMessage,
+    ]);
+
+    try {
+      const raw = await assist(text);
+      const { profile, programs, reply } = adaptAssistResult(raw);
+
+      setCurrentProfile(profile);
+      setApiPrograms((prev) => {
+        // Aynı id varsa güncelle, yoksa ekle
+        const existingIds = new Set(prev.map((p) => p.id));
+        const fresh = programs.filter((p) => !existingIds.has(p.id));
+        return [...prev, ...fresh];
+      });
+
+      const chips = profileToChips(profile);
+      const programIds = programs.map((p) => p.id);
+
+      const responses: ChatMessageDraft[] = [];
+
+      if (chips.length > 0) {
+        responses.push({ role: "assistant", kind: "profile", chips });
+      }
+
+      if (programIds.length > 0) {
+        responses.push({ role: "assistant", kind: "cards", programIds });
+      }
+
+      if (reply) {
+        responses.push({ role: "assistant", kind: "text", text: reply });
+      }
+
+      if (responses.length === 0) {
+        responses.push({
+          role: "assistant",
+          kind: "text",
+          text: "Profilini tam çıkaramadım. Sektör, şehir, ekip büyüklüğü ve hedefin hakkında biraz daha bilgi verir misin?",
+        });
+      }
+
+      replaceLastWith(responses);
+
+      // Takip önerileri
+      if (programIds.length > 0) {
+        setFollowups([
+          { key: "apply", label: `${programs[0].name} başvurusunu hazırla` },
+          { key: "more", label: "Daha fazla destek göster" },
+        ]);
+      }
+    } catch (err: unknown) {
+      removeLastLoading();
+      const msg =
+        err instanceof Error ? err.message : "Beklenmeyen bir hata oluştu.";
+      push({
+        role: "assistant",
+        kind: "error",
+        text: `Bir sorun oluştu: ${msg}`,
+      });
+    } finally {
+      setTyping(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, typing]);
+
+  function onFollowup(key: string) {
+    if (key === "apply" && apiPrograms.length > 0) {
+      applyProgram(apiPrograms[0].id);
+      return;
+    }
+    if (key === "more") {
+      setView("matches");
+      return;
+    }
+    // Fallback
+    setInput(key);
+  }
+
+  function onSuggestion(suggestionKey: string) {
+    const labelMap: Record<string, string> = {
+      profile: "Düzce'de yeni bir AI yazılım girişimi kurdum, 3 kişiyiz",
+      cloud: "Bulut altyapısı için kredi arıyorum",
+      arge: "Ar-Ge hibesine uygun muyum?",
+      all: "Yeni şirketim için tüm destekleri göster",
+    };
+    const label = labelMap[suggestionKey] ?? suggestionKey;
+    setInput(label);
+    // Kısa gecikme ile gönder (input state'inin güncellenmesi için)
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        { id: nextId(), role: "user", text: label } as ChatMessage,
+      ]);
+      setFollowups([]);
+      setTyping(true);
+      setMessages((msgs) => [
+        ...msgs,
+        { id: nextId(), role: "assistant", kind: "loading" } as ChatMessage,
+      ]);
+
+      assist(label)
+        .then((raw) => {
+          const { profile, programs, reply } = adaptAssistResult(raw);
+          setCurrentProfile(profile);
+          setApiPrograms((prev) => {
+            const existingIds = new Set(prev.map((p) => p.id));
+            const fresh = programs.filter((p) => !existingIds.has(p.id));
+            return [...prev, ...fresh];
+          });
+
+          const chips = profileToChips(profile);
+          const programIds = programs.map((p) => p.id);
+          const responses: ChatMessageDraft[] = [];
+          if (chips.length > 0) responses.push({ role: "assistant", kind: "profile", chips });
+          if (programIds.length > 0) responses.push({ role: "assistant", kind: "cards", programIds });
+          if (reply) responses.push({ role: "assistant", kind: "text", text: reply });
+
+          replaceLastWith(responses);
+
+          if (programIds.length > 0) {
+            setFollowups([
+              { key: "apply", label: `${programs[0].name} başvurusunu hazırla` },
+              { key: "more", label: "Daha fazla destek göster" },
+            ]);
+          }
+        })
+        .catch((err: unknown) => {
+          removeLastLoading();
+          const msg = err instanceof Error ? err.message : "Hata oluştu.";
+          setMessages((prev) => [
+            ...prev,
+            { id: nextId(), role: "assistant", kind: "error", text: msg } as ChatMessage,
+          ]);
+        })
+        .finally(() => {
+          setTyping(false);
+          setInput("");
+        });
+    }, 50);
   }
 
   function openProgram(id: string) {
@@ -157,24 +237,74 @@ export default function Home() {
     setView("detail");
   }
 
-  function applyProgram(id: string) {
+  /** Başvuru taslağını backend'den çeker ve ApplicationView'e geçer */
+  async function applyProgram(id: string) {
     setSelectedId(id);
-    setView("application");
+
+    // Profil yoksa direkt yönlendir (detay ekranına dön)
+    if (!currentProfile) {
+      setView("application");
+      return;
+    }
+
+    setApplyLoading(true);
+    try {
+      const raw = await fetchApplicationDraft(currentProfile, id);
+      const draft = adaptApplicationDraft(raw);
+      setApplicationDraft(draft);
+      setDocs(draft.docs);
+    } catch {
+      // Taslak çekilemezse boş state ile devam et
+      setApplicationDraft(null);
+      setDocs([]);
+    } finally {
+      setApplyLoading(false);
+      setView("application");
+    }
   }
 
   function onCtaAction(action: "go-matches" | "apply-bigg") {
-    if (action === "apply-bigg") applyProgram("bigg");
-    else setView("matches");
+    if (action === "apply-bigg") {
+      // BİGG mock ID'si; gerçek veride program_id backend'den gelir
+      const biggId = apiPrograms.find((p) =>
+        p.name.toLowerCase().includes("bigg"),
+      )?.id ?? "bigg";
+      applyProgram(biggId);
+    } else {
+      setView("matches");
+    }
   }
 
   function toggleDoc(id: string) {
     setDocs((prev) => prev.map((d) => (d.id === id ? { ...d, done: !d.done } : d)));
+    // ApplicationDraft'taki docs'u da senkronize et
+    setApplicationDraft((prev) =>
+      prev
+        ? {
+            ...prev,
+            docs: prev.docs.map((d) => (d.id === id ? { ...d, done: !d.done } : d)),
+          }
+        : prev,
+    );
   }
 
   function flash(text: string) {
     setToastText(text);
     setToastShow(true);
     setTimeout(() => setToastShow(false), TOAST_MS);
+  }
+
+  function buildPlanText(): string {
+    if (applicationDraft) {
+      const lines: string[] = [
+        applicationDraft.planTitle,
+        "",
+        ...applicationDraft.planSections.flatMap((s) => [s.heading, s.body, ""]),
+      ];
+      return lines.join("\n");
+    }
+    // Fallback: boş taslak yoksa
+    return "Başvuru taslağı henüz yüklenmedi.";
   }
 
   function onCopyPlan() {
@@ -189,14 +319,25 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "TUBITAK-BIGG-Is-Plani-Taslagi.txt";
+    const filename = applicationDraft
+      ? `${applicationDraft.programName.replace(/\s+/g, "-")}-Is-Plani.txt`
+      : "Basvuru-Is-Plani.txt";
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
     flash("Taslak indiriliyor");
   }
 
-  const selectedProgram = getProgram(selectedId);
-  const matchCount = 7;
+  /**
+   * Chat'teki program kartları için program çözümleme.
+   * Önce API'den gelen gerçek programlara bak; yoksa mock'a düş.
+   */
+  function resolveProgram(id: string) {
+    return apiPrograms.find((p) => p.id === id) ?? getProgram(id);
+  }
+
+  const selectedProgram = resolveProgram(selectedId);
+  const matchCount = apiPrograms.length > 0 ? apiPrograms.length : 7;
 
   return (
     <div style={{ display: "flex", height: "100vh", background: "#f4f3ef" }}>
@@ -226,6 +367,7 @@ export default function Home() {
             onOpenProgram={openProgram}
             onApplyProgram={applyProgram}
             onCtaAction={onCtaAction}
+            resolveProgram={resolveProgram}
           />
         )}
         {view === "matches" && (
@@ -248,6 +390,8 @@ export default function Home() {
         {view === "application" && (
           <ApplicationView
             docs={docs}
+            applicationDraft={applicationDraft}
+            applyLoading={applyLoading}
             onToggleDoc={toggleDoc}
             onBack={() => setView("detail")}
             onCopyPlan={onCopyPlan}
@@ -259,28 +403,4 @@ export default function Home() {
       <Toast show={toastShow} text={toastText} />
     </div>
   );
-}
-
-function buildPlanText(): string {
-  return [
-    "Nova — Otonom Bulut Maliyet Optimizasyon Ajanı",
-    "",
-    "PROJE ADI",
-    "Nova — KOBİ'ler ve erken aşama yazılım girişimleri için otonom bulut maliyet optimizasyon ajanı.",
-    "",
-    "ÖZET",
-    "Nova, işletmelerin AWS/GCP/Azure bulut faturalarını sürekli izleyen, anormal maliyet artışlarını tespit eden ve kullanılmayan kaynakları otomatik olarak kapatan bir yapay zekâ ajanıdır. Manuel maliyet denetimine kıyasla %20-35 oranında tasarruf hedefler.",
-    "",
-    "PROBLEM VE ÇÖZÜM",
-    "Küçük ekipler bulut maliyetlerini takip edecek özel bir FinOps kadrosuna sahip değil; faturalar kontrolsüz büyüyor. Nova, kaynak kullanım verilerini sürekli analiz ederek gereksiz harcamaları otomatik tespit eder ve onaylı aksiyonları kendi başına uygular.",
-    "",
-    "PAZAR VE HEDEF KİTLE",
-    "Birincil hedef kitle, Türkiye'de bulut altyapısı kullanan erken-orta ölçekli yazılım şirketleri ve KOBİ'lerdir. İlk faz hedefi: 50 pilot şirket, 6 ay içinde.",
-    "",
-    "EKİP",
-    "3 kurucu ortak: yazılım mimarisi/bulut altyapısı, makine öğrenmesi/veri mühendisliği, iş geliştirme/müşteri ilişkileri. Tüm ekip Düzce merkezli ve tam zamanlı.",
-    "",
-    "TALEP EDİLEN DESTEK",
-    "TÜBİTAK 1512 BİGG programından 600.000 TL hibe sermaye talep ediyoruz. Bütçe: ürün geliştirme (%55), bulut altyapı/test maliyetleri (%20), pazara giriş (%15), operasyonel giderler (%10).",
-  ].join("\n");
 }
