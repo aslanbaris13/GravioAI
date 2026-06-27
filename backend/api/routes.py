@@ -3,11 +3,17 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
-from ..agents import EligibilityAgent, ProfileExtractor
+from ..agents import EligibilityAgent, Orchestrator, ProfileExtractor
 from ..core.embeddings import embed_text
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
 from ..data import repo
-from ..models import Category, EligibilityResult, SupportProgram, UserProfile
+from ..models import (
+    AssistResult,
+    Category,
+    EligibilityResult,
+    SupportProgram,
+    UserProfile,
+)
 
 router = APIRouter()
 
@@ -72,6 +78,16 @@ async def evaluate_eligibility(body: EligibilityRequest) -> EligibilityResult:
         raise HTTPException(status_code=404, detail="Program bulunamadı")
     agent = EligibilityAgent()
     return await agent.run(body.profile, program)
+
+
+class AssistRequest(BaseModel):
+    message: str
+
+
+@router.post("/assist", response_model=AssistResult)
+async def assist(body: AssistRequest) -> AssistResult:
+    """Uçtan uca akış: mesaj -> profil -> eşleştirme -> uygunluk (Orkestratör)."""
+    return await Orchestrator().run(body.message)
 
 
 class ChatRequest(BaseModel):

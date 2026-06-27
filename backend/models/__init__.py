@@ -4,6 +4,7 @@ from .eligibility import (
     EligibilityResult,
     EligibilityState,
 )
+from .orchestration import AssistResult, ProgramMatch
 from .profile import UserProfile
 from .program import ApplicationStatus, Currency, SupportProgram, SupportType
 from .taxonomy import SUBCATEGORIES, Category
@@ -20,4 +21,6 @@ __all__ = [
     "EligibilityCondition",
     "EligibilityState",
     "ConditionState",
+    "AssistResult",
+    "ProgramMatch",
 ]

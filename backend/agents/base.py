@@ -13,6 +13,7 @@ sağlayıcıdan bağımsızdır (Gemini/Anthropic/diğer fark etmez), çünkü �
 
 Yeni ajan = `Agent`'tan türet, `name` + `system_prompt` ver, bir `run()` yaz.
 """
+import asyncio
 import json
 import re
 from abc import ABC
@@ -23,6 +24,9 @@ from pydantic import BaseModel
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
 
 TModel = TypeVar("TModel", bound=BaseModel)
+
+# Geçici (transient) sağlayıcı hatalarının işaretleri — bunlarda yeniden denenir.
+_TRANSIENT = ("503", "unavailable", "429", "overloaded", "rate limit", "timeout")
 
 _JSON_FENCE = re.compile(r"```(?:json)?\s*(.*?)\s*```", re.DOTALL)
 
@@ -62,6 +66,29 @@ class Agent(ABC):
     def __init__(self, llm: LLMClient | None = None) -> None:
         self._llm = llm or get_llm_client()
 
+    async def _chat(
+        self,
+        user_text: str,
+        *,
+        system: str | None,
+        max_tokens: int,
+        retries: int = 3,
+    ) -> str:
+        """LLM çağrısı; geçici hatalarda (503/429/overload) artan beklemeyle yeniden dener."""
+        for attempt in range(retries):
+            try:
+                return await self._llm.chat(
+                    [LLMMessage(role="user", content=user_text)],
+                    system=system,
+                    max_tokens=max_tokens,
+                )
+            except Exception as e:  # noqa: BLE001 — sağlayıcıya özgü hata tipleri değişebilir
+                transient = any(t in str(e).lower() for t in _TRANSIENT)
+                if not transient or attempt == retries - 1:
+                    raise
+                await asyncio.sleep(2 * (attempt + 1))
+        raise RuntimeError("ulaşılamaz")  # döngü ya döner ya yükseltir
+
     async def _complete(
         self,
         user_text: str,
@@ -70,10 +97,8 @@ class Agent(ABC):
         max_tokens: int = 2048,
     ) -> str:
         """Serbest metin yanıt üretir."""
-        return await self._llm.chat(
-            [LLMMessage(role="user", content=user_text)],
-            system=system or self.system_prompt,
-            max_tokens=max_tokens,
+        return await self._chat(
+            user_text, system=system or self.system_prompt, max_tokens=max_tokens
         )
 
     async def _extract(
@@ -92,9 +117,5 @@ class Agent(ABC):
             "Bilinmeyen/çıkarılamayan alanlar için null kullan.\n"
             f"JSON şeması:\n{schema}"
         )
-        raw = await self._llm.chat(
-            [LLMMessage(role="user", content=user_text)],
-            system=system,
-            max_tokens=max_tokens,
-        )
+        raw = await self._chat(user_text, system=system, max_tokens=max_tokens)
         return model.model_validate(_loads_json(raw))
