@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
-from ..agents import ProfileExtractor
+from ..agents import EligibilityAgent, ProfileExtractor
 from ..core.embeddings import embed_text
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
 from ..data import repo
-from ..models import Category, SupportProgram, UserProfile
+from ..models import Category, EligibilityResult, SupportProgram, UserProfile
 
 router = APIRouter()
 
@@ -57,6 +57,21 @@ async def extract_profile(body: ProfileRequest) -> UserProfile:
     """Serbest metinden yapılandırılmış kullanıcı profili çıkarır (Profil Çıkarma Ajanı)."""
     agent = ProfileExtractor()
     return await agent.run(body.message)
+
+
+class EligibilityRequest(BaseModel):
+    profile: UserProfile
+    program_id: str
+
+
+@router.post("/eligibility", response_model=EligibilityResult)
+async def evaluate_eligibility(body: EligibilityRequest) -> EligibilityResult:
+    """Bir profili belirli bir programa karşı değerlendirir (Uygunluk Ajanı)."""
+    program = await run_in_threadpool(repo.get_program, body.program_id)
+    if program is None:
+        raise HTTPException(status_code=404, detail="Program bulunamadı")
+    agent = EligibilityAgent()
+    return await agent.run(body.profile, program)
 
 
 class ChatRequest(BaseModel):
