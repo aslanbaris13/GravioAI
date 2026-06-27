@@ -8,8 +8,10 @@ from ..core.embeddings import embed_text
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
 from ..data import repo
 from ..models import (
+    ApplicationDraft,
     AssistResult,
     Category,
+    ConversationTurn,
     EligibilityResult,
     SupportProgram,
     UserProfile,
@@ -82,12 +84,13 @@ async def evaluate_eligibility(body: EligibilityRequest) -> EligibilityResult:
 
 class AssistRequest(BaseModel):
     message: str
+    history: list[ConversationTurn] = []
 
 
 @router.post("/assist", response_model=AssistResult)
 async def assist(body: AssistRequest) -> AssistResult:
-    """Uçtan uca akış: mesaj -> profil -> eşleştirme -> uygunluk (Orkestratör)."""
-    return await Orchestrator().run(body.message)
+    """Uçtan uca akış: mesaj + geçmiş → profil → eşleştirme → uygunluk (Orkestratör)."""
+    return await Orchestrator().run(body.message, history=body.history or None)
 
 
 class ChatRequest(BaseModel):

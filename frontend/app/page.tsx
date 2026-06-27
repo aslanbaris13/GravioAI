@@ -10,7 +10,7 @@ import ApplicationView from "@/components/ApplicationView";
 import DashboardView from "@/components/DashboardView";
 import { getProgram } from "@/lib/programs";
 import { assist, fetchApplicationDraft } from "@/lib/api";
-import type { BackendUserProfile } from "@/lib/api";
+import type { BackendUserProfile, ConversationTurn } from "@/lib/api";
 import { adaptAssistResult, adaptApplicationDraft, profileToChips } from "@/lib/adapter";
 import type {
   ApplicationDraft,
@@ -45,6 +45,21 @@ export default function Home() {
 
   const idRef = useRef(1);
   const nextId = () => String(idRef.current++);
+
+  /** Mevcut mesaj listesini backend history formatına dönüştürür.
+   * Yalnızca text mesajları alır; profil/kart/cta gibi UI-özel turlar kapsam dışı.
+   */
+  function buildHistory(msgs: ChatMessage[]): ConversationTurn[] {
+    const turns: ConversationTurn[] = [];
+    for (const m of msgs) {
+      if (m.role === "user") {
+        turns.push({ role: "user", content: m.text });
+      } else if (m.role === "assistant" && m.kind === "text") {
+        turns.push({ role: "assistant", content: m.text });
+      }
+    }
+    return turns;
+  }
 
   function push(msg: ChatMessageDraft) {
     setMessages((prev) => [...prev, { ...msg, id: nextId() } as ChatMessage]);
@@ -96,7 +111,7 @@ export default function Home() {
     ]);
 
     try {
-      const raw = await assist(text);
+      const raw = await assist(text, buildHistory(messages));
       const { profile, programs, reply } = adaptAssistResult(raw);
 
       setCurrentProfile(profile);
@@ -178,57 +193,64 @@ export default function Home() {
     };
     const label = labelMap[suggestionKey] ?? suggestionKey;
     setInput(label);
-    // Kısa gecikme ile gönder (input state'inin güncellenmesi için)
+    // Kısa gecikme ile gönder
     setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { id: nextId(), role: "user", text: label } as ChatMessage,
-      ]);
-      setFollowups([]);
-      setTyping(true);
-      setMessages((msgs) => [
-        ...msgs,
-        { id: nextId(), role: "assistant", kind: "loading" } as ChatMessage,
-      ]);
+      // History snapshot'ını gecikme öncesinde al
+      setMessages((prev) => {
+        const snapshotHistory = buildHistory(prev);
+        const withUser = [
+          ...prev,
+          { id: nextId(), role: "user", text: label } as ChatMessage,
+        ];
+        setFollowups([]);
+        setTyping(true);
 
-      assist(label)
-        .then((raw) => {
-          const { profile, programs, reply } = adaptAssistResult(raw);
-          setCurrentProfile(profile);
-          setApiPrograms((prev) => {
-            const existingIds = new Set(prev.map((p) => p.id));
-            const fresh = programs.filter((p) => !existingIds.has(p.id));
-            return [...prev, ...fresh];
+        const withLoading = [
+          ...withUser,
+          { id: nextId(), role: "assistant", kind: "loading" } as ChatMessage,
+        ];
+
+        assist(label, snapshotHistory)
+          .then((raw) => {
+            const { profile, programs, reply } = adaptAssistResult(raw);
+            setCurrentProfile(profile);
+            setApiPrograms((prev2) => {
+              const existingIds = new Set(prev2.map((p) => p.id));
+              const fresh = programs.filter((p) => !existingIds.has(p.id));
+              return [...prev2, ...fresh];
+            });
+
+            const chips = profileToChips(profile);
+            const programIds = programs.map((p) => p.id);
+            const responses: ChatMessageDraft[] = [];
+            if (chips.length > 0) responses.push({ role: "assistant", kind: "profile", chips });
+            if (programIds.length > 0) responses.push({ role: "assistant", kind: "cards", programIds });
+            if (reply) responses.push({ role: "assistant", kind: "text", text: reply });
+
+            replaceLastWith(responses);
+
+            if (programIds.length > 0) {
+              setFollowups([
+                { key: "apply", label: `${programs[0].name} başvurusunu hazırla` },
+                { key: "more", label: "Daha fazla destek göster" },
+              ]);
+            }
+          })
+          .catch((err: unknown) => {
+            removeLastLoading();
+            const msg = err instanceof Error ? err.message : "Hata oluştu.";
+            setMessages((m) => [
+              ...m,
+              { id: nextId(), role: "assistant", kind: "error", text: msg } as ChatMessage,
+            ]);
+          })
+          .finally(() => {
+            setTyping(false);
+            setInput("");
           });
 
-          const chips = profileToChips(profile);
-          const programIds = programs.map((p) => p.id);
-          const responses: ChatMessageDraft[] = [];
-          if (chips.length > 0) responses.push({ role: "assistant", kind: "profile", chips });
-          if (programIds.length > 0) responses.push({ role: "assistant", kind: "cards", programIds });
-          if (reply) responses.push({ role: "assistant", kind: "text", text: reply });
-
-          replaceLastWith(responses);
-
-          if (programIds.length > 0) {
-            setFollowups([
-              { key: "apply", label: `${programs[0].name} başvurusunu hazırla` },
-              { key: "more", label: "Daha fazla destek göster" },
-            ]);
-          }
-        })
-        .catch((err: unknown) => {
-          removeLastLoading();
-          const msg = err instanceof Error ? err.message : "Hata oluştu.";
-          setMessages((prev) => [
-            ...prev,
-            { id: nextId(), role: "assistant", kind: "error", text: msg } as ChatMessage,
-          ]);
-        })
-        .finally(() => {
-          setTyping(false);
-          setInput("");
-        });
+        return withLoading;
+      });
     }, 50);
   }
 
@@ -371,7 +393,12 @@ export default function Home() {
           />
         )}
         {view === "matches" && (
-          <MatchesView filterCat={filterCat} onFilterChange={setFilterCat} onOpenProgram={openProgram} />
+          <MatchesView
+            programs={apiPrograms}
+            filterCat={filterCat}
+            onFilterChange={setFilterCat}
+            onOpenProgram={openProgram}
+          />
         )}
         {view === "detail" && (
           <DetailView
