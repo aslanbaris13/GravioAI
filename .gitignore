@@ -216,3 +216,20 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Node.js / Next.js (frontend/)
+node_modules/
+.next/
+out/
+.vercel
+*.tsbuildinfo
+.env.local
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# frontend/lib ve frontend/next-env.d.ts: yukarıdaki Python "lib/" ve
+# next-env kalıplarının frontend uygulama kodunu yutmasını engelle
+!frontend/lib/
+!frontend/lib/**
+frontend/next-env.d.ts
