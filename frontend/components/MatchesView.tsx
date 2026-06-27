@@ -1,8 +1,15 @@
+/**
+ * Eşleşmeler ekranı.
+ *
+ * Programlar artık `programs` prop'u üzerinden gelir.
+ * - Chat'ten gelen `apiPrograms` varsa onlar gösterilir (gerçek backend verisi).
+ * - Liste boşsa yükleniyor/boş durumu gösterilir.
+ * İstatistikler ve filtreler dinamik olarak hesaplanır.
+ */
 "use client";
 import Ms from "./Ms";
-import { PROGRAMS } from "@/lib/programs";
 import { toVM } from "@/lib/viewmodel";
-import type { ProgramCategory } from "@/lib/types";
+import type { Program, ProgramCategory } from "@/lib/types";
 
 const CAT_FILTERS: { key: "all" | ProgramCategory; label: string }[] = [
   { key: "all", label: "Tümü" },
@@ -10,24 +17,43 @@ const CAT_FILTERS: { key: "all" | ProgramCategory; label: string }[] = [
   { key: "vergi", label: "Vergi & Lokasyon" },
   { key: "bulut", label: "Bulut & Yazılım" },
   { key: "hizlandirici", label: "Hızlandırıcı" },
-];
-
-const STATS = [
-  { icon: "auto_awesome", label: "Toplam eşleşme", value: "7" },
-  { icon: "check_circle", label: "Tam uygun", value: "4" },
-  { icon: "schedule", label: "Yaklaşan son tarih", value: "18 gün" },
+  { key: "yatirim", label: "Yatırım" },
+  { key: "yarisma", label: "Yarışma" },
+  { key: "global", label: "Global" },
 ];
 
 export default function MatchesView({
+  programs,
   filterCat,
   onFilterChange,
   onOpenProgram,
 }: {
+  programs: Program[];
   filterCat: "all" | ProgramCategory;
   onFilterChange: (cat: "all" | ProgramCategory) => void;
   onOpenProgram: (id: string) => void;
 }) {
-  const filtered = filterCat === "all" ? PROGRAMS : PROGRAMS.filter((p) => p.category === filterCat);
+  const filtered =
+    filterCat === "all" ? programs : programs.filter((p) => p.category === filterCat);
+
+  // Dinamik istatistikler
+  const fullCount = programs.filter((p) => p.elig.state === "full").length;
+  const nearestDeadlineDays = programs
+    .map((p) => p.deadlineDays)
+    .filter((d): d is number => d !== null)
+    .sort((a, b) => a - b)[0];
+
+  const stats = [
+    { icon: "auto_awesome", label: "Toplam eşleşme", value: String(programs.length || "—") },
+    { icon: "check_circle", label: "Tam uygun", value: programs.length ? String(fullCount) : "—" },
+    {
+      icon: "schedule",
+      label: "Yaklaşan son tarih",
+      value: nearestDeadlineDays != null ? `${nearestDeadlineDays} gün` : "—",
+    },
+  ];
+
+  const isEmpty = programs.length === 0;
 
   return (
     <section data-screen-label="Eşleşmelerim" style={{ height: "100%", overflowY: "auto" }}>
@@ -36,11 +62,14 @@ export default function MatchesView({
           Eşleşmelerim
         </h1>
         <p style={{ fontSize: 14, color: "#5a6b75", marginTop: 6 }}>
-          Nova AI Yazılım profiline göre bulunan 7 fırsat, uygunluk durumuna göre sıralandı.
+          {isEmpty
+            ? "Henüz eşleşme yok — chat ekranında işletmeni anlat."
+            : `Profiline göre bulunan ${programs.length} fırsat, uygunluk durumuna göre sıralandı.`}
         </p>
 
+        {/* İstatistik kartları */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 22 }}>
-          {STATS.map((s) => (
+          {stats.map((s) => (
             <div
               key={s.label}
               style={{
@@ -76,80 +105,118 @@ export default function MatchesView({
           ))}
         </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 26 }}>
-          {CAT_FILTERS.map((f) => {
-            const active = f.key === filterCat;
-            return (
-              <button
-                key={f.key}
-                onClick={() => onFilterChange(f.key)}
-                style={{
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  padding: "8px 15px",
-                  borderRadius: 999,
-                  border: active ? "1px solid #ea580c" : "1px solid #e3e0d8",
-                  background: active ? "#fff3ea" : "#fff",
-                  color: active ? "#ea580c" : "#5a6b75",
-                }}
-              >
-                {f.label}
-              </button>
-            );
-          })}
-        </div>
+        {/* Boş durum */}
+        {isEmpty && (
+          <div
+            style={{
+              marginTop: 48,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+              padding: "40px 24px",
+              background: "#fff",
+              border: "1px solid #e7e4dc",
+              borderRadius: 18,
+            }}
+          >
+            <Ms name="search_off" size={40} color="#d0cdc4" />
+            <div style={{ fontSize: 17, fontWeight: 700, color: "#27353e", marginTop: 14 }}>
+              Henüz eşleşme bulunamadı
+            </div>
+            <div style={{ fontSize: 14, color: "#8a96a0", marginTop: 8, maxWidth: 380, lineHeight: 1.6 }}>
+              Chat ekranında işletmeni anlat; Gravio profilini çıkarıp sana uygun
+              destek programlarını buraya listeleyecek.
+            </div>
+          </div>
+        )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 22 }}>
-          {filtered.map((p) => {
-            const c = toVM(p);
-            return (
-              <button
-                key={p.id}
-                onClick={() => onOpenProgram(p.id)}
-                style={{
-                  textAlign: "left",
-                  background: "#fff",
-                  border: "1px solid #e7e4dc",
-                  borderRadius: 16,
-                  padding: 18,
-                  boxShadow: "0 1px 2px rgba(20,34,44,.04)",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 13,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-                  <div style={c.iconWrapStyle}>
-                    <Ms name={c.icon} size={22} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#14222c", lineHeight: 1.25 }}>{c.name}</div>
-                    <div style={{ fontSize: 12, color: "#8a96a0", marginTop: 2 }}>{c.org}</div>
-                  </div>
-                  <span style={c.statusBadgeStyle}>
-                    <span style={c.statusDotStyle} />
-                    {c.statusLabel}
-                  </span>
-                </div>
+        {/* Filtreler — yalnızca program varsa göster */}
+        {!isEmpty && (
+          <>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 26 }}>
+              {CAT_FILTERS.map((f) => {
+                const active = f.key === filterCat;
+                // Filtrede o kategoriden program yoksa soluklaştır
+                const count =
+                  f.key === "all" ? programs.length : programs.filter((p) => p.category === f.key).length;
+                if (count === 0 && f.key !== "all") return null;
+                return (
+                  <button
+                    key={f.key}
+                    onClick={() => onFilterChange(f.key)}
+                    style={{
+                      fontSize: 12.5,
+                      fontWeight: 600,
+                      padding: "8px 15px",
+                      borderRadius: 999,
+                      border: active ? "1px solid #ea580c" : "1px solid #e3e0d8",
+                      background: active ? "#fff3ea" : "#fff",
+                      color: active ? "#ea580c" : "#5a6b75",
+                    }}
+                  >
+                    {f.label}
+                    {f.key !== "all" && (
+                      <span style={{ marginLeft: 5, fontSize: 11, opacity: 0.7 }}>({count})</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
 
-                <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                  <span style={{ fontSize: 19, fontWeight: 800, color: "#ea580c", fontVariantNumeric: "tabular-nums" }}>
-                    {c.amountDisplayText}
-                  </span>
-                  <span style={{ fontSize: 11.5, color: "#97a2aa", fontWeight: 600 }}>{c.amountSub}</span>
-                </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 22 }}>
+              {filtered.map((p) => {
+                const c = toVM(p);
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => onOpenProgram(p.id)}
+                    style={{
+                      textAlign: "left",
+                      background: "#fff",
+                      border: "1px solid #e7e4dc",
+                      borderRadius: 16,
+                      padding: 18,
+                      boxShadow: "0 1px 2px rgba(20,34,44,.04)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 13,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                      <div style={c.iconWrapStyle}>
+                        <Ms name={c.icon} size={22} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: "#14222c", lineHeight: 1.25 }}>{c.name}</div>
+                        <div style={{ fontSize: 12, color: "#8a96a0", marginTop: 2 }}>{c.org}</div>
+                      </div>
+                      <span style={c.statusBadgeStyle}>
+                        <span style={c.statusDotStyle} />
+                        {c.statusLabel}
+                      </span>
+                    </div>
 
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={c.eligBadgeStyle}>
-                    <Ms name={c.eligIconName} size={14} />
-                    {c.eligLabel}
-                  </span>
-                  <span style={{ fontSize: 11.5, color: "#97a2aa" }}>{c.deadlineText}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                      <span style={{ fontSize: 19, fontWeight: 800, color: "#ea580c", fontVariantNumeric: "tabular-nums" }}>
+                        {c.amountDisplayText}
+                      </span>
+                      <span style={{ fontSize: 11.5, color: "#97a2aa", fontWeight: 600 }}>{c.amountSub}</span>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={c.eligBadgeStyle}>
+                        <Ms name={c.eligIconName} size={14} />
+                        {c.eligLabel}
+                      </span>
+                      <span style={{ fontSize: 11.5, color: "#97a2aa" }}>{c.deadlineText}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

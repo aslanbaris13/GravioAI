@@ -124,14 +124,24 @@ export interface BackendApplicationDraft {
 /* API fonksiyonları                                                    */
 /* ------------------------------------------------------------------ */
 
+/** Konuşma turu — backend ile senkronize tip */
+export interface ConversationTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+
 /**
  * Ana orkestratör çağrısı.
  * Kullanıcı mesajından profil → eşleştirme → uygunluk pipeline'ını çalıştırır.
+ * `history` ile önceki konuşma turları gönderilir; backend bağlamsal profil çıkarır.
  */
-export async function assist(message: string): Promise<BackendAssistResult> {
+export async function assist(
+  message: string,
+  history?: ConversationTurn[],
+): Promise<BackendAssistResult> {
   return apiFetch<BackendAssistResult>("/assist", {
     method: "POST",
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, history: history ?? [] }),
   });
 }
 

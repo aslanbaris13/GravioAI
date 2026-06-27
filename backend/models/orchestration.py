@@ -1,4 +1,4 @@
-"""Orkestratör çıktı modelleri.
+"""Orkestratör giriş/çıkış modelleri.
 
 Orkestratör'ün tek yanıtı: çıkarılan profil + her aday program için uygunluk
 değerlendirmesi + sohbet için kısa bir metin. Frontend bu yapıyı doğrudan
@@ -9,6 +9,13 @@ from pydantic import BaseModel
 from .eligibility import EligibilityResult
 from .profile import UserProfile
 from .program import SupportProgram
+
+
+class ConversationTurn(BaseModel):
+    """Tek bir konuşma turu — role + içerik."""
+
+    role: str  # "user" | "assistant"
+    content: str
 
 
 class ProgramMatch(BaseModel):
