@@ -8,7 +8,7 @@ FastAPI tabanlı backend ve sağlayıcı-bağımsız LLM katmanı.
 cd backend
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env        # ANTHROPIC_API_KEY vb. doldur
+cp .env.example .env        # GEMINI_API_KEY vb. doldur
 uvicorn main:app --reload
 ```
 
@@ -25,6 +25,7 @@ backend/
 │   ├── config.py      # ortam değişkeni ayarları
 │   └── llm/           # sağlayıcı-bağımsız LLM katmanı
 │       ├── base.py        # LLMClient arayüzü
+│       ├── gemini_client.py
 │       ├── anthropic_client.py
 │       └── factory.py     # config'e göre sağlayıcı seçimi
 ├── api/routes.py      # uç noktalar

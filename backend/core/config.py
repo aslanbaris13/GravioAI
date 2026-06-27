@@ -13,9 +13,10 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
 
     # LLM katmanı
-    llm_provider: str = "anthropic"
-    llm_model: str = "claude-opus-4-8"
+    llm_provider: str = "gemini"
+    llm_model: str = "gemini-3.5-flash"
     anthropic_api_key: str = ""
+    gemini_api_key: str = ""
 
     # Supabase
     supabase_url: str = ""
