@@ -1,3 +1,4 @@
+from .profile import UserProfile
 from .program import ApplicationStatus, Currency, SupportProgram, SupportType
 from .taxonomy import SUBCATEGORIES, Category
 
@@ -8,4 +9,5 @@ __all__ = [
     "SupportType",
     "ApplicationStatus",
     "Currency",
+    "UserProfile",
 ]

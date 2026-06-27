@@ -3,10 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
+from ..agents import ProfileExtractor
 from ..core.embeddings import embed_text
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
 from ..data import repo
-from ..models import Category, SupportProgram
+from ..models import Category, SupportProgram, UserProfile
 
 router = APIRouter()
 
@@ -45,6 +46,17 @@ async def match(body: MatchRequest) -> list[SupportProgram]:
             embedding, match_count=body.limit, category=body.category
         )
     )
+
+
+class ProfileRequest(BaseModel):
+    message: str
+
+
+@router.post("/profile", response_model=UserProfile)
+async def extract_profile(body: ProfileRequest) -> UserProfile:
+    """Serbest metinden yapılandırılmış kullanıcı profili çıkarır (Profil Çıkarma Ajanı)."""
+    agent = ProfileExtractor()
+    return await agent.run(body.message)
 
 
 class ChatRequest(BaseModel):
