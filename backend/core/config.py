@@ -2,7 +2,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
@@ -27,6 +27,17 @@ class Settings(BaseSettings):
     supabase_key: str = ""
     # pgvector ile doğrudan SQL/vektör arama için Postgres bağlantı dizesi
     database_url: str = Field(default="", validation_alias="CONNECTION_URL")
+
+    @field_validator("supabase_url", mode="before")
+    @classmethod
+    def _normalize_supabase_url(cls, v):
+        """Project URL'i taban hâline getirir; yanlışlıkla yapıştırılan
+        '/rest/v1' soneki veya sondaki '/' temizlenir (supabase-py kendi ekler)."""
+        if isinstance(v, str):
+            v = v.strip().rstrip("/")
+            if v.endswith("/rest/v1"):
+                v = v[: -len("/rest/v1")]
+        return v
 
     @property
     def cors_origin_list(self) -> list[str]:

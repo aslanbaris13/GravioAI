@@ -1,9 +1,11 @@
 """HTTP uç noktaları."""
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
+from ..core.embeddings import embed_text
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
-from ..data.loader import filter_programs, get_program
+from ..data import repo
 from ..models import Category, SupportProgram
 
 router = APIRouter()
@@ -17,15 +19,32 @@ async def health() -> dict:
 @router.get("/programs", response_model=list[SupportProgram])
 async def list_programs(category: Category | None = None) -> list[SupportProgram]:
     """Destek programlarını listeler; opsiyonel kategori filtresi."""
-    return filter_programs(category)
+    return await run_in_threadpool(repo.get_programs, category)
 
 
 @router.get("/programs/{program_id}", response_model=SupportProgram)
 async def read_program(program_id: str) -> SupportProgram:
-    program = get_program(program_id)
+    program = await run_in_threadpool(repo.get_program, program_id)
     if program is None:
         raise HTTPException(status_code=404, detail="Program bulunamadı")
     return program
+
+
+class MatchRequest(BaseModel):
+    query: str
+    limit: int = 5
+    category: Category | None = None
+
+
+@router.post("/match", response_model=list[SupportProgram])
+async def match(body: MatchRequest) -> list[SupportProgram]:
+    """Serbest metin sorgusuna en yakın programları döner (vektör araması / RAG)."""
+    embedding = await run_in_threadpool(embed_text, body.query)
+    return await run_in_threadpool(
+        lambda: repo.match_programs(
+            embedding, match_count=body.limit, category=body.category
+        )
+    )
 
 
 class ChatRequest(BaseModel):
