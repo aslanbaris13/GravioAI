@@ -11,3 +11,7 @@ google-genai>=1.0
 
 # Veri katmanı (Supabase REST + pgvector RAG)
 supabase>=2.0
+
+# Test
+pytest>=8.0
+pytest-asyncio>=0.23
