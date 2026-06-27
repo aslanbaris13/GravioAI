@@ -1,12 +1,16 @@
 """Uygulama ayarları — ortam değişkenlerinden okunur."""
 from functools import lru_cache
+from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+        env_file=_ENV_FILE, env_file_encoding="utf-8", extra="ignore"
     )
 
     app_env: str = "development"
@@ -21,6 +25,8 @@ class Settings(BaseSettings):
     # Supabase
     supabase_url: str = ""
     supabase_key: str = ""
+    # pgvector ile doğrudan SQL/vektör arama için Postgres bağlantı dizesi
+    database_url: str = Field(default="", validation_alias="CONNECTION_URL")
 
     @property
     def cors_origin_list(self) -> list[str]:
