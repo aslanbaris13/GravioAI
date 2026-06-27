@@ -17,7 +17,12 @@ def build_llm_client(settings: Settings) -> LLMClient:
 
         return AnthropicClient(api_key=settings.anthropic_api_key, model=settings.llm_model)
 
-    # İleride: "gemini", "openai" ...
+    if provider == "gemini":
+        from .gemini_client import GeminiClient
+
+        return GeminiClient(api_key=settings.gemini_api_key, model=settings.llm_model)
+
+    # İleride: "openai" ...
     raise ValueError(f"Desteklenmeyen LLM sağlayıcı: {settings.llm_provider!r}")
 
 

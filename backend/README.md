@@ -4,12 +4,15 @@ FastAPI tabanlı backend ve sağlayıcı-bağımsız LLM katmanı.
 
 ## Kurulum
 
+Paket içi modüller birbirini relative import ile çağırıyor, bu yüzden
+proje kökünden (`GravioAI/`) `backend.main` paketi olarak çalıştırılmalı —
+`backend/` dizinine girip `uvicorn main:app` ile çalıştırmayın.
+
 ```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env        # ANTHROPIC_API_KEY vb. doldur
-uvicorn main:app --reload
+python -m venv backend/.venv && source backend/.venv/bin/activate   # Windows: backend\.venv\Scripts\activate
+pip install -r backend/requirements.txt
+cp backend/.env.example backend/.env        # GEMINI_API_KEY vb. doldur
+uvicorn backend.main:app --reload
 ```
 
 - API: `http://localhost:8000`
@@ -25,6 +28,7 @@ backend/
 │   ├── config.py      # ortam değişkeni ayarları
 │   └── llm/           # sağlayıcı-bağımsız LLM katmanı
 │       ├── base.py        # LLMClient arayüzü
+│       ├── gemini_client.py
 │       ├── anthropic_client.py
 │       └── factory.py     # config'e göre sağlayıcı seçimi
 ├── api/routes.py      # uç noktalar
