@@ -1,3 +1,4 @@
+<img width="1440" height="867" alt="Ekran görüntüsü 2026-06-27 145942" src="https://github.com/user-attachments/assets/7e32f139-51a6-444f-94cc-31b1dca1cd7b" />
 <div align="center">
 
 <!-- LOGO: ProjectManagement/assets/logo.png yükleyince aşağıdaki satırı aç -->
@@ -150,16 +151,17 @@ Sprint backlog'u, projenin ilk sürümünde geliştirilecek kullanıcı hikâyel
 Sprint süreci boyunca görev takibi Jira Sprint Board üzerinden gerçekleştirilmiştir.
 
 ### Sprint Başlangıcı
+ <img width="1440" height="867" alt="Ekran görüntüsü 2026-06-27 145942" src="https://github.com/user-attachments/assets/d23317d0-a5b1-4ec4-aad1-59fe6b87d515" />
+![Uploading Ekran görüntüsü 2026-06-27 145942.png…]()
 
-```md
-![Sprint Board Başlangıcı](images/sprint1-board-start.png)
-```
+
 
 ### Sprint İlerlemeleri
+<img width="1230" height="740" alt="Ekran görüntüsü 2026-07-04 143633" src="https://github.com/user-attachments/assets/7160997a-812f-43df-86e0-c9e3e75d1dab" />
 
-```md
-![Sprint Board ilerlemeler](images/sprint1-board-start.png)
-```
+<img width="1142" height="766" alt="Ekran görüntüsü 2026-07-04 155747" src="https://github.com/user-attachments/assets/7c78ca36-b7cc-4f0f-bed2-4c84da1aa4cb" />
+
+<img width="1222" height="870" alt="Ekran görüntüsü 2026-07-04 155831" src="https://github.com/user-attachments/assets/33c1dcdc-7778-4ceb-a500-3e285ad29247" />
 
 ### Sprint Sonu
 
