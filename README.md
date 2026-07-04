@@ -59,9 +59,7 @@ Kullanıcı asistanla **konuşarak** profilini oluşturur. GravioAI ardından pr
 
 ## Product Backlog URL
 
-📋 **[GravioAI Product Backlog Board](#)** _(Miro / GitHub Projects linki — eklenecek)_
-
----
+🔗 [GravioAI Product Backlog Board](https://haticenurolgun.atlassian.net/jira/software/projects/SCRUM/boards/1)
 
 ## 🧠 Yapay Zekâ Mimarisi
 
