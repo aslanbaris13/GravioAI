@@ -1,5 +1,3 @@
-<img width="1440" height="867" alt="Ekran görüntüsü 2026-06-27 145942" src="https://github.com/user-attachments/assets/7e32f139-51a6-444f-94cc-31b1dca1cd7b" />
-<div align="center">
 
 <!-- LOGO: ProjectManagement/assets/logo.png yükleyince aşağıdaki satırı aç -->
 <!-- <img src="ProjectManagement/assets/logo.png" alt="GravioAI" width="180" /> -->
@@ -146,13 +144,27 @@ Sprint backlog'u, projenin ilk sürümünde geliştirilecek kullanıcı hikâyel
 ---
 
 <details>
+  <summary><b>💻 Frontend Arayüz Demosu</b></summary>
+  <br>
+
+
+https://github.com/user-attachments/assets/104a3304-f776-4950-9042-9d34f0b2e240
+
+
+
+</details>
+
+---
+
+<details>
 <summary><b>📌 Sprint Board Güncellemeleri</b></summary>
 
 Sprint süreci boyunca görev takibi Jira Sprint Board üzerinden gerçekleştirilmiştir.
 
+
 ### Sprint Başlangıcı
  <img width="1440" height="867" alt="Ekran görüntüsü 2026-06-27 145942" src="https://github.com/user-attachments/assets/d23317d0-a5b1-4ec4-aad1-59fe6b87d515" />
-![Uploading Ekran görüntüsü 2026-06-27 145942.png…]()
+
 
 
 
