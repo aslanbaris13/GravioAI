@@ -102,33 +102,147 @@ GravioAI "tek bir LLM çağrısı" değil; bir **orkestratör** tarafından yön
 
 ---
 
-# Sprint 1
+# 🚀 Sprint 1
 
-> 🟢 **Sprint Tarihi:** 19 Haziran – 5 Temmuz 2026
-> **Sprint Hedefi:** Problem doğrulama · veri modeli · ilk konektörler (AWS + BİGG) · profil çıkarma + eşleştirme ajanı · temel sohbet arayüzü
+## 🎯 Sprint Amacı
 
-- **Sprint Notları:** _(Sprint planlama notları ve story dağılımı buraya eklenecek)_
-
-- **Sprint içinde tamamlanması tahmin edilen puan:** _(eklenecek)_
-
-- **Puan tamamlama mantığı:** _(Toplam backlog puanı ve sprint başına hedef puan mantığı buraya yazılacak)_
-
-- **Backlog düzeni ve Story seçimleri:** _(Backlog'un nasıl düzenlendiği, story → task ayrımı buraya yazılacak)_
-
-- **Daily Scrum:** _(Daily Scrum toplantı notları — jpeg/word olarak ProjectManagement/Sprint1Documents/ altına eklenecek ve buradan linklenecek)_
-
-- **Sprint Board Update:** _(Sprint board ekran görüntüleri buraya eklenecek)_
-  <!-- ![Sprint 1 Board](ProjectManagement/Sprint1Documents/board1.png) -->
-
-- **Ürün Durumu:** _(Ürünün ekran görüntüleri buraya eklenecek)_
-  <!-- ![Ürün Ekranı 1](ProjectManagement/Sprint1Documents/product1.png) -->
-
-- **Sprint Review:** _(Sprint Review'da alınan kararlar ve katılımcılar buraya yazılacak)_
-
-- **Sprint Retrospective:** _(Retrospektif çıktıları — iyileştirme kararları buraya yazılacak)_
+Sprint 1'in temel amacı; projenin veri altyapısını oluşturmak, girişim destek programlarını toplamak ve düzenlemek, ortak veri şeması oluşturmak, backend altyapısını kurmak ve semantik arama için gerekli temel bileşenleri geliştirmektir.
 
 ---
 
+## 📊 Sprint Özeti
+
+| Başlık | Değer |
+|--------|--------|
+| Sprint Süresi | 19 Haziran - 5 Temmuz |
+| Takım Büyüklüğü | 4 Kişi |
+| Toplantı Sayısı | 6 |
+| Toplantı Sıklığı | Haftada 2-3 |
+| Planlanan Story Point | XX SP |
+
+---
+
+<details>
+<summary><b>📋 Sprint Planlama</b></summary>
+
+### Backlog Düzeni
+
+Sprint backlog'u, projenin ilk sürümünde geliştirilecek kullanıcı hikâyelerine göre oluşturulmuştur. Story'ler daha küçük görevlere (task) ayrılmış ve ekip üyelerine dağıtılmıştır. Önceliklendirme yapılırken sistemin çalışması için kritik bileşenler öncelikli olarak planlanmıştır.
+
+### Sprint Kapsamı
+
+- Girişim destek programlarının toplanması
+- Ortak veri şemasının oluşturulması
+- Destek programlarının kategorilere ayrılması
+- Backend altyapısının kurulması
+- LLM Provider katmanının geliştirilmesi
+- Vector Database kurulumu
+- Embedding Pipeline geliştirilmesi
+- Eligibility (uygunluk) kurallarının tanımlanması
+- Destek programlarının uygunluk kriterleriyle eşleştirilmesi
+
+</details>
+
+---
+
+<details>
+<summary><b>📌 Sprint Board Güncellemeleri</b></summary>
+
+Sprint süreci boyunca görev takibi Jira Sprint Board üzerinden gerçekleştirilmiştir.
+
+### Sprint Başlangıcı
+
+```md
+![Sprint Board Başlangıcı](images/sprint1-board-start.png)
+```
+
+### Sprint Sonu
+
+```md
+![Sprint Board Sonu](images/sprint1-board-end.png)
+```
+
+</details>
+
+---
+
+<details>
+<summary><b>🤝 Sprint Toplantıları</b></summary>
+
+Sprint boyunca haftada **2-3 kez** ilerleme toplantıları gerçekleştirilmiştir.
+
+Toplantılarda;
+
+- Sprint ilerleyişi değerlendirilmiştir.
+- Tamamlanan ve devam eden görevler gözden geçirilmiştir.
+- Teknik sorunlar değerlendirilmiştir.
+- Yeni aksiyonlar belirlenmiştir.
+- Jira görevleri güncellenmiştir.
+
+📄 **Toplantı Notları**
+
+Toplantı gündemleri ve alınan kararlar aşağıdaki Jira dokümanında yer almaktadır.
+
+➡️ **Sprint 1 Toplantı Notları**
+
+</details>
+
+---
+
+<details>
+<summary><b>✅ Sprint Değerlendirmesi (Sprint Review)</b></summary>
+
+### Tamamlanan Çalışmalar
+
+- Problem doğrulama çalışması tamamlandı.
+- Backend altyapısının ilk versiyonu oluşturuldu.
+- Destek programlarının toplanmasına başlandı.
+- Ortak veri şemasının ilk taslağı oluşturuldu.
+
+### Devam Eden Çalışmalar
+
+- Destek programlarının veri setinin genişletilmesi
+- Embedding Pipeline geliştirilmesi
+- Vector Database yapılandırılması
+- Eligibility kurallarının oluşturulması
+- Uygunluk kriterlerinin eşleştirilmesi
+
+### Sprint Sonuçları
+
+- Projenin temel veri altyapısı oluşturulmaya başlandı.
+- Semantik arama altyapısı için gerekli temel bileşenlerin geliştirilmesine başlandı.
+- Devam eden görevlerin Sprint 2 kapsamında tamamlanmasına karar verildi.
+
+</details>
+
+---
+
+<details>
+<summary><b>🔄 Sprint Değerlendirmesi (Retrospective)</b></summary>
+
+### İyi Giden Noktalar
+
+- Görev dağılımı planlandığı şekilde gerçekleştirildi.
+- Düzenli toplantılar sayesinde sprint ilerleyişi etkin şekilde takip edildi.
+- Jira üzerinden görev yönetimi düzenli olarak sürdürüldü.
+- Takım içi iletişim etkili şekilde sağlandı.
+
+### Geliştirilebilecek Noktalar
+
+- Story Point tahminlerinin daha isabetli yapılması.
+- Teknik dokümantasyonun sprint boyunca daha düzenli güncellenmesi.
+- Modüller arası bağımlılıkların daha erken planlanması.
+- Kod inceleme (Code Review) süreçlerinin daha erken başlatılması.
+
+### Sprint 2 İçin Aksiyonlar
+
+- Destek programı veri setinin genişletilmesi.
+- Eligibility Mapping çalışmalarının tamamlanması.
+- Embedding Pipeline'ın iyileştirilmesi.
+- Semantik arama performansının artırılması.
+- Frontend geliştirmelerine başlanması.
+
+</details>
 # Sprint 2
 
 > ⚪ **Sprint Tarihi:** 6 – 19 Temmuz 2026
