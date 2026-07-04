@@ -116,8 +116,8 @@ Sprint 1'in temel amacı; projenin veri altyapısını oluşturmak, girişim des
 |--------|--------|
 | Sprint Süresi | 19 Haziran - 5 Temmuz |
 | Takım Büyüklüğü | 4 Kişi |
-| Toplantı Sayısı | 6 |
-| Toplantı Sıklığı | Haftada 2-3 |
+| Toplantı Sayısı | 5 |
+| Toplantı Sıklığı | Haftada 2 |
 | Planlanan Story Point | 54 SP |
 
 ---
