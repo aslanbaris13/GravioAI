@@ -177,9 +177,8 @@ Sprint süreci boyunca görev takibi Jira Sprint Board üzerinden gerçekleştir
 
 ### Sprint Sonu
 
-```md
-![Sprint Board Sonu](images/sprint1-board-end.png)
-```
+<img width="936" height="732" alt="Ekran görüntüsü 2026-07-05 221733" src="https://github.com/user-attachments/assets/42b0ebf6-b0de-4c02-a3ef-579aa0d86bf6" />
+
 
 </details>
 
@@ -217,10 +216,9 @@ https://hatiicenurolgun.atlassian.net/wiki/pages/resumedraft.action?draftId=1
 | Metrik | Değer |
 |--------|--------|
 | Planlanan Story Point | 54 SP |
-| Tamamlanan Story Point | 28 SP |
-| Tamamlanan Görev | 5 |
-| İncelemede | 3 (16 SP)|
-| Devam Eden | 2 (10 SP ) |
+| Tamamlanan Story Point | 54 SP |
+| Tamamlanan Görev | 10 |
+|
 
 ### Sprint Çıktıları
 
@@ -256,10 +254,14 @@ https://hatiicenurolgun.atlassian.net/wiki/pages/resumedraft.action?draftId=1
 
 Sprint 2 kapsamında farklı veri kaynaklarından veri toplanmasını standartlaştırmak amacıyla ortak bir veri toplama (Data Ingestion) altyapısı geliştirilecektir. Böylece tüm veri sağlayıcıları aynı iş akışını kullanacak, kod tekrarının azaltılması ve bakım kolaylığının artırılması hedeflenmektedir.
 
-- Devam eden görevler tamamlanacak ve semantic search altyapısı geliştirilmeye devam edilecek.
+-  Semantic search altyapısı geliştirilmeye devam edilecek.
+-  Ajan orchestration geliştirmelerine başlanacak
 - Frontend geliştirmelerine başlanacak.
 
 </details>
+
+
+---
 
 # Sprint 2
 
