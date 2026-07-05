@@ -2,7 +2,7 @@
 <!-- LOGO: ProjectManagement/assets/logo.png yükleyince aşağıdaki satırı aç -->
 <!-- <img src="ProjectManagement/assets/logo.png" alt="GravioAI" width="180" /> -->
 
-# 🛰️ GravioAI
+# 🤖 🚀 GravioAI
 
 ### _Yüzeyin altındaki fırsatı çıkar_
 
