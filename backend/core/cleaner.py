@@ -2,10 +2,13 @@
 from bs4 import BeautifulSoup
 import re # Metindeki fazladan boşlukları silmek için
 
-def extract_text_from_html(html_content: str) -> str:
+def extract_text_from_html(html_content: str, forbidden_terms: list[str] = None) -> str:
     """
     Bu metod, HTML içeriğindeki gereksiz kısımları ayıklar ve LLM için temizlenmiş, daha az token harcayacak bir metin döndürür.
     """
+    # Eğer parametre gelmediyse boş liste tanımla
+    if forbidden_terms is None:
+        forbidden_terms = []
     soup = BeautifulSoup(html_content, "html.parser")
     
     # Sitedeki HTML etiketlerini (<div>, <p> vb.) atıp sadece metinleri al
@@ -19,15 +22,6 @@ def extract_text_from_html(html_content: str) -> str:
     #geri kalan temiz kısmı alıyoruz
 
     cleaned_text = soup.get_text(separator="\n").strip()
-
-# KOSGEB Erişilebilirlik ve site başlığı çöp metinleri
-    yasakli_satirlar = [
-        "Erişilebilirlik Menüsü", "x", "Ekran Okuyucu", "Seçili Alan Okuyucu", 
-        "Bağlantı Vurgula", "Büyük Metin", "Metni Sola Hizala", "İmleç", 
-        "Okuma", "Disleksi Dostu", "Kontrast", "Solgunlaştırma", 
-        "Düşük Doygunluk", "Yüksek Doygunluk", "Erişilebilirlik Ayarlarını Temizle",
-        "Tüm Liste", "Site içi arama", "e-hizmetler"
-    ]
     
     lines = cleaned_text.split('\n')
     filtered_lines = []
@@ -35,7 +29,7 @@ def extract_text_from_html(html_content: str) -> str:
     for line in lines:
         line_clean = line.strip()
         # Satır yasaklı listedeyse veya tamamen boşsa atla
-        if line_clean in yasakli_satirlar or not line_clean:
+        if line_clean in forbidden_terms or not line_clean:
             continue
         filtered_lines.append(line_clean)
         
