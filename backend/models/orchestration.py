@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from .eligibility import EligibilityResult
 from .profile import UserProfile
-from .program import SupportProgram
+from .program import SupportProgramDB
 
 
 class ConversationTurn(BaseModel):
@@ -21,7 +21,7 @@ class ConversationTurn(BaseModel):
 class ProgramMatch(BaseModel):
     """Bir aday program ve onun profile göre uygunluk değerlendirmesi."""
 
-    program: SupportProgram
+    program: SupportProgramDB
     eligibility: EligibilityResult
 
 
