@@ -1,9 +1,9 @@
 
 from models.raw_program import RawProgram
-
-from connectors.kalkinma_ag import KalkinmaAgConnector
-from connectors.tubitak import TubitakConnector
-from connectors.kosgeb import KosgebConnector
+from connectors.base import BaseConnector
+#from connectors.kalkinma_ag import KalkinmaAgConnector
+#from connectors.tubitak import TubitakConnector
+from connectors.kosgeb import KOSGEBConnector
 
 class ConnectorManager:
     """
@@ -12,32 +12,32 @@ class ConnectorManager:
 
     def __init__(self):
 
-        "# İleride AWS veya Google eklersek, tek yapmamız gereken onları bu listeye yazmak!"
-
-        self.connectors = [KalkinmaAgConnector(), 
-                    TubitakConnector(), 
-                    KosgebConnector()]
-            
+        # Sisteme kayıtlı olan connector'ları tutacağımız liste
+        self._connectors: list[BaseConnector] = []
        
+    def register(self, connector: BaseConnector) -> None:
+        """Yeni bir kurumu sisteme ekler."""
+        self._connectors.append(connector)
 
-    async def fetch_all(self) -> list[RawProgram]:
-        """
-        Bu metod, tüm connector'ların fetch metodunu çağırarak verileri toplar.
-        """
-        all_programs = []         ## Bütün kurumlardan gelen verileri toplayacağımız ana liste
+    async def run_all(self) -> list[dict]:
+        """Kayıtlı tüm connector'ları sırayla çalıştırır ve verileri toplar."""
+        all_programs = []
         
-        
-        for connector in self.connectors:
+        for connector in self._connectors:
+            # Sınıfın adını (örn: KosgebConnector) dinamik olarak alıyoruz
+            connector_name = connector.__class__.__name__
+            print(f"\n[MANAGER] Başlatılıyor: {connector_name}")
+            
             try:
-                programs = await connector.fetch() #veriyi getiriyoruz
-        
-                all_programs.extend(programs)  # Her connector'dan gelen verileri ana listeye ekliyoruz 
-
+                # Her connector kendi fetch metodunu çalıştırır
+                programs = await connector.fetch()
+                
+                # Çekilen verileri ana listeye ekle
+                all_programs.extend(programs)
+                print(f"[MANAGER] Başarılı: {connector_name} - {len(programs)} program bulundu.")
+                
             except Exception as e:
-                # Eğer bir kurumun sitesi çökmüşse, bütün sistemimiz çökmesin!
-                # Sadece o kurumu atlayıp diğerlerine devam edelim. (Hata yönetimi)
-                print(f"HATA: Bir connector çalışırken sorun yaşadı: {e}")
-        
-
-        print(f"\n İşlem tamamlandı. Toplam {len(all_programs)} adet program başarıyla çekildi.")
+                # Hata izolasyonu: Biri çökerse diğerine geç
+                print(f"[MANAGER] HATA: {connector_name} çalışırken kritik hata oluştu: {e}")
+                
         return all_programs

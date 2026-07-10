@@ -8,16 +8,16 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-from ..models import SupportProgram
+from ..models import SupportProgramDB
 
 _PROGRAMS_DIR = Path(__file__).parent / "programs"
 
 
 @lru_cache
-def load_programs() -> list[SupportProgram]:
-    programs: list[SupportProgram] = []
+def load_programs() -> list[SupportProgramDB]:
+    programs: list[SupportProgramDB] = []
     for path in sorted(_PROGRAMS_DIR.glob("*.json")):
         raw = json.loads(path.read_text(encoding="utf-8"))
         for item in raw:
-            programs.append(SupportProgram.model_validate(item))
+            programs.append(SupportProgramDB.model_validate(item))
     return programs

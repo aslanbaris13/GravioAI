@@ -106,7 +106,7 @@ class ExtractedSupportInfo(BaseModel):
 # 3) Veri tabanının şablonu: Yapay zeka artık SupportProgramDB sınıfını hiç görmeyecek.
 
 ## Ona sadece ExtractedSupportInfo sınıfını vereceğiz.
-# #  Böylece "Ben embedding diye bir alan görüyorum,
+# # Böylece "Ben embedding diye bir alan görüyorum,
 # # buraya ne uydursam acaba?" diye kafası karışmayacak.
 
 class SupportProgramDB(ExtractedSupportInfo):

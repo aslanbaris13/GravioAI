@@ -2,10 +2,9 @@
 from bs4 import BeautifulSoup
 from connectors.base import BaseConnector
 from models.raw_program import RawProgram
-from core.fetcher import HttpFetcher
 from core.cleaner import extract_text_from_html
-import uuid
-import json
+from core.fetcher import BaseFetcher
+
 from core.llm.factory import get_llm_client
 from models.program import SupportProgramDB
 
@@ -19,14 +18,14 @@ class KOSGEBConnector(BaseConnector):
         "Tüm Liste", "Site içi arama", "e-hizmetler"
     ]
 
-    def __init__(self):
+    def __init__(self,fetcher:BaseFetcher):
 
-        self.fetcher = HttpFetcher()  # HTTP fetcher'ı kullanıyoruz
+        self.fetcher = fetcher  # HTTP fetcher'ı kullanıyoruz
         self.main_list_url= "https://www.kosgeb.gov.tr/site/tr/genel/destekler/3/destekler"
         self.base_domain = "https://www.kosgeb.gov.tr"
 
 
-    async def fetch(self) -> list[RawProgram]:
+    async def fetch(self) -> list[dict]:
         """
         Bu metod, KOSGEB'in web sitesinden program verilerini çeker.
         """
@@ -37,10 +36,16 @@ class KOSGEBConnector(BaseConnector):
 
 
         for url in links:
+            # Linkin başında "http" yoksa, base_domain ile birleştir
+            full_url = url
+            
+            if not full_url.startswith("http"):
+                full_url = f"{self.base_domain}{url}"
             try:
-                print(f"detaylar indiriliyor: {url}")
+                print(f"detaylar indiriliyor: {full_url}")
+                
                 #içerik çekme
-                detail_html=await self.fetcher.fetch_text(url)
+                detail_html=await self.fetcher.fetch_text(full_url)
 
                 #temizleme
 
@@ -56,19 +61,21 @@ class KOSGEBConnector(BaseConnector):
                     continue
 
                 #LLM ile analiz
-                #     
+                    
                 print(f"Yapay zeka analiz ediyor: {title}")
                     
                 # gemini client'in extract_program_details metodunu çağırıyoruz.
                 
                 extracted_info = await llm_client.extract_program_details(body_text=clean_txt, source_name="KOSGEB")
 
-
-                ####burada DB kaydı oluşturucam
+                if extracted_info:
+                    #Veriyi formatla ve listeye ekle
                     
-
+                    db_record = self.format_to_db(extracted_info, full_url, clean_txt)
+                    programs.append(db_record)
+                    print(f" Başarıyla ayrıştırıldı ve formatlandı: {title}")
+                    
             except Exception as e :
                 print(f" HATA: {url} SAYFASI OKUNAMADI: {e}")
                     
-
         return programs

@@ -12,7 +12,7 @@ from .taxonomy import SUBCATEGORIES, Category
 __all__ = [
     "Category",
     "SUBCATEGORIES",
-    "SupportProgram",
+    "SupportProgramDB",
     "SupportType",
     "ApplicationStatus",
     "Currency",

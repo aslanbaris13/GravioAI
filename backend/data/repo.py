@@ -11,7 +11,7 @@ from functools import lru_cache
 from supabase import Client, create_client
 
 from ..core.config import get_settings
-from ..models import Category, SupportProgram
+from ..models import Category, SupportProgramDB
 
 _TABLE = "programs"
 
@@ -22,7 +22,7 @@ def _client() -> Client:
     return create_client(s.supabase_url, s.supabase_key)
 
 
-def program_embedding_text(p: SupportProgram) -> str:
+def program_embedding_text(p: SupportProgramDB) -> str:
     """Bir programın vektörlenecek metni — eşleştirme kalitesini belirleyen alanlar.
 
     (Veri ekibiyle netleşince güncellenecek; şimdilik makul varsayılan.)
@@ -30,7 +30,7 @@ def program_embedding_text(p: SupportProgram) -> str:
     parts = [
         p.program_name,
         p.institution,
-        p.description,
+        #p.description,
         p.target_audience,
         p.sector,
         p.category,
@@ -38,7 +38,7 @@ def program_embedding_text(p: SupportProgram) -> str:
     return " — ".join(part for part in parts if part)
 
 
-def _to_row(p: SupportProgram, embedding: list[float] | None = None) -> dict:
+def _to_row(p: SupportProgramDB, embedding: list[float] | None = None) -> dict:
     """SupportProgram'ı DB satırına (İngilizce kolon adları) çevirir."""
     row = p.model_dump(mode="json")  # alan adları (alias değil), tarihler ISO string
     if embedding is not None:
@@ -46,9 +46,9 @@ def _to_row(p: SupportProgram, embedding: list[float] | None = None) -> dict:
     return row
 
 
-def _from_row(row: dict) -> SupportProgram:
+def _from_row(row: dict) -> SupportProgramDB:
     """DB satırını modele çevirir (fazladan kolonlar — embedding vb. — yok sayılır)."""
-    return SupportProgram.model_validate(row)
+    return SupportProgramDB.model_validate(row)
 
 
 def upsert_programs(rows: list[dict]) -> int:
@@ -59,7 +59,7 @@ def upsert_programs(rows: list[dict]) -> int:
     return len(resp.data or [])
 
 
-def get_programs(category: Category | None = None) -> list[SupportProgram]:
+def get_programs(category: Category | None = None) -> list[SupportProgramDB]:
     query = _client().table(_TABLE).select("*").order("id")
     if category is not None:
         query = query.eq("category", category.value)
@@ -67,7 +67,7 @@ def get_programs(category: Category | None = None) -> list[SupportProgram]:
     return [_from_row(r) for r in (resp.data or [])]
 
 
-def get_program(program_id: str) -> SupportProgram | None:
+def get_program(program_id: str) -> SupportProgramDB | None:
     resp = _client().table(_TABLE).select("*").eq("id", program_id).limit(1).execute()
     data = resp.data or []
     return _from_row(data[0]) if data else None
@@ -78,7 +78,7 @@ def match_programs(
     *,
     match_count: int = 5,
     category: Category | None = None,
-) -> list[SupportProgram]:
+) -> list[SupportProgramDB]:
     """Verilen embedding'e en yakın programları (kosinüs) döner — RAG eşleştirmesi."""
     resp = _client().rpc(
         "match_programs",
