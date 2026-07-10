@@ -1,14 +1,13 @@
 """Destek programı JSON dosyalarını diskten okur ve modele göre doğrular.
 
 Veri ekibinin sağladığı `data/programs/*.json` dosyaları ingestion'ın kaynağıdır
-(`scripts/ingest.py` bunları okuyup embed'leyerek Supabase'e yükler). Çalışma
-zamanı okumaları artık Supabase üzerinden yapılır (`data/repo.py`).
+(`scripts/ingest.py` bunları okuyup embed'leyerek Supabase'e yükler).
 """
 import json
 from functools import lru_cache
 from pathlib import Path
 
-from ..models import SupportProgramDB
+from models import SupportProgramDB
 
 _PROGRAMS_DIR = Path(__file__).parent / "programs"
 

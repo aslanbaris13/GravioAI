@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
-from bs4 import BeautifulSoup 
+from bs4 import BeautifulSoup
 
 class BaseFetcher(ABC):
     """
@@ -21,15 +21,14 @@ class BaseFetcher(ABC):
 
 class HttpFetcher(BaseFetcher):
     """
-    Bu sınıf, HTTP üzerinden internete çıkıp sayfaların 
+    Bu sınıf, HTTP üzerinden internete çıkıp sayfaların
     HTML (veya metin) kodunu indiren veri çekmek için kullanılacak.
     """
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
-    
-    async def fetch_text(self, url: str) -> dict:
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=4, max=20))
+    async def fetch_text(self, url: str) -> str:
         """
-        Bu metod, verilen URL'den veri çeker ve JSON formatında döndürür.
+        Bu metod, verilen URL'den veri çeker ve ham metin (HTML) olarak döndürür.
         Eğer istek başarısız olursa, belirli bir sayıda tekrar dener.
         """
         kimlik_karti = {
@@ -37,11 +36,11 @@ class HttpFetcher(BaseFetcher):
         }
 
         print(f"istek atılıyor: {url}")
-        async with httpx.AsyncClient(timeout=15.0, headers=kimlik_karti) as client:
-            response = await client.get(url )
+     
+        async with httpx.AsyncClient(timeout=30.0, headers=kimlik_karti) as client:
+            response = await client.get(url)
             response.raise_for_status()  # Eğer HTTP hatası varsa exception fırlatır
             return response.text
-        
 
     async def fetch_links(self, url: str, filter_pattern: str) -> set:
         html = await self.fetch_text(url)
@@ -52,4 +51,3 @@ class HttpFetcher(BaseFetcher):
             if filter_pattern in href:
                 links.add(href)
         return links
-

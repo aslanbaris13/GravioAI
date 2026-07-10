@@ -19,7 +19,7 @@ class LLMMessage:
 
 
 class LLMClient(ABC):
-    """Bütün LLM sağlayıcı adaptörlerinin uyduğu kontrat."""
+    """Bütün LLM sağlayıcılar buna uymalı."""
 
     @abstractmethod
     async def chat(

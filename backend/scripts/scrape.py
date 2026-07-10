@@ -4,6 +4,8 @@ import os
 from core.fetcher import HttpFetcher
 from connectors.kosgeb import KOSGEBConnector
 from connectors.manager import ConnectorManager
+from connectors.kalkinma_ajansi import KalkinmaAjansiConnector
+from connectors.tubitak import TubitakConnector
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -17,9 +19,9 @@ async def main():
     
     # Çalıştırılacak Kurumlar (İleride burası tek satırla büyüyecek)
     aktif_kurumlar = [
-        KOSGEBConnector(fetcher=http_fetcher),
-        # TubitakConnector(fetcher=fetcher),         
-        # KalkinmaAjansiConnector(fetcher=fetcher)  
+        TubitakConnector(fetcher=http_fetcher),
+        KOSGEBConnector(fetcher=http_fetcher),         
+        KalkinmaAjansiConnector(fetcher=http_fetcher)  
         #diğer_portalConnector(fetcher=js_fetcher) 
     ]
     

@@ -1,30 +1,53 @@
-"""Destek programlarını embed'leyip Supabase'e yükler.
+"""Taslak JSON dosyasındaki programları embed'leyip Supabase'e yükler.
 
-Çalıştırma (proje kökünden):
-    python -m backend.scripts.ingest
-
-`data/programs/*.json` dosyalarını okur, her programı Gemini ile embed'ler ve
-`programs` tablosuna upsert eder. Tekrar çalıştırılabilir (id'ye göre upsert).
+Akış:
+1. data/loader.py ile taslak.json'daki programları oku ve doğrula.
+2. Her program için embedding metnini oluştur (data/repo.py).
+3. core/embedding/factory.py ile doğru embedding client'ı al, metni vektöre çevir.
+4. Satırı embedding ile birlikte hazırla.
+5. Toplu olarak Supabase'e yaz (upsert).
 """
-from ..core.embeddings import embed_text
-from ..data.loader import load_programs
-from ..data.repo import program_embedding_text, upsert_programs, _to_row
+import asyncio
+
+from data.loader import load_programs
+from data.repo import program_embedding_text, _to_row, upsert_programs
+from core.embedding.factory import get_embedding_client
 
 
-def main() -> None:
+async def main():
+    print("Ingestion başlatılıyor...\n")
+
     programs = load_programs()
-    print(f"{len(programs)} program bulundu, embedding üretiliyor...")
+    print(f"{len(programs)} program taslak dosyasından okundu.")
+
+    if not programs:
+        print("Yüklenecek program bulunamadı, çıkılıyor.")
+        return
+
+    embedding_client = get_embedding_client()
 
     rows = []
-    for i, p in enumerate(programs, 1):
-        text = program_embedding_text(p)
-        embedding = embed_text(text)
-        rows.append(_to_row(p, embedding))
-        print(f"  [{i}/{len(programs)}] {p.id} ✓")
+    for program in programs:
+        text = program_embedding_text(program)
+        print(f"Embedding oluşturuluyor: {program.title}")
 
+        try:
+            embedding = await embedding_client.embed_text(text)
+        except Exception as e:
+            print(f" HATA: {program.title} için embedding oluşturulamadı: {e}")
+            continue
+
+        row = _to_row(program, embedding=embedding)
+        rows.append(row)
+
+    if not rows:
+        print("Hiçbir satır hazırlanamadı, Supabase'e yazılmayacak.")
+        return
+
+    print(f"\n{len(rows)} satır Supabase'e yazılıyor...")
     written = upsert_programs(rows)
-    print(f"Tamamlandı — {written} kayıt Supabase'e yazıldı.")
+    print(f"Tamamlandı: {written} kayıt yazıldı.")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

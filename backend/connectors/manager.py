@@ -1,7 +1,7 @@
 
 from models.raw_program import RawProgram
 from connectors.base import BaseConnector
-#from connectors.kalkinma_ag import KalkinmaAgConnector
+from connectors.kalkinma_ajansi import KalkinmaAjansiConnector
 #from connectors.tubitak import TubitakConnector
 from connectors.kosgeb import KOSGEBConnector
 
