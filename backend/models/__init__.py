@@ -7,11 +7,11 @@ from .eligibility import (
 from .orchestration import AssistResult, ConversationTurn, ProgramMatch
 from .profile import UserProfile
 from .program import ApplicationStatus, Currency, ExtractedSupportInfo, SupportProgramDB, SupportType
-from .taxonomy import SUBCATEGORIES, Category
+from .taxonomy import Category
 
 __all__ = [
     "Category",
-    "SUBCATEGORIES",
+    #"SUBCATEGORIES",
     "SupportProgramDB",
     "SupportType",
     "ApplicationStatus",

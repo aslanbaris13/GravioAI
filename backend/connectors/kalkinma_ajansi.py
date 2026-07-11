@@ -13,7 +13,7 @@ class KalkinmaAjansiConnector(BaseConnector):
     forbidden_terms = []
     ambiguous_keywords = [
         "kobi", "işletme", "yenilik", "inovasyon", "teknik destek",
-        "ar-ge", "dijital dönüşüm", "kapasite",
+        "ar-ge", "dijital dönüşüm", "kapasite","finansman","yatırım","akademik",
     ]
 
     # Rate limiting'e karşı önlem: her istek arası küçük bekleme,
@@ -63,7 +63,10 @@ class KalkinmaAjansiConnector(BaseConnector):
                 end_date = self._parse_date(item.get("support_end_date"))
                 if end_date and end_date < datetime.now():
                     continue
-
+                
+                
+                #Girişimcilere uygun olmayanlar için ön eleme
+                
                 title_clearly_relevant = self.is_relevant(text="", title=title)
                 title_ambiguous = any(kw in title.lower() for kw in self.ambiguous_keywords)
 
@@ -89,9 +92,9 @@ class KalkinmaAjansiConnector(BaseConnector):
                     except Exception as e:
                         print(f" -> Detay sayfası okunamadı ({redirect_url}): {e}")
 
-                if not self.is_relevant(detail_text, title):
-                    print(f" -> ELENDİ (tam metin kontrolünde alakasız çıktı): {title}")
-                    continue
+                # if not self.is_relevant(detail_text, title):
+                #     print(f" -> ELENDİ (tam metin kontrolünde alakasız çıktı): {title}")
+                #     continue
 
                 print(f"Yapay zeka analiz ediyor: {title}")
                 extracted_info = await llm_client.extract_program_details(

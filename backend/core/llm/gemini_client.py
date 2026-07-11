@@ -1,21 +1,23 @@
 """Google Gemini adaptörü — sağlayıcı-bağımsız LLM katmanının bir uygulaması."""
 
 import os
+import asyncio
 from google import genai
 from google.genai import types
 from .base import LLMClient, LLMMessage
 from dotenv import load_dotenv
-
+from models.program import ExtractedSupportInfo
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 # Pydantic modelimizi ve base sınıfları içeri alıyoruz
-from models.program import ExtractedSupportInfo
-from .base import LLMClient, LLMMessage
+
+
 
 load_dotenv() 
 
 _ROLE_MAP = {"user": "user", "assistant": "model"}
 
-_ROLE_MAP = {"user": "user", "assistant": "model"}
+
 
 
 class GeminiClient(LLMClient):
@@ -48,20 +50,25 @@ class GeminiClient(LLMClient):
         )
         return resp.text
 
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=4, max=15))
+
     async def extract_program_details(self, body_text: str, source_name: str = "Destek/Hibe") -> ExtractedSupportInfo | None:
         
         #raw metni alır gemini gönderir 
         # ve doldurulmuş pydantic modelini döndürür
+        
+        await asyncio.sleep(1)
+        
         system_instruction = (
             "Sen uzman bir hibe ve teşvik danışmanısın. Sana verilen web sitesi metnini dikkatlice oku. "
             "Metindeki bilgileri kullanarak bütçe, başvuru şartları ve sektör gibi alanları çıkar. "
             "Eğer bir bilgi metinde kesin olarak yoksa, o alanı boş (null) bırak, asla uydurma."
         )
 
-        try:
-            # Asenkron istek atıyoruz (self._client.aio kullanımına dikkat)
+       
+        # Asenkron istek atıyoruz (self._client.aio kullanımına dikkat)
             
-            response = await self._client.aio.models.generate_content(
+        response = await self._client.aio.models.generate_content(
                 model=self._model,
                 contents=f"Aşağıdaki {source_name} programı metnini analiz et:\n\n{body_text}",
                 config=types.GenerateContentConfig(
@@ -73,9 +80,8 @@ class GeminiClient(LLMClient):
             )
 
             # # Gemini'dan dönen metni (JSON string) Pydantic objesine çeviriyoruz.
-            extracted_data = ExtractedSupportInfo.model_validate_json(response.text)
-            return extracted_data
         
-        except Exception as e:
-            print(f"LLM Extraction Error: {e}")
-            return None
+        return ExtractedSupportInfo.model_validate_json(response.text)
+        
+
+            

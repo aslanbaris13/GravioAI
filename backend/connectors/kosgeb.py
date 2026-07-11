@@ -55,10 +55,11 @@ class KOSGEBConnector(BaseConnector):
                 soup = BeautifulSoup(detail_html, "html.parser")
                 title = soup.title.string.replace("KOSGEB - ", "").strip() if soup.title else "Başlıksız"
 
-                # Ön filtreleme
-                if not self.is_relevant(clean_txt, title):
-                    print(f" -> ELENDİ (Girişimci odaklı değil): {title}")
-                    continue
+                # Ön filtreleme: Girişimclere uygun mu değil mi diye
+                
+                # if not self.is_relevant(clean_txt, title):
+                #     print(f" -> ELENDİ (Girişimci odaklı değil): {title}")
+                #     continue
 
                 #LLM ile analiz
                     

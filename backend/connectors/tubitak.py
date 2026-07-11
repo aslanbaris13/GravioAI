@@ -67,9 +67,12 @@ class TubitakConnector(BaseConnector):
                 if not (href.startswith("/tr/destekler/") and len(baslik) > 20):
                     continue
 
-                # Menü/kategori linklerini ele, sadece gerçek program sayfalarını al
-                if not self._is_program_link(href):
-                    continue
+            # Menü/kategori linklerini ele, sadece gerçek program sayfalarını al
+            # tüm /tr/destekler/ linkleri (kategori sayfaları dahil) çekilip
+            # veritabanında gözlemlenecek, filtre ihtiyacı sonra netleştirilecek.
+
+                # if not self._is_program_link(href):
+                #     continue
 
                 full_url = self.base_domain + href
                 if full_url in gorulen_linkler:

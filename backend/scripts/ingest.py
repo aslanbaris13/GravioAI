@@ -11,7 +11,7 @@ import asyncio
 
 from data.loader import load_programs
 from data.repo import program_embedding_text, _to_row, upsert_programs
-from core.embedding.factory import get_embedding_client
+from core.embedder import get_embedding_client
 
 
 async def main():
@@ -44,10 +44,23 @@ async def main():
         print("Hiçbir satır hazırlanamadı, Supabase'e yazılmayacak.")
         return
 
+    # Aynı program_id'ye sahip birden fazla satır varsa (filtreler kapalıyken
+    # aynı slug'ı üreten farklı linkler gibi durumlarda olabiliyor), Postgres
+    # tek bir upsert komutunda aynı satırı iki kez güncelleyemiyor. Bu yüzden
+    # göndermeden önce tekilleştiriyoruz — aynı program_id'den en son
+    # gördüğümüzü tutuyoruz.
+    tekil_satirlar = {}
+    for row in rows:
+        pid = row["program_id"]
+        if pid in tekil_satirlar:
+            print(f" - Tekrarlanan program_id atlandı: {pid}")
+        tekil_satirlar[pid] = row
+
+    rows = list(tekil_satirlar.values())
+
     print(f"\n{len(rows)} satır Supabase'e yazılıyor...")
     written = upsert_programs(rows)
     print(f"Tamamlandı: {written} kayıt yazıldı.")
-
-
+    
 if __name__ == "__main__":
     asyncio.run(main())
