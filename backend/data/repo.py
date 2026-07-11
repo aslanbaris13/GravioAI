@@ -11,7 +11,7 @@ from functools import lru_cache
 from supabase import Client, create_client
 
 from core.config import get_settings
-from models import Category, SupportProgramDB
+from models import Category, SupportProgram
 
 _TABLE = "programs_v2"  # yeni, nihai şemaya sahip tablo
 
@@ -22,7 +22,7 @@ def _client() -> Client:
     return create_client(s.supabase_url, s.supabase_key)
 
 
-def program_embedding_text(p: SupportProgramDB) -> str:
+def program_embedding_text(p: SupportProgram) -> str:
     """Bir programın vektörlenecek metni — eşleştirme kalitesini belirleyen alanlar.
 
     Not: Burada sadece 'anlamsal' alanları kullanıyoruz (isim, kurum, kategori,
@@ -47,17 +47,17 @@ def program_embedding_text(p: SupportProgramDB) -> str:
     return " — ".join(part for part in parts if part)
 
 
-def _to_row(p: SupportProgramDB, embedding: list[float] | None = None) -> dict:
-    """SupportProgramDB'yi DB satırına (İngilizce kolon adları) çevirir."""
+def _to_row(p: SupportProgram, embedding: list[float] | None = None) -> dict:
+    """SupportProgram'yi DB satırına (İngilizce kolon adları) çevirir."""
     row = p.model_dump(mode="json")  # alan adları (alias değil), enum'lar string'e döner
     if embedding is not None:
         row["embedding"] = embedding
     return row
 
 
-def _from_row(row: dict) -> SupportProgramDB:
+def _from_row(row: dict) -> SupportProgram:
     """DB satırını modele çevirir (fazladan kolonlar varsa yok sayılır)."""
-    return SupportProgramDB.model_validate(row)
+    return SupportProgram.model_validate(row)
 
 
 def upsert_programs(rows: list[dict]) -> int:
@@ -67,7 +67,7 @@ def upsert_programs(rows: list[dict]) -> int:
     resp = _client().table(_TABLE).upsert(rows, on_conflict="program_id").execute()
     return len(resp.data or [])
 
-def get_programs(category: Category | None = None) -> list[SupportProgramDB]:
+def get_programs(category: Category | None = None) -> list[SupportProgram]:
     """Kategoriye göre (isteğe bağlı) tüm programları getirir."""
     query = _client().table(_TABLE).select("*").order("id")
     if category is not None:
@@ -76,7 +76,7 @@ def get_programs(category: Category | None = None) -> list[SupportProgramDB]:
     return [_from_row(r) for r in (resp.data or [])]
 
 
-def get_program(program_id: str) -> SupportProgramDB | None:
+def get_program(program_id: str) -> SupportProgram | None:
     """Tek bir programı program_id'sine göre getirir."""
     resp = _client().table(_TABLE).select("*").eq("program_id", program_id).limit(1).execute()
     data = resp.data or []
@@ -88,7 +88,7 @@ def match_programs(
     *,
     match_count: int = 5,
     category: Category | None = None,
-) -> list[SupportProgramDB]:
+) -> list[SupportProgram]:
     """Verilen embedding'e en yakın programları (kosinüs benzerliği) döner — RAG eşleştirmesi."""
     resp = _client().rpc(
         "match_programs",

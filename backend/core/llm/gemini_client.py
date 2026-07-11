@@ -50,7 +50,7 @@ class GeminiClient(LLMClient):
         )
         return resp.text
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=4, max=15))
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=4, max=15),reraise=True)
 
     async def extract_program_details(self, body_text: str, source_name: str = "Destek/Hibe") -> ExtractedSupportInfo | None:
         

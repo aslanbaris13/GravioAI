@@ -6,7 +6,7 @@ from core.cleaner import extract_text_from_html
 from core.fetcher import BaseFetcher
 
 from core.llm.factory import get_llm_client
-from models.program import SupportProgramDB
+from models.program import SupportProgram
 
 class KOSGEBConnector(BaseConnector):
 # KOSGEB Erişilebilirlik ve site başlığı çöp metinleri
@@ -72,7 +72,7 @@ class KOSGEBConnector(BaseConnector):
                 if extracted_info:
                     #Veriyi formatla ve listeye ekle
                     
-                    db_record = self.format_to_db(extracted_info, full_url, clean_txt)
+                    db_record = self.format_to_db(extracted_info, full_url, clean_txt,source_name="KOSGEB")
                     programs.append(db_record)
                     print(f" Başarıyla ayrıştırıldı ve formatlandı: {title}")
                     

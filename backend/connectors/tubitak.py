@@ -22,6 +22,7 @@ from core.fetcher import BaseFetcher
 from core.llm.factory import get_llm_client
 
 
+
 class TubitakConnector(BaseConnector):
 
     forbidden_terms = []
@@ -96,7 +97,7 @@ class TubitakConnector(BaseConnector):
                     if not extracted_info.deadline and listeleme_tarihi:
                         extracted_info.deadline = listeleme_tarihi
 
-                    db_record = self.format_to_db(extracted_info, full_url, clean_txt)
+                    db_record = self.format_to_db(extracted_info, full_url, clean_txt, source_name=self.source_name)
                     programs.append(db_record)
                     print(f" Başarıyla ayrıştırıldı ve formatlandı: {baslik}")
 

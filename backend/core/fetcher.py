@@ -25,7 +25,7 @@ class HttpFetcher(BaseFetcher):
     HTML (veya metin) kodunu indiren veri çekmek için kullanılacak.
     """
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=4, max=20))
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=4, max=20),reraise=True)
     async def fetch_text(self, url: str) -> str:
         """
         Bu metod, verilen URL'den veri çeker ve ham metin (HTML) olarak döndürür.
@@ -37,7 +37,7 @@ class HttpFetcher(BaseFetcher):
 
         print(f"istek atılıyor: {url}")
      
-        async with httpx.AsyncClient(timeout=30.0, headers=kimlik_karti) as client:
+        async with httpx.AsyncClient(timeout=30.0, headers=kimlik_karti, follow_redirects=True) as client:
             response = await client.get(url)
             response.raise_for_status()  # Eğer HTTP hatası varsa exception fırlatır
             return response.text

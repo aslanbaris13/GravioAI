@@ -7,6 +7,7 @@ from connectors.base import BaseConnector
 from core.fetcher import BaseFetcher
 from core.llm.factory import get_llm_client
 
+from core.constants import KALKINMA_AJANSI_ISIMLERI
 
 class KalkinmaAjansiConnector(BaseConnector):
 
@@ -60,10 +61,18 @@ class KalkinmaAjansiConnector(BaseConnector):
             for item in items:
                 title = item.get("name") or "Başlıksız Hibe"
 
+                 # Süresi geçmiş ilanları atla
                 end_date = self._parse_date(item.get("support_end_date"))
                 if end_date and end_date < datetime.now():
                     continue
                 
+                
+                # agency_code'u tam isme çevir
+                agency_code = item.get("agency_code")
+                agency_name = (
+                    KALKINMA_AJANSI_ISIMLERI.get(agency_code.lower(), agency_code)
+                    if agency_code else None
+                )
                 
                 #Girişimcilere uygun olmayanlar için ön eleme
                 
@@ -103,7 +112,10 @@ class KalkinmaAjansiConnector(BaseConnector):
 
                 if extracted_info:
                     source_url = redirect_url or url
-                    db_record = self.format_to_db(extracted_info, source_url, detail_text)
+                    db_record = self.format_to_db(extracted_info, source_url, detail_text,
+                        source_name=self.source_name,
+                        region_override=agency_name,)
+                    
                     programs.append(db_record)
                     print(f" Başarıyla ayrıştırıldı ve formatlandı: {title}")
 

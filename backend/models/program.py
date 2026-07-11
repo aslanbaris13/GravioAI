@@ -250,10 +250,10 @@ class ExtractedSupportInfo(BaseModel):
 
         return v
 
-# 3) Veritabanının şablonu: Yapay zeka artık SupportProgramDB sınıfını hiç görmeyecek.
+# 3) Veritabanının şablonu: Yapay zeka artık SupportProgram sınıfını hiç görmeyecek.
 # Ona sadece ExtractedSupportInfo sınıfını vereceğiz, böylece kafası karışmayacak.
 
-class SupportProgramDB(ExtractedSupportInfo):
+class SupportProgram(ExtractedSupportInfo):
     """
     ExtractedSupportInfo'daki tüm verileri (bütçe, ad vb.) miras alır,
     üstüne sadece yazılım sistemimizin ihtiyaç duyduğu teknik verileri ekler.

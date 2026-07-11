@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Kurum adı -> (connector sınıfı, taslak dosya adı) eşlemesi.
-# Yeni bir kurum eklerken buraya da eklemen yeterli.
+# Yeni bir kurum eklerken buraya da eklemek yeterli.
 KURUM_MAP = {
     "kosgeb": (KOSGEBConnector, "kosgeb_taslak.json"),
     "kalkinma": (KalkinmaAjansiConnector, "kalkinma_taslak.json"),

@@ -1,19 +1,12 @@
 import re
 from abc import ABC, abstractmethod
 from datetime import datetime
+
 from models.raw_program import RawProgram
 from core.cleaner import extract_text_from_html
-from models.program import SupportProgramDB
+from models.program import SupportProgram
+from core.constants import AY_KISALTMALARI, BOS_ALAN_MESAJLARI, TURKCE_KARAKTER_DEGISIMLERI
 
-
-# Farklı kaynaklardan gelen tarih metinlerini (İngilizce ay adı, Türkçe kısaltma,
-# saat eki vb.) standart YYYY-MM-DD formatına çevirmek için kullanılan yardımcılar.
-_AY_KISALTMALARI = {
-    "oca": 1, "jan": 1, "sub": 2, "şub": 2, "feb": 2, "mar": 3,
-    "nis": 4, "apr": 4, "may": 5, "haz": 6, "jun": 6, "tem": 7, "jul": 7,
-    "agu": 8, "ağu": 8, "aug": 8, "eyl": 9, "sep": 9, "eki": 10, "oct": 10,
-    "kas": 11, "nov": 11, "ara": 12, "dec": 12,
-}
 
 
 def _normalize_deadline(raw: str | None) -> str | None:
@@ -32,7 +25,7 @@ def _normalize_deadline(raw: str | None) -> str | None:
     m = re.search(r"(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)\s+(\d{4})", raw)
     if m:
         gun, ay_metni, yil = m.groups()
-        ay = _AY_KISALTMALARI.get(ay_metni[:3].lower().replace("ı", "i"))
+        ay = AY_KISALTMALARI.get(ay_metni[:3].lower().replace("ı", "i"))
         if ay:
             try:
                 return datetime(int(yil), ay, int(gun)).strftime("%Y-%m-%d")
@@ -42,16 +35,6 @@ def _normalize_deadline(raw: str | None) -> str | None:
     # Tanınmayan format, olduğu gibi bırak
     return raw
 
-# Text/opsiyonel alanlar boşsa (None), gösterilecek varsayılan Türkçe mesajlar.
-_BOS_ALAN_MESAJLARI = {
-    "region": "Bölge şartı belirtilmemiş",
-    "founded_after": "Kuruluş tarihi şartı belirtilmemiş",
-    "deadline": "Son başvuru tarihi belirtilmemiş",
-    "support_rate": "Destek oranı belirtilmemiş",
-    "official_url": "Resmi link belirtilmemiş",
-    "conditions_summary": "Şartlar özeti belirtilmemiş",
-    "category": "Kategori belirtilmemiş",
-}
 
 
 class BaseConnector(ABC):
@@ -84,43 +67,50 @@ class BaseConnector(ABC):
 
     def generate_id(self, text: str) -> str:
         """Supabase program ID üretir (Türkçe karakterleri güvenli şekilde temizler)."""
-        değişimler = {
-            "İ": "i", "I": "i", "ı": "i",
-            "Ğ": "g", "ğ": "g",
-            "Ü": "u", "ü": "u",
-            "Ş": "s", "ş": "s",
-            "Ö": "o", "ö": "o",
-            "Ç": "c", "ç": "c",
-        }
-        for eski, yeni in değişimler.items():
+
+        for eski, yeni in TURKCE_KARAKTER_DEGISIMLERI.items():
             text = text.replace(eski, yeni)
+        
         text = text.lower()
 
         cln_txt = "".join(harf for harf in text if harf.isalnum() or harf == " ")
         kelimeler = cln_txt.split()
         return "-".join(kelimeler)
 
-    def format_to_db(self, extracted_info, url: str, raw_text: str) -> dict:
-        """
-        LLM'den gelen veriyi, veritabanına (Supabase) yazılacak standart formata sokar.
-        bu metod sayesinde her veri, Supabase'e gitmeden önce tek bir kalıba (SupportProgramDB) sokulur.
+    def format_to_db(
+    self,
+    extracted_info,
+    url: str,
+    raw_text: str,
+    source_name: str,
+    region_override: str | None = None,) -> dict:
+        
+        """LLM çıktısını Supabase'e yazılacak standart formata sokar.
+
+        source_name: connector'ın kendi bildiği sabit kurum adı (LLM'e güvenmek yerine).
+        region_override: varsa (örn. Kalkınma Ajansı kodu), LLM'in bulduğu region'ın yerini alır.
         """
         readable_id = self.generate_id(extracted_info.title)
 
-        # Deadline'ı standart formata çevir (LLM her kaynaktan farklı format dönebiliyor)
         if extracted_info.deadline:
             extracted_info.deadline = _normalize_deadline(extracted_info.deadline)
 
-        # Boş (None) olan text/opsiyonel alanları anlamlı Türkçe mesajlarla doldur
-        for alan_adi, mesaj in _BOS_ALAN_MESAJLARI.items():
+        extracted_info.source = source_name
+
+        if region_override:
+            extracted_info.region = region_override
+        elif extracted_info.region is None:
+            extracted_info.region = "Ulusal"
+
+        for alan_adi, mesaj in BOS_ALAN_MESAJLARI.items():
             if getattr(extracted_info, alan_adi, None) is None:
                 setattr(extracted_info, alan_adi, mesaj)
-        
-        db_record = SupportProgramDB(
-            **extracted_info.model_dump(by_alias=False),  # LLM'in bulduğu verileri (bütçe, başlık vs.) açarak içine koyar
-            program_id=readable_id,                        # Supabase için benzersiz bir ID üretir
-            source_url=url,                                # Verinin hangi linkten çekildiğini kaydeder
-            body_chunk=raw_text,                            # İleride yapay zekanın (RAG) metni okuyabilmesi için orijinal metni saklar
+
+        db_record = SupportProgram(
+            **extracted_info.model_dump(by_alias=False),
+            program_id=readable_id,
+            source_url=url,
+            body_chunk=raw_text,
         )
 
         return db_record.model_dump(mode='json')
