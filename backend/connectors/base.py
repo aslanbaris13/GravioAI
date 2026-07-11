@@ -42,6 +42,17 @@ def _normalize_deadline(raw: str | None) -> str | None:
     # Tanınmayan format, olduğu gibi bırak
     return raw
 
+# Text/opsiyonel alanlar boşsa (None), gösterilecek varsayılan Türkçe mesajlar.
+_BOS_ALAN_MESAJLARI = {
+    "region": "Bölge şartı belirtilmemiş",
+    "founded_after": "Kuruluş tarihi şartı belirtilmemiş",
+    "deadline": "Son başvuru tarihi belirtilmemiş",
+    "support_rate": "Destek oranı belirtilmemiş",
+    "official_url": "Resmi link belirtilmemiş",
+    "conditions_summary": "Şartlar özeti belirtilmemiş",
+    "category": "Kategori belirtilmemiş",
+}
+
 
 class BaseConnector(ABC):
 
@@ -100,6 +111,11 @@ class BaseConnector(ABC):
         if extracted_info.deadline:
             extracted_info.deadline = _normalize_deadline(extracted_info.deadline)
 
+        # Boş (None) olan text/opsiyonel alanları anlamlı Türkçe mesajlarla doldur
+        for alan_adi, mesaj in _BOS_ALAN_MESAJLARI.items():
+            if getattr(extracted_info, alan_adi, None) is None:
+                setattr(extracted_info, alan_adi, mesaj)
+        
         db_record = SupportProgramDB(
             **extracted_info.model_dump(by_alias=False),  # LLM'in bulduğu verileri (bütçe, başlık vs.) açarak içine koyar
             program_id=readable_id,                        # Supabase için benzersiz bir ID üretir
