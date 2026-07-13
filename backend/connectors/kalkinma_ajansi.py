@@ -2,7 +2,7 @@ import asyncio
 import json
 from datetime import datetime
 from typing import Optional
-
+from core.cleaner import BaseCleaner
 from connectors.base import BaseConnector
 from core.fetcher import BaseFetcher
 from core.llm.factory import get_llm_client
@@ -11,6 +11,8 @@ from core.constants import KALKINMA_AJANSI_ISIMLERI
 
 class KalkinmaAjansiConnector(BaseConnector):
 
+    SOURCE_NAME = "KALKİNMA"
+    
     forbidden_terms = []
     ambiguous_keywords = [
         "kobi", "işletme", "yenilik", "inovasyon", "teknik destek",
@@ -23,7 +25,8 @@ class KalkinmaAjansiConnector(BaseConnector):
     BATCH_SIZE = 15
     BATCH_PAUSE = 1.0
 
-    def __init__(self, fetcher: BaseFetcher):
+    def __init__(self, fetcher: BaseFetcher, cleaner: BaseCleaner | None = None):
+        super().__init__(cleaner=cleaner)
         self.fetcher = fetcher
         self.api_url_template = "https://ka.gov.tr/api/supports?filters={{}}&page={page}"
         self.source_name = "Kalkınma Ajansları"

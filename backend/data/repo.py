@@ -13,8 +13,9 @@ from supabase import Client, create_client
 from core.config import get_settings
 from models import Category, SupportProgram
 
-_TABLE = "programs_v2"  # yeni, nihai şemaya sahip tablo
-
+_TABLE = "programs_v2"  # yeni tablo
+_CHİLD = "program_chunks" #child
+_PARENT = "program_parents" #parent
 
 @lru_cache
 def _client() -> Client:
@@ -66,6 +67,22 @@ def upsert_programs(rows: list[dict]) -> int:
         return 0
     resp = _client().table(_TABLE).upsert(rows, on_conflict="program_id").execute()
     return len(resp.data or [])
+
+def upsert_program_parents(rows: list[dict]) -> int:
+    """program_parents tablosuna toplu upsert yapar."""
+    
+    if not rows:
+        return 0
+
+    par_resp= _client().table(_PARENT).upsert(rows,on_conflict="id").execute()
+    return len(par_resp.data or [])
+    
+def upsert_program_chunks(rows: list[dict]) -> int:
+    """program_chunks tablosuna toplu upsert yapar."""
+    if not rows:
+        return 0
+    ch_resp= _client().table(_CHİLD).upsert(rows,on_conflict="id").execute()
+    return len(ch_resp.data or [])
 
 def get_programs(category: Category | None = None) -> list[SupportProgram]:
     """Kategoriye göre (isteğe bağlı) tüm programları getirir."""

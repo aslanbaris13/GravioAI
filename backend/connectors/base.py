@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from models.raw_program import RawProgram
-from core.cleaner import extract_text_from_html
+from core.cleaner import BaseCleaner, get_cleaner
 from models.program import SupportProgram
 from core.constants import AY_KISALTMALARI, BOS_ALAN_MESAJLARI, TURKCE_KARAKTER_DEGISIMLERI
 
@@ -46,7 +46,11 @@ class BaseConnector(ABC):
     """
     forbidden_terms = []
     relevance_keywords = ["girişimci", "iş kurma", "startup", "kuluçka", "yeni işletme"]
-
+    
+    def __init__(self,cleaner:BaseCleaner|None=None):
+        self.cleaner=cleaner or get_cleaner(self.SOURCE_NAME)
+    
+    
     @abstractmethod
     async def fetch(self) -> list[dict]:
         """
@@ -57,7 +61,7 @@ class BaseConnector(ABC):
 
     def clean(self, raw_html: str) -> str:
         # core/cleaner.py dosyasındaki fonksiyonunu buraya çağıracağız
-        return extract_text_from_html(raw_html, forbidden_terms=self.forbidden_terms)
+        return self.cleaner.clean(raw_html)
 
     # girişimcilere uygun mu kontrolü?
     def is_relevant(self, text: str, title: str) -> bool:

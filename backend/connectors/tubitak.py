@@ -20,14 +20,17 @@ from bs4 import BeautifulSoup
 from connectors.base import BaseConnector
 from core.fetcher import BaseFetcher
 from core.llm.factory import get_llm_client
-
+from core.cleaner import BaseCleaner
 
 
 class TubitakConnector(BaseConnector):
-
+    
+    SOURCE_NAME = "TUBİTAK"
+    
     forbidden_terms = []
 
-    def __init__(self, fetcher: BaseFetcher):
+    def __init__(self, fetcher: BaseFetcher, cleaner: BaseCleaner | None = None):
+        super().__init__(cleaner=cleaner)
         self.fetcher = fetcher
         self.main_list_url = "https://tubitak.gov.tr/tr/acik-cagrilar"
         self.base_domain = "https://tubitak.gov.tr"

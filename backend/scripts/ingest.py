@@ -12,7 +12,8 @@ import asyncio
 from data.loader import load_programs
 from data.repo import program_embedding_text, _to_row, upsert_programs
 from core.embedder import get_embedding_client
-
+from core.chunker import HierarchicalChunker
+from data.repo import upsert_program_parents, upsert_program_chunks
 
 async def main():
     print("Ingestion başlatılıyor...\n")
@@ -25,8 +26,12 @@ async def main():
         return
 
     embedding_client = get_embedding_client()
+    chunker = HierarchicalChunker(embedding_client=embedding_client)
 
     rows = []
+    all_parent_rows = []   
+    all_child_rows = []
+    
     for program in programs:
         text = program_embedding_text(program)
         print(f"Embedding oluşturuluyor: {program.title}")
@@ -39,6 +44,16 @@ async def main():
 
         row = _to_row(program, embedding=embedding)
         rows.append(row)
+        
+        try:
+            parent_rows, child_rows = await chunker.chunk_program(
+                body_chunk=program.body_chunk,
+                program_id=program.program_id
+            )
+            all_parent_rows.extend(parent_rows)
+            all_child_rows.extend(child_rows)
+        except Exception as e:
+            print(f" HATA: {program.title} için chunking yapılamadı: {e}")
 
     if not rows:
         print("Hiçbir satır hazırlanamadı, Supabase'e yazılmayacak.")
@@ -61,6 +76,14 @@ async def main():
     print(f"\n{len(rows)} satır Supabase'e yazılıyor...")
     written = upsert_programs(rows)
     print(f"Tamamlandı: {written} kayıt yazıldı.")
+    
+    print(f"\n{len(all_parent_rows)} parent satırı yazılıyor...")
+    written_parents = upsert_program_parents(all_parent_rows)
+    print(f"Tamamlandı: {written_parents} parent kaydı yazıldı.")
+
+    print(f"\n{len(all_child_rows)} child (chunk) satırı yazılıyor...")
+    written_chunks = upsert_program_chunks(all_child_rows)
+    print(f"Tamamlandı: {written_chunks} chunk kaydı yazıldı.")
     
 if __name__ == "__main__":
     asyncio.run(main())

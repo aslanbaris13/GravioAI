@@ -2,14 +2,17 @@
 from bs4 import BeautifulSoup
 from connectors.base import BaseConnector
 from models.raw_program import RawProgram
-from core.cleaner import extract_text_from_html
+from core.cleaner import BaseCleaner,get_cleaner
 from core.fetcher import BaseFetcher
 
 from core.llm.factory import get_llm_client
 from models.program import SupportProgram
-
+import traceback
 class KOSGEBConnector(BaseConnector):
 # KOSGEB Erişilebilirlik ve site başlığı çöp metinleri
+
+    SOURCE_NAME = "KOSGEB"
+    
     forbidden_terms = [
         "Erişilebilirlik Menüsü", "x", "Ekran Okuyucu", "Seçili Alan Okuyucu", 
         "Bağlantı Vurgula", "Büyük Metin", "Metni Sola Hizala", "İmleç", 
@@ -18,7 +21,8 @@ class KOSGEBConnector(BaseConnector):
         "Tüm Liste", "Site içi arama", "e-hizmetler"
     ]
 
-    def __init__(self,fetcher:BaseFetcher):
+    def __init__(self,fetcher:BaseFetcher, cleaner: BaseCleaner | None = None):
+        super().__init__(cleaner=cleaner)
 
         self.fetcher = fetcher  # HTTP fetcher'ı kullanıyoruz
         self.main_list_url= "https://www.kosgeb.gov.tr/site/tr/genel/destekler/3/destekler"
@@ -78,5 +82,6 @@ class KOSGEBConnector(BaseConnector):
                     
             except Exception as e :
                 print(f" HATA: {url} SAYFASI OKUNAMADI: {e}")
+                traceback.print_exc()
                     
         return programs

@@ -4,7 +4,13 @@ Embedding katmanı — metni sayısal vektöre çeviren sağlayıcı-bağımsız
 from abc import ABC, abstractmethod
 from functools import lru_cache
 
-from google import genai
+
+import os
+import uuid
+from langchain_experimental.text_splitter import SemanticChunker
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 
 from core.config import Settings, get_settings
 
@@ -16,31 +22,49 @@ class EmbeddingClient(ABC):
     async def embed_text(self, text: str) -> list[float]:
         """Verilen metni sayısal bir vektöre çevirir."""
         raise NotImplementedError
+    
+    @abstractmethod
+    def get_langchain_embeddings(self):
+            """
+            LangChain uyumlu embedding nesnesini döner .
+
+            Bu metodun amacı: chunker.py, GeminiEmbeddingClient'ın İÇİNDE
+            `lc_embeddings` diye bir attribute olduğunu bilmemeli — sadece
+            ABC üzerinden "bana LangChain embedding nesnesini ver" diyebilmeli.
+            """
+            raise NotImplementedError
+    
 
 
 class GeminiEmbeddingClient(EmbeddingClient):
     """Gemini embedding modelini kullanan somut uygulama."""
 
     def __init__(self, api_key: str, model: str) -> None:
-        self._client = genai.Client(api_key=api_key)
-        self._model = model
-
-    async def embed_text(self, text: str) -> list[float]:
-        """Metni Gemini embedding API'sine gönderir, dönen vektörü döner."""
-        response = await self._client.aio.models.embed_content(
+        
+        self._model=model
+        self.lc_embeddings = GoogleGenerativeAIEmbeddings(
             model=self._model,
-            contents=text,
-            config={'output_dimensionality': 768},
-        )
-        return response.embeddings[0].values
+            google_api_key=api_key,
+            task_type="retrieval_document",
+            output_dimensionality=768
+        ) 
+        
+        
+    async def embed_text(self, text: str) -> list[float]:
+        """Metni LangChain üzerinden asenkron embed eder"""
 
+        return await self.lc_embeddings.aembed_query(text)
 
-def build_embedding_client(settings: Settings) -> EmbeddingClient:
-    """Config'e göre doğru embedding sağlayıcı adaptörünü üretir.
+    async def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        # Çoklu metinleri tek API çağrısında işler
+        return await self.lc_embeddings.aembed_documents(texts)
 
-    Yeni sağlayıcı eklemek = buraya bir `elif` + yeni sınıf. Çağıran kod
-    (ingest.py vb.) hangi sağlayıcı kullanıldığını hiç bilmek zorunda kalmaz.
-    """
+    def get_langchain_embeddings(self):
+        
+        return self.lc_embeddings
+    
+def build_embedding_client(settings) -> EmbeddingClient:
+    """Config'e göre doğru embedding sağlayıcı  üretir."""
     provider = settings.embedding_provider.lower()
 
     if provider == "gemini":
@@ -49,9 +73,8 @@ def build_embedding_client(settings: Settings) -> EmbeddingClient:
             model=settings.embedding_model,
         )
 
-    raise ValueError(f"Desteklenmeyen embedding sağlayıcı: {settings.embedding_provider!r}")
-
-
+    raise ValueError(f"Desteklenmeyen embedding sağlayıcı: {settings.embedding_provider!r}")    
+    
 @lru_cache
 def get_embedding_client() -> EmbeddingClient:
     return build_embedding_client(get_settings())
