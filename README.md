@@ -1,9 +1,8 @@
-<div align="center">
 
 <!-- LOGO: ProjectManagement/assets/logo.png yükleyince aşağıdaki satırı aç -->
 <!-- <img src="ProjectManagement/assets/logo.png" alt="GravioAI" width="180" /> -->
 
-# 🛰️ GravioAI
+# 🤖 🚀 GravioAI
 
 ### _Yüzeyin altındaki fırsatı çıkar_
 
@@ -59,9 +58,7 @@ Kullanıcı asistanla **konuşarak** profilini oluşturur. GravioAI ardından pr
 
 ## Product Backlog URL
 
-📋 **[GravioAI Product Backlog Board](#)** _(Miro / GitHub Projects linki — eklenecek)_
-
----
+🔗 [GravioAI Product Backlog Board](https://haticenurolgun.atlassian.net/jira/software/projects/SCRUM/boards/1)
 
 ## 🧠 Yapay Zekâ Mimarisi
 
@@ -102,30 +99,167 @@ GravioAI "tek bir LLM çağrısı" değil; bir **orkestratör** tarafından yön
 
 ---
 
-# Sprint 1
+# 🚀 Sprint 1
 
-> 🟢 **Sprint Tarihi:** 19 Haziran – 5 Temmuz 2026
-> **Sprint Hedefi:** Problem doğrulama · veri modeli · ilk konektörler (AWS + BİGG) · profil çıkarma + eşleştirme ajanı · temel sohbet arayüzü
+## 🎯 Sprint Amacı
 
-- **Sprint Notları:** _(Sprint planlama notları ve story dağılımı buraya eklenecek)_
+Sprint 1'in temel amacı; projenin veri altyapısını oluşturmak, girişim destek programlarını toplamak ve düzenlemek, ortak veri şeması oluşturmak, backend altyapısını kurmak ve semantik arama için gerekli temel bileşenleri geliştirmektir.
 
-- **Sprint içinde tamamlanması tahmin edilen puan:** _(eklenecek)_
+---
 
-- **Puan tamamlama mantığı:** _(Toplam backlog puanı ve sprint başına hedef puan mantığı buraya yazılacak)_
+## 📊 Sprint Özeti
 
-- **Backlog düzeni ve Story seçimleri:** _(Backlog'un nasıl düzenlendiği, story → task ayrımı buraya yazılacak)_
+| Başlık | Değer |
+|--------|--------|
+| Sprint Süresi | 19 Haziran - 5 Temmuz |
+| Takım Büyüklüğü | 4 Kişi |
+| Toplantı Sayısı | 5 |
+| Toplantı Sıklığı | Haftada 2 |
+| Planlanan Story Point | 54 SP |
 
-- **Daily Scrum:** _(Daily Scrum toplantı notları — jpeg/word olarak ProjectManagement/Sprint1Documents/ altına eklenecek ve buradan linklenecek)_
+---
 
-- **Sprint Board Update:** _(Sprint board ekran görüntüleri buraya eklenecek)_
-  <!-- ![Sprint 1 Board](ProjectManagement/Sprint1Documents/board1.png) -->
+<details>
+<summary><b>📋 Sprint Planlama</b></summary>
 
-- **Ürün Durumu:** _(Ürünün ekran görüntüleri buraya eklenecek)_
-  <!-- ![Ürün Ekranı 1](ProjectManagement/Sprint1Documents/product1.png) -->
+### Backlog Düzeni
 
-- **Sprint Review:** _(Sprint Review'da alınan kararlar ve katılımcılar buraya yazılacak)_
+Sprint backlog'u, projenin ilk sürümünde geliştirilecek kullanıcı hikâyelerine göre oluşturulmuştur. Story'ler daha küçük görevlere (task) ayrılmış ve ekip üyelerine dağıtılmıştır. Önceliklendirme yapılırken sistemin çalışması için kritik bileşenler öncelikli olarak planlanmıştır.
 
-- **Sprint Retrospective:** _(Retrospektif çıktıları — iyileştirme kararları buraya yazılacak)_
+### Sprint Kapsamı
+
+- Girişim destek programlarının toplanması
+- Ortak veri şemasının oluşturulması
+- Destek programlarının kategorilere ayrılması
+- Frontend taslağının oluşturulması.
+- Backend altyapısının kurulması
+- LLM Provider katmanının geliştirilmesi
+- Vector Database kurulumu
+- Embedding Pipeline geliştirilmesi
+- Eligibility (uygunluk) kurallarının tanımlanması
+- Destek programlarının uygunluk kriterleriyle eşleştirilmesi
+
+</details>
+
+---
+
+<details>
+  <summary><b>💻 Frontend Arayüz Demosu</b></summary>
+  <br>
+
+
+https://github.com/user-attachments/assets/104a3304-f776-4950-9042-9d34f0b2e240
+
+
+
+</details>
+
+---
+
+<details>
+<summary><b>📌 Sprint Board Güncellemeleri</b></summary>
+
+Sprint süreci boyunca görev takibi Jira Sprint Board üzerinden gerçekleştirilmiştir.
+
+
+### Sprint Başlangıcı
+ <img width="1440" height="867" alt="Ekran görüntüsü 2026-06-27 145942" src="https://github.com/user-attachments/assets/d23317d0-a5b1-4ec4-aad1-59fe6b87d515" />
+
+
+
+
+### Sprint İlerlemeleri
+<img width="1230" height="740" alt="Ekran görüntüsü 2026-07-04 143633" src="https://github.com/user-attachments/assets/7160997a-812f-43df-86e0-c9e3e75d1dab" />
+
+<img width="1142" height="766" alt="Ekran görüntüsü 2026-07-04 155747" src="https://github.com/user-attachments/assets/7c78ca36-b7cc-4f0f-bed2-4c84da1aa4cb" />
+
+<img width="1222" height="870" alt="Ekran görüntüsü 2026-07-04 155831" src="https://github.com/user-attachments/assets/33c1dcdc-7778-4ceb-a500-3e285ad29247" />
+
+### Sprint Sonu
+
+<img width="936" height="732" alt="Ekran görüntüsü 2026-07-05 221733" src="https://github.com/user-attachments/assets/42b0ebf6-b0de-4c02-a3ef-579aa0d86bf6" />
+
+
+</details>
+
+---
+
+<details>
+<summary><b>🤝 Sprint Toplantıları</b></summary>
+
+Sprint boyunca haftada **2-3 kez** ilerleme toplantıları gerçekleştirilmiştir.
+
+Toplantılarda;
+
+- Sprint ilerleyişi değerlendirilmiştir.
+- Tamamlanan ve devam eden görevler gözden geçirilmiştir.
+- Teknik sorunlar değerlendirilmiştir.
+- Yeni aksiyonlar belirlenmiştir.
+- Jira görevleri güncellenmiştir.
+
+📄 **Toplantı Notları**
+
+Toplantı gündemleri ve alınan kararlar aşağıda verilen linkteki Jira dokümanında yer almaktadır.
+https://hatiicenurolgun.atlassian.net/wiki/pages/resumedraft.action?draftId=1
+
+
+
+</details>
+
+---
+
+<details>
+<summary><b>✅ Sprint Değerlendirmesi (Sprint Review)</b></summary>
+
+## Sprint Sonu Özeti
+
+| Metrik | Değer |
+|--------|--------|
+| Planlanan Story Point | 54 SP |
+| Tamamlanan Story Point | 54 SP |
+| Tamamlanan Görev | 10 |
+|
+
+### Sprint Çıktıları
+
+- Projenin temel veri altyapısı oluşturulmaya başlandı.
+- Backend altyapısı ve LLM Provider katmanı geliştirildi.
+- Girişim destek programlarının toplanması ve veri şemasının oluşturulması çalışmalarında önemli ilerleme kaydedildi.
+- Embedding Pipeline, Vector Database ve Eligibility modüllerinin ilk sürümleri geliştirildi.
+- Sprint sonunda tamamlanamayan görevlerin Sprint 2'de devam ettirilmesine karar verildi.
+
+
+
+</details>
+
+---
+
+<details>
+<summary><b>🔄 Sprint Değerlendirmesi (Retrospective)</b></summary>
+
+### 👍 İyi Giden Noktalar
+
+- Takım içi görev dağılımı planlandığı şekilde gerçekleştirildi.
+- Düzenli sprint toplantıları sayesinde ilerleme sürekli takip edildi.
+- Jira üzerinden görev yönetimi etkin şekilde yürütüldü.
+- Projenin temel mimarisi ve veri altyapısı başarıyla oluşturulmaya başlandı.
+
+### ⚠️ Geliştirilebilecek Noktalar
+
+- Veri toplama sürecinde ekip üyeleri farklı yöntemler kullandığından veri yapısında tutarlılığı sağlamak zorlaştı.
+- Story Point tahminlerinin sonraki sprintlerde daha gerçekçi yapılması hedeflenmektedir.
+- Teknik dokümantasyonun sprint boyunca daha düzenli güncellenmesi planlanmaktadır.
+
+### 🎯 Sprint 2 Aksiyonları
+
+Sprint 2 kapsamında farklı veri kaynaklarından veri toplanmasını standartlaştırmak amacıyla ortak bir veri toplama (Data Ingestion) altyapısı geliştirilecektir. Böylece tüm veri sağlayıcıları aynı iş akışını kullanacak, kod tekrarının azaltılması ve bakım kolaylığının artırılması hedeflenmektedir.
+
+-  Semantic search altyapısı geliştirilmeye devam edilecek.
+-  Ajan orchestration geliştirmelerine başlanacak
+- Frontend geliştirmelerine başlanacak.
+
+</details>
+
 
 ---
 

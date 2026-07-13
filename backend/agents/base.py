@@ -89,6 +89,33 @@ class Agent(ABC):
                 await asyncio.sleep(2 * (attempt + 1))
         raise RuntimeError("ulaşılamaz")  # döngü ya döner ya yükseltir
 
+    async def _chat_with_history(
+        self,
+        history: list[LLMMessage],
+        *,
+        system: str | None,
+        max_tokens: int,
+        retries: int = 3,
+    ) -> str:
+        """Konuşma geçmişini (çoklu tur) LLM'e gönderir.
+
+        `_chat`'ten farkı: tek bir user mesajı yerine tam history listesini iletir.
+        Bu sayede LLM önceki turları görerek bağlamsal yanıt üretebilir.
+        """
+        for attempt in range(retries):
+            try:
+                return await self._llm.chat(
+                    history,
+                    system=system,
+                    max_tokens=max_tokens,
+                )
+            except Exception as e:  # noqa: BLE001
+                transient = any(t in str(e).lower() for t in _TRANSIENT)
+                if not transient or attempt == retries - 1:
+                    raise
+                await asyncio.sleep(2 * (attempt + 1))
+        raise RuntimeError("ulaşılamaz")
+
     async def _complete(
         self,
         user_text: str,

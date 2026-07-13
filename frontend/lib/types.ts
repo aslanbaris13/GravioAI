@@ -82,7 +82,9 @@ export type ChatMessage =
       action: "go-matches" | "apply-bigg";
       delay?: number;
     }
-  | { id: string; role: "assistant"; kind: "note"; text: string; delay?: number };
+  | { id: string; role: "assistant"; kind: "note"; text: string; delay?: number }
+  | { id: string; role: "assistant"; kind: "loading"; delay?: number }
+  | { id: string; role: "assistant"; kind: "error"; text: string; delay?: number };
 
 export type ChatMessageDraft = ChatMessage extends infer T
   ? T extends { id: string }
@@ -101,3 +103,14 @@ export interface DocItem {
   done: boolean;
   auto?: boolean;
 }
+
+/** Backend ApplicationDraft verisi — ApplicationView'e prop olarak geçer */
+export interface ApplicationDraft {
+  programName: string;
+  planTitle: string;
+  planSections: { heading: string; body: string }[];
+  docs: DocItem[];
+}
+
+/** API çağrısı durumu */
+export type ApiStatus = "idle" | "loading" | "error";

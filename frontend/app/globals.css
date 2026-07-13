@@ -66,6 +66,11 @@ textarea {
     transform: translateY(-3px);
   }
 }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 @keyframes toastIn {
   from {
     opacity: 0;
