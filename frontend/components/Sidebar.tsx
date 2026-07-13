@@ -25,6 +25,7 @@ function navStyle(active: boolean): CSSProperties {
 export default function Sidebar({
   view,
   matchCount,
+  open,
   onNewChat,
   onNavChat,
   onNavMatches,
@@ -32,6 +33,7 @@ export default function Sidebar({
 }: {
   view: ViewName;
   matchCount: number;
+  open: boolean;
   onNewChat: () => void;
   onNavChat: () => void;
   onNavMatches: () => void;
@@ -41,6 +43,7 @@ export default function Sidebar({
 
   return (
     <aside
+      className={`sidebar${open ? " sidebar-open" : ""}`}
       style={{
         width: 256,
         flexShrink: 0,

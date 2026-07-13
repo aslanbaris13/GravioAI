@@ -2,6 +2,7 @@
 import { useCallback, useRef, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Toast from "@/components/Toast";
+import Ms from "@/components/Ms";
 import ChatView from "@/components/ChatView";
 import MatchesView from "@/components/MatchesView";
 import DetailView from "@/components/DetailView";
@@ -27,6 +28,7 @@ const TOAST_MS = 2200;
 
 export default function Home() {
   const [view, setView] = useState<ViewName>("chat");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedId, setSelectedId] = useState("bigg");
   const [filterCat, setFilterCat] = useState<"all" | ProgramCategory>("all");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -363,16 +365,51 @@ export default function Home() {
 
   return (
     <div style={{ display: "flex", height: "100vh", background: "#f4f3ef" }}>
+      <button
+        className="mobile-menu-button"
+        onClick={() => setSidebarOpen(true)}
+        aria-label="Menüyü aç"
+        style={{
+          position: "fixed",
+          top: 14,
+          left: 14,
+          zIndex: 20,
+          width: 38,
+          height: 38,
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 10,
+          background: "#0d2a3c",
+          boxShadow: "0 2px 10px rgba(20,34,44,.25)",
+        }}
+      >
+        <Ms name="menu" size={20} color="#fff" />
+      </button>
+      <div
+        className={`sidebar-backdrop${sidebarOpen ? " sidebar-open" : ""}`}
+        onClick={() => setSidebarOpen(false)}
+      />
       <Sidebar
         view={view}
         matchCount={matchCount}
+        open={sidebarOpen}
         onNewChat={() => {
           onNewChat();
           setView("chat");
+          setSidebarOpen(false);
         }}
-        onNavChat={() => setView("chat")}
-        onNavMatches={() => setView("matches")}
-        onNavProfile={() => setView("dashboard")}
+        onNavChat={() => {
+          setView("chat");
+          setSidebarOpen(false);
+        }}
+        onNavMatches={() => {
+          setView("matches");
+          setSidebarOpen(false);
+        }}
+        onNavProfile={() => {
+          setView("dashboard");
+          setSidebarOpen(false);
+        }}
       />
       <main style={{ flex: 1, minWidth: 0, position: "relative" }}>
         {view === "chat" && (

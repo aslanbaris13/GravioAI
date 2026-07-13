@@ -67,3 +67,29 @@ Bu dosya, Sprint 2 kapsamında yaptığım işlerin **ne, neden, nasıl** yapıl
 **Bilinçli kapsam dışı bıraktığım**: `apply_request` niyetini ayrı bir "doğrudan başvuru taslağı" zincirine bağlamadım — hangi programa başvurulacağını mesajdan çıkarmak SCRUM-96'nın kapsamını aşıyordu (frontend zaten CTA/followup ile ayrı `/application` uç noktasını tetikliyor). Şimdilik `profile_info` ile aynı tam zinciri çalıştırıyor; ileride ayrı bir zincir gerekirse bu not referans alınabilir.
 
 **Sıradaki adım**: Bu değişiklikleri gözden geçirip commit/PR'a hazırlamak, sonra Faz 3'e (SCRUM-23/173: chat arayüzünü responsive yapmak) geçmek.
+
+---
+
+## 2026-07-14 — Faz 3: Chat arayüzünü responsive yapmak (SCRUM-173)
+
+**Ne yaptım**: `feat_chat_responsive` dalını (`feat_planner_orchestrator`'ı içine alarak) açtım. `02-wireframe.md`'de önerilen 768px kırılma noktasını uyguladım:
+
+1. `frontend/app/globals.css` — `768px` altında geçerli responsive kurallar: sidebar sabit-genişlikli off-canvas panele dönüyor (`transform: translateX(-100%)` / `sidebar-open` sınıfıyla `translateX(0)`), yarı saydam bir backdrop, öneri kartları grid'i tek sütuna düşüyor, sohbet içeriğinin yatay boşluğu daralıyor.
+2. `frontend/components/Sidebar.tsx` — `open` prop'u eklendi, `className="sidebar"` ile CSS'e bağlandı.
+3. `frontend/app/page.tsx` — mobilde görünen sabit bir hamburger butonu + backdrop eklendi; `sidebarOpen` state'i; herhangi bir nav aksiyonunda (yeni sohbet/sohbet/eşleşmeler/panelim) sidebar otomatik kapanıyor.
+4. `frontend/components/ChatView.tsx` — header/scroll alanı/öneri grid'ine hedefli class'lar eklendi (mevcut inline style'lara dokunmadan, sadece breakpoint'e özgü üç-dört CSS kuralı için).
+5. Global hamburger tüm ekranlarda (Eşleşmeler/Detay/Uygunluk/Başvuru/Panelim) göründüğü için, bu ekranların ortak `data-screen-label` örüntüsünden yararlanıp `[data-screen-label] > div:first-child` seçiciyle tek bir CSS kuralıyla üstten boşluk ekledim — böylece başlıklar hamburger'la çakışmıyor, 5 ayrı dosyaya dokunmadan.
+
+**Neden**: `ChatView.tsx` tamamen sabit piksel inline style kullanıyordu; sidebar da masaüstünde akışa dahil sabit 256px genişlikte. 375px'lik bir mobil ekranda bu, sohbete ~119px alan bırakıyordu — kullanılamaz durumdaydı.
+
+**Nasıl doğruladım**: Next.js dev sunucusunu tarayıcı önizlemesinde çalıştırıp:
+- 375px (mobil), 768px (tablet sınırı) ve masaüstü genişliklerinde ekran görüntüsü aldım.
+- Hamburger'a tıklayıp sidebar'ın kayarak açıldığını, backdrop'un göründüğünü doğruladım.
+- Backdrop'a tıklayıp kapandığını, bir nav öğesine (Eşleşmelerim) tıklayınca hem view'ın değiştiğini hem sidebar'ın otomatik kapandığını doğruladım.
+- Masaüstünde sidebar'ın eskisi gibi akışta sabit kaldığını, hamburger'ın görünmediğini doğruladım (regresyon yok).
+- `npx tsc --noEmit` ile tip hatası olmadığını doğruladım.
+- Not: Test sırasında ekran görüntüsü koordinatlarını `devicePixelRatio` (2x) hesaba katmadan yanlış yorumlayıp birkaç kez yanlış yere tıkladım (ör. hamburger yerine boşluğa) — kod hatası değildi, kendi ölçüm hatamdı; JS ile gerçek `getBoundingClientRect()` alarak doğruladım.
+
+**Bilinçli kapsam dışı bıraktığım**: Diğer görünümlerin (Eşleşmeler/Detay/Uygunluk/Başvuru/Panelim) kendi iç düzenleri (ör. MatchesView'daki 3 sütunlu istatistik kartları mobilde taşıyor) responsive değil. SCRUM-173 özellikle "Chat interface UI" kapsamındaydı; sidebar/hamburger çakışmasını gidermek zorunluydu (paylaşılan global öğe olduğu için) ama her ekranın kendi iç grid'ini düzeltmek ayrı bir iş — ileride ayrı bir ticket olarak ele alınmalı.
+
+**Sıradaki adım**: Faz 4 — entegrasyon/kapanış: üç dalı (chat_flow_design, planner_orchestrator, chat_responsive) sırayla develop'a PR'lamak, uçtan uca (gerçek backend ile) test etmek.
