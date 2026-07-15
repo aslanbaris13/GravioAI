@@ -6,7 +6,8 @@ değişse bile ajan kodu değişmez.
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Optional
+from models.program import ExtractedSupportInfo
 
 Role = Literal["user", "assistant"]
 
@@ -18,7 +19,7 @@ class LLMMessage:
 
 
 class LLMClient(ABC):
-    """Bütün LLM sağlayıcı adaptörlerinin uyduğu kontrat."""
+    """Bütün LLM sağlayıcılar buna uymalı."""
 
     @abstractmethod
     async def chat(
@@ -29,4 +30,10 @@ class LLMClient(ABC):
         max_tokens: int = 4096,
     ) -> str:
         """Konuşma geçmişini gönderir, modelin metin yanıtını döner."""
+        raise NotImplementedError
+
+
+    @abstractmethod
+    async def extract_program_details(self, body_text: str, source_name: str) -> ExtractedSupportInfo | None:
+        """Raw metni alır, LLM'e gönderir ve yapılandırılmış veri döndürür."""
         raise NotImplementedError

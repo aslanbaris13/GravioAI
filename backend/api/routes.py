@@ -4,7 +4,7 @@ from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
 from ..agents import EligibilityAgent, Orchestrator, ProfileExtractor
-from ..core.embeddings import embed_text
+from ..core.embedding.gemini_embedding import embed_text
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
 from ..data import repo
 from ..models import (

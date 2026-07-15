@@ -6,12 +6,12 @@ from .eligibility import (
 )
 from .orchestration import AssistResult, ConversationTurn, ProgramMatch
 from .profile import UserProfile
-from .program import ApplicationStatus, Currency, SupportProgram, SupportType
-from .taxonomy import SUBCATEGORIES, Category
+from .program import ApplicationStatus, Currency, ExtractedSupportInfo, SupportProgram, SupportType
+from .taxonomy import Category
 
 __all__ = [
     "Category",
-    "SUBCATEGORIES",
+    #"SUBCATEGORIES",
     "SupportProgram",
     "SupportType",
     "ApplicationStatus",
