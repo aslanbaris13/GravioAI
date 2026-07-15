@@ -78,6 +78,14 @@ class TubitakConnector(BaseConnector):
                 # if not self._is_program_link(href):
                 #     continue
 
+                # KARAR BEKLİYOR: Bu connector base.py'deki is_relevant() (anahtar
+                # kelime) filtresini hiç kullanmıyor — sayfa zaten "Açık Çağrılar"
+                # (ulusal/sanayi odaklı) ile sınırlı olduğu için şimdilik her şeyin
+                # girişimciyle alakalı olduğu varsayılıyor. kosgeb.py ve
+                # kalkinma_ajansi.py'de aynı filtre kapalı bırakılmış; kota
+                # tasarrufu (Gemini günlük limiti 20 istek) ile yanlış eleme riski
+                # arasındaki tercih üç connector için birlikte netleştirilmeli.
+
                 full_url = self.base_domain + href
                 if full_url in gorulen_linkler:
                     continue
