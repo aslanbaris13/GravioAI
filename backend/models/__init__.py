@@ -5,6 +5,7 @@ from .eligibility import (
     EligibilityResult,
     EligibilityState,
 )
+from .intent import Intent, IntentResult
 from .orchestration import AssistResult, ConversationTurn, ProgramMatch
 from .profile import UserProfile
 from .program import ApplicationStatus, Currency, ExtractedSupportInfo, SupportProgram, SupportType
@@ -22,6 +23,8 @@ __all__ = [
     "EligibilityCondition",
     "EligibilityState",
     "ConditionState",
+    "Intent",
+    "IntentResult",
     "AssistResult",
     "ProgramMatch",
     "ConversationTurn",
