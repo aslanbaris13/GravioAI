@@ -6,7 +6,7 @@ from google import genai
 from google.genai import types
 from .base import LLMClient, LLMMessage
 from dotenv import load_dotenv
-from models.program import ExtractedSupportInfo
+from ...models.program import ExtractedSupportInfo
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 # Pydantic modelimizi ve base sınıfları içeri alıyoruz

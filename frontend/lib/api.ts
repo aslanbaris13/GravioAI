@@ -58,24 +58,26 @@ export interface BackendEligibilityResult {
 }
 
 export interface BackendSupportProgram {
-  id: string;
+  program_id: string;
+  title: string;
   /** Tam Türkçe kategori adı, örn. "Kamu Destekleri" */
   category: string;
-  subcategory?: string | null;
-  program_name: string;
-  institution?: string | null;
+  source?: string | null;
   support_type?: string | null;
   amount_min?: number | null;
   amount_max?: number | null;
   currency?: "TRY" | "USD" | "EUR" | null;
   support_rate?: string | null;
   application_status?: "Açık" | "Kapalı" | "Sürekli" | null;
-  application_deadline?: string | null;
-  application_link?: string | null;
-  official_source?: string | null;
-  description?: string | null;
-  target_audience?: string | null;
-  sector?: string | null;
+  region?: string | null;
+  founded_after?: string | null;
+  deadline?: string | null;
+  official_url?: string | null;
+  conditions_summary?: string | null;
+  women_entrepreneur?: boolean | null;
+  technopark?: boolean | null;
+  company_required?: boolean | null;
+  student?: boolean | null;
 }
 
 export interface BackendUserProfile {

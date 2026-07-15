@@ -12,7 +12,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-from core.config import Settings, get_settings
+from .config import Settings, get_settings
 
 
 class EmbeddingClient(ABC):

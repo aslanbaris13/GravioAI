@@ -10,8 +10,8 @@ from functools import lru_cache
 
 from supabase import Client, create_client
 
-from core.config import get_settings
-from models import Category, SupportProgram
+from ..core.config import get_settings
+from ..models import Category, SupportProgram
 
 _TABLE = "programs_v2"  # yeni tablo
 _CHİLD = "program_chunks" #child
