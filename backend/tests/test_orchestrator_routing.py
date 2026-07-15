@@ -95,6 +95,71 @@ async def test_profile_info_runs_full_chain_unchanged(orchestrator):
 
 
 @pytest.mark.asyncio
+async def test_apply_request_uses_single_targeted_match(orchestrator):
+    """apply_request -> profil çıkarılır, sadece 1 aday eşleştirilir ve
+    değerlendirilir (tam zincirdeki 5 aday/3 değerlendirme yerine)."""
+    with patch.object(
+        orchestrator._intent_agent, "run",
+        new=AsyncMock(return_value=IntentResult(intent=Intent.APPLY_REQUEST, confidence=0.9)),
+    ), patch.object(
+        orchestrator._profile_agent, "run", new=AsyncMock(return_value=UserProfile(sector="Yazılım")),
+    ), patch.object(
+        orchestrator._matching_agent, "run", new=AsyncMock(return_value=[_program("bigg")]),
+    ) as matching_run, patch.object(
+        orchestrator._eligibility_agent, "run", new=AsyncMock(return_value=_eligibility(85)),
+    ) as eligibility_run, patch.object(
+        orchestrator._profile_agent, "_chat_with_history", new=AsyncMock(return_value="Başvuru için..."),
+    ):
+        result = await orchestrator.run("BİGG'e nasıl başvururum?")
+
+    matching_run.assert_awaited_once()
+    assert matching_run.call_args.kwargs.get("limit") == 1
+    eligibility_run.assert_awaited_once()  # tam zincirdeki gibi birden fazla değil
+    assert len(result.matches) == 1
+    assert result.matches[0].program.program_id == "bigg"
+
+
+@pytest.mark.asyncio
+async def test_apply_request_falls_back_to_message_query_when_profile_yields_nothing(orchestrator):
+    """Profil-bazlı eşleştirme boş dönerse, mesajın kendisiyle tekrar denenmeli."""
+    with patch.object(
+        orchestrator._intent_agent, "run",
+        new=AsyncMock(return_value=IntentResult(intent=Intent.APPLY_REQUEST, confidence=0.9)),
+    ), patch.object(
+        orchestrator._profile_agent, "run", new=AsyncMock(return_value=UserProfile()),
+    ), patch.object(
+        orchestrator._matching_agent, "run",
+        new=AsyncMock(side_effect=[[], [_program("marka")]]),
+    ) as matching_run, patch.object(
+        orchestrator._eligibility_agent, "run", new=AsyncMock(return_value=_eligibility(60)),
+    ), patch.object(
+        orchestrator._profile_agent, "_chat_with_history", new=AsyncMock(return_value="Başvuru için..."),
+    ):
+        result = await orchestrator.run("MARKA'ya başvurmak istiyorum")
+
+    assert matching_run.await_count == 2
+    assert len(result.matches) == 1
+    assert result.matches[0].program.program_id == "marka"
+
+
+@pytest.mark.asyncio
+async def test_apply_request_no_candidates_returns_clarifying_reply(orchestrator):
+    """Hiç aday bulunamazsa çökmemeli, açıklayıcı bir yanıt dönmeli."""
+    with patch.object(
+        orchestrator._intent_agent, "run",
+        new=AsyncMock(return_value=IntentResult(intent=Intent.APPLY_REQUEST, confidence=0.9)),
+    ), patch.object(
+        orchestrator._profile_agent, "run", new=AsyncMock(return_value=UserProfile()),
+    ), patch.object(
+        orchestrator._matching_agent, "run", new=AsyncMock(return_value=[]),
+    ):
+        result = await orchestrator.run("başvurmak istiyorum")
+
+    assert result.matches == []
+    assert "anlayamadım" in result.reply.lower()
+
+
+@pytest.mark.asyncio
 async def test_intent_classifier_failure_falls_back_safely(orchestrator):
     """Sınıflandırıcı çökerse kullanıcı yanıtsız kalmamalı — tam zincire düşülmeli.
 

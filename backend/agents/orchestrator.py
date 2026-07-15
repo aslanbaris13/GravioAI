@@ -1,12 +1,15 @@
 """Orkestratör — ajanları niyete göre zincirleyen beyin (SCRUM-96).
 
 Her mesaj önce Niyet Sınıflandırma Ajanı'ndan (`IntentClassifier`) geçer, sonra
-niyete göre üç zincirden biri çalışır (bkz. docs/chat-flow/03-prompt-akisi.md):
+niyete göre dört zincirden biri çalışır (bkz. docs/chat-flow/03-prompt-akisi.md):
 
     - greeting / off_topic  -> sadece LLM ile kısa yanıt (ajan zinciri yok)
     - program_question      -> doğrudan mesaj metniyle eşleştirme (profil
                                çıkarma atlanır), ardından uygunluk + yanıt
-    - profile_info / apply_request / belirsiz (confidence düşük)
+    - apply_request         -> profil çıkar, mesajla en alakalı TEK programı
+                               bul, sadece onun için uygunluk değerlendir,
+                               başvuru sürecine yönlendiren bir yanıt üret
+    - profile_info / belirsiz (confidence düşük)
                             -> tam zincir: Profil Çıkarma -> Eşleştirme ->
                                Uygunluk -> Reply üretme (SCRUM-96 öncesi
                                davranışla birebir aynı)
@@ -55,6 +58,19 @@ _SMALL_TALK_FALLBACK = (
     "Merhaba! İşletmeni birkaç cümleyle anlatırsan sana uygun destekleri bulabilirim."
 )
 
+_APPLY_REPLY_SYSTEM = (
+    "Sen GravioAI asistanısın. Kullanıcı bir destek/hibe programına nasıl "
+    "başvuracağını soruyor. Bulunan en uygun programı kısaca tanıt, başvuru "
+    "için genel adımları özetle (uygunluk koşullarını kontrol et, gerekli "
+    "belgeleri hazırla) ve arayüzdeki 'Başvuru hazırla' seçeneğini işaret et. "
+    "Kısa, samimi ve Türkçe yaz. Teknik jargon kullanma."
+)
+
+_APPLY_NO_MATCH_REPLY = (
+    "Hangi programa başvurmak istediğini tam anlayamadım. Program adını "
+    "veya işletmenle ilgili birkaç detay (sektör, şehir, hedef) paylaşır mısın?"
+)
+
 
 class Orchestrator:
     name = "orchestrator"
@@ -83,6 +99,9 @@ class Orchestrator:
             elif intent_result.intent == Intent.PROGRAM_QUESTION:
                 logger.info("chain_selected intent=%s chain=program_question", intent_result.intent.value)
                 result = await self._run_program_question(message, match_limit, eligibility_limit)
+            elif intent_result.intent == Intent.APPLY_REQUEST:
+                logger.info("chain_selected intent=%s chain=apply_request", intent_result.intent.value)
+                result = await self._run_apply_request(message, history)
             else:
                 logger.info("chain_selected intent=%s chain=full", intent_result.intent.value)
                 result = await self._run_full_chain(message, history, match_limit, eligibility_limit)
@@ -160,6 +179,40 @@ class Orchestrator:
 
         reply = await self._compose_reply_llm(message, matches, None)
         return AssistResult(profile=query_profile, matches=matches, reply=reply)
+
+    async def _run_apply_request(
+        self,
+        message: str,
+        history: list[ConversationTurn] | None,
+    ) -> AssistResult:
+        """Kullanıcı bir programa başvurmak istiyor.
+
+        Tam zincirden farkı: 5 aday yerine mesajla en alakalı TEK programı
+        bulur ve sadece onun için uygunluk değerlendirir (daha az LLM çağrısı,
+        daha odaklı yanıt). Hangi programa başvurulacağı frontend'de zaten
+        ayrı bir CTA/`/api/application` çağrısıyla netleşiyor — buradaki amaç
+        sohbette doğru yöne işaret etmek.
+        """
+        profile = await self._profile_agent.run(message, history=history)
+
+        candidates = await self._matching_agent.run(profile, limit=1)
+        if not candidates:
+            # Profil boşsa (ör. sadece program adı yazıldıysa) mesajın
+            # kendisiyle dene — program_question'daki gibi.
+            query_profile = UserProfile(summary=message)
+            candidates = await self._matching_agent.run(query_profile, limit=1)
+            if candidates:
+                profile = query_profile
+
+        if not candidates:
+            return AssistResult(profile=profile, matches=[], reply=_APPLY_NO_MATCH_REPLY)
+
+        top = candidates[0]
+        eligibility = await self._eligibility_agent.run(profile, top)
+        matches = [ProgramMatch(program=top, eligibility=eligibility)]
+
+        reply = await self._compose_apply_reply(message, matches[0])
+        return AssistResult(profile=profile, matches=matches, reply=reply)
 
     async def _run_full_chain(
         self,
@@ -257,4 +310,25 @@ class Orchestrator:
                 f"Profiline göre {len(matches)} uygun destek buldum. "
                 f"En uygunu {top.program.title} ({top.eligibility.label}). "
                 "Detaylar ve uygunluk koşulları listede."
+            )
+
+    async def _compose_apply_reply(self, message: str, match: ProgramMatch) -> str:
+        """apply_request için başvuru sürecine odaklı bir yanıt üretir."""
+        user_prompt = (
+            f"Kullanıcı mesajı: {message}\n\n"
+            f"En uygun program: {match.program.title} ({match.program.source or ''}) — "
+            f"{match.eligibility.label} (skor: {match.eligibility.score}/100)\n\n"
+            "Kullanıcıya bu programa nasıl başvuracağını kısaca anlat."
+        )
+        try:
+            return await self._profile_agent._chat_with_history(
+                [LLMMessage(role="user", content=user_prompt)],
+                system=_APPLY_REPLY_SYSTEM,
+                max_tokens=400,
+            )
+        except Exception:  # noqa: BLE001 — reply üretilemezse deterministik fallback
+            return (
+                f"{match.program.title} programı için uygunluğun: {match.eligibility.label} "
+                f"({match.eligibility.score}/100). Başvuru hazırlığı için detay ekranındaki "
+                "'Başvuru hazırla' seçeneğini kullanabilirsin."
             )
