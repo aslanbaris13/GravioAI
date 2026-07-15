@@ -70,6 +70,32 @@ Bu dosya, Sprint 2 kapsamında yaptığım işlerin **ne, neden, nasıl** yapıl
 
 ---
 
+## 2026-07-14 — Faz 3: Chat arayüzünü responsive yapmak (SCRUM-173)
+
+**Ne yaptım**: `feat_chat_responsive` dalını (`feat_planner_orchestrator`'ı içine alarak) açtım. `02-wireframe.md`'de önerilen 768px kırılma noktasını uyguladım:
+
+1. `frontend/app/globals.css` — `768px` altında geçerli responsive kurallar: sidebar sabit-genişlikli off-canvas panele dönüyor (`transform: translateX(-100%)` / `sidebar-open` sınıfıyla `translateX(0)`), yarı saydam bir backdrop, öneri kartları grid'i tek sütuna düşüyor, sohbet içeriğinin yatay boşluğu daralıyor.
+2. `frontend/components/Sidebar.tsx` — `open` prop'u eklendi, `className="sidebar"` ile CSS'e bağlandı.
+3. `frontend/app/page.tsx` — mobilde görünen sabit bir hamburger butonu + backdrop eklendi; `sidebarOpen` state'i; herhangi bir nav aksiyonunda (yeni sohbet/sohbet/eşleşmeler/panelim) sidebar otomatik kapanıyor.
+4. `frontend/components/ChatView.tsx` — header/scroll alanı/öneri grid'ine hedefli class'lar eklendi (mevcut inline style'lara dokunmadan, sadece breakpoint'e özgü üç-dört CSS kuralı için).
+5. Global hamburger tüm ekranlarda (Eşleşmeler/Detay/Uygunluk/Başvuru/Panelim) göründüğü için, bu ekranların ortak `data-screen-label` örüntüsünden yararlanıp `[data-screen-label] > div:first-child` seçiciyle tek bir CSS kuralıyla üstten boşluk ekledim — böylece başlıklar hamburger'la çakışmıyor, 5 ayrı dosyaya dokunmadan.
+
+**Neden**: `ChatView.tsx` tamamen sabit piksel inline style kullanıyordu; sidebar da masaüstünde akışa dahil sabit 256px genişlikte. 375px'lik bir mobil ekranda bu, sohbete ~119px alan bırakıyordu — kullanılamaz durumdaydı.
+
+**Nasıl doğruladım**: Next.js dev sunucusunu tarayıcı önizlemesinde çalıştırıp:
+- 375px (mobil), 768px (tablet sınırı) ve masaüstü genişliklerinde ekran görüntüsü aldım.
+- Hamburger'a tıklayıp sidebar'ın kayarak açıldığını, backdrop'un göründüğünü doğruladım.
+- Backdrop'a tıklayıp kapandığını, bir nav öğesine (Eşleşmelerim) tıklayınca hem view'ın değiştiğini hem sidebar'ın otomatik kapandığını doğruladım.
+- Masaüstünde sidebar'ın eskisi gibi akışta sabit kaldığını, hamburger'ın görünmediğini doğruladım (regresyon yok).
+- `npx tsc --noEmit` ile tip hatası olmadığını doğruladım.
+- Not: Test sırasında ekran görüntüsü koordinatlarını `devicePixelRatio` (2x) hesaba katmadan yanlış yorumlayıp birkaç kez yanlış yere tıkladım (ör. hamburger yerine boşluğa) — kod hatası değildi, kendi ölçüm hatamdı; JS ile gerçek `getBoundingClientRect()` alarak doğruladım.
+
+**Bilinçli kapsam dışı bıraktığım**: Diğer görünümlerin (Eşleşmeler/Detay/Uygunluk/Başvuru/Panelim) kendi iç düzenleri (ör. MatchesView'daki 3 sütunlu istatistik kartları mobilde taşıyor) responsive değil. SCRUM-173 özellikle "Chat interface UI" kapsamındaydı; sidebar/hamburger çakışmasını gidermek zorunluydu (paylaşılan global öğe olduğu için) ama her ekranın kendi iç grid'ini düzeltmek ayrı bir iş — ileride ayrı bir ticket olarak ele alınmalı.
+
+**Sıradaki adım**: Faz 4 — entegrasyon/kapanış: üç dalı (chat_flow_design, planner_orchestrator, chat_responsive) sırayla develop'a PR'lamak, uçtan uca (gerçek backend ile) test etmek.
+
+---
+
 ## 2026-07-14/15 — PR'lar, Supabase migration eksikliği ve şema geçişinin kırdıkları
 
 **Ne yaptım** (özet, ayrıntılar Jira/PR'larda):
@@ -116,3 +142,11 @@ Bu dosya, Sprint 2 kapsamında yaptığım işlerin **ne, neden, nasıl** yapıl
 - 8 backend testi + `tsc --noEmit` yeşil.
 
 **Sıradaki adım**: Bu hotfix'i (`fix_schema_migration_breakage`) develop'a PR'lamak, sonra PR #18 (orchestrator, `program_name`/`institution` referanslarını düzeltmek gerekiyor), PR #19 (frontend, muhtemelen değişiklik gerekmiyor) ve PR #10'u (zaten bu dala alındı) yeni develop'a göre sırayla kapatmak.
+
+---
+
+## 2026-07-15 — Tüm dallar develop'a merge edildi
+
+**Ne yaptım**: PR #20 (hotfix) develop'a merge edildi (PR #10 içeriği zaten onun içindeydi, GitHub otomatik "merged" işaretledi). Ardından `feat_planner_orchestrator`'a güncel develop'u alıp `orchestrator.py`'deki son iki eski alan adı referansını (`program_name`→`title`, `institution`→`source`) düzelttim, 15 test yeşil, PR #18 develop'a merge edildi. Son olarak `feat_chat_responsive`'e güncel develop'u aldım (sadece bu ilerleme dosyasında basit ard arda ekleme çakışması çıktı, kod tarafında çakışma yok — frontend zaten şema değişikliğinden PR #20'de düzeltilmişti).
+
+**Sıradaki adım**: PR #19'u da develop'a merge edip Sprint 2'nin backend/entegrasyon kısmını kapatmak.

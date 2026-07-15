@@ -99,3 +99,64 @@ textarea {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ------------------------------------------------------------------ */
+/* Responsive — mobil/tablet (SCRUM-173)                                */
+/* Sidebar masaüstünde sabit 256px genişlikte akışa dahildir; mobilde   */
+/* dar ekranı ele geçirmemesi için kayan (off-canvas) panele döner.     */
+/* ------------------------------------------------------------------ */
+
+.mobile-menu-button {
+  display: none;
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-button {
+    display: flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 40;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+    box-shadow: 12px 0 32px rgba(10, 20, 28, 0.35);
+  }
+
+  .sidebar-backdrop.sidebar-open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 20, 28, 0.45);
+    z-index: 30;
+  }
+
+  .chat-suggestions-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .chat-scroll-padding {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .chat-header {
+    padding-left: 58px !important;
+  }
+
+  /* Sohbet dışındaki ekranlar (Eşleşmeler/Detay/Uygunluk/Başvuru/Panelim) kendi
+     header'ını içermiyor; hamburger butonuyla çakışmaması için içeriğin ilk
+     bloğuna üstten boşluk ekleniyor. */
+  [data-screen-label] > div:first-child {
+    padding-top: 56px !important;
+  }
+}

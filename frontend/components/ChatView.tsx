@@ -50,6 +50,7 @@ export default function ChatView({
   return (
     <section data-screen-label="Sohbet" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <header
+        className="chat-header"
         style={{
           display: "flex",
           alignItems: "center",
@@ -100,7 +101,7 @@ export default function ChatView({
       </header>
 
       <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", padding: "0 0 8px" }}>
-        <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 24px" }}>
+        <div className="chat-scroll-padding" style={{ maxWidth: 760, margin: "0 auto", padding: "0 24px" }}>
           {showEmpty && (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "66px 0 20px" }}>
               <div
@@ -125,7 +126,10 @@ export default function ChatView({
                 kontrol edip başvurunu hazırlayayım. Form yok, sadece sohbet.
               </p>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, width: "100%", maxWidth: 580, marginTop: 34 }}>
+              <div
+                className="chat-suggestions-grid"
+                style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, width: "100%", maxWidth: 580, marginTop: 34 }}
+              >
                 {SUGGESTIONS.map((s) => (
                   <button
                     key={s.key}
@@ -203,7 +207,7 @@ export default function ChatView({
         </div>
       </div>
 
-      <div style={{ padding: "8px 24px 18px", background: "linear-gradient(0deg,#fbfaf7 65%,rgba(251,250,247,0))" }}>
+      <div className="chat-scroll-padding" style={{ padding: "8px 24px 18px", background: "linear-gradient(0deg,#fbfaf7 65%,rgba(251,250,247,0))" }}>
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
           {followups.length > 0 && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
