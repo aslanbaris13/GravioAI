@@ -69,3 +69,23 @@ Bu dosya, Sprint 2 kapsamında yaptığım işlerin **ne, neden, nasıl** yapıl
 **Ders**: Pydantic model alan adı değişiklikleri git için "çakışma" değildir (farklı satırlar), ama çalışma zamanı için tam bir kırılmadır. Büyük bir şema/model refactor'u merge etmeden önce, o modeli tüketen HER dosyayı (agents, repo, frontend adapter, testler) taramak gerekiyor — sadece `git merge`'in "temiz" demesine güvenmemeli.
 
 **Sıradaki adım**: Barış'tan güncellenmiş `db/schema.sql`'i (programs_v2 + program_parents + program_chunks + yeni match_programs) Supabase'e uygulamasını istedim. Uygulandıktan sonra gerçek `/api/assist` ve `/api/match` ile tam uçtan uca doğrulama yapılacak, sonra bu hotfix develop'a PR'lanacak, ardından PR #18/#19/#10 yeni develop'a göre güncellenip (alan adı düzeltmeleri dahil) sırayla merge edilecek.
+
+---
+
+## 2026-07-15 — Migration uygulandı, iki bug daha bulundu, tam doğrulama
+
+**Ne oldu**: Barış güncel `db/schema.sql`'i Supabase'e uyguladı. `/api/programs`'ı tekrar denedim, iki yeni (ayrı) hata çıktı:
+
+1. **`_from_row` embedding alanında patlıyordu**: Supabase'in gerçek verisi (Hatice'nin ingest ettiği KOSGEB/TÜBİTAK programları) döndü ama `embedding` alanı `list[float]` değil düz metin ("[-0.001,...]") olarak geliyordu — pgvector kolonlarının PostgREST üzerinden JSON listesi değil metin olarak serileştirilmesinden kaynaklanıyor (bilinen bir davranış). **Düzeltme**: `repo.py::_from_row`, response'tan `embedding` alanını atıyor artık (zaten API tüketicileri kullanmıyor, 768 boyutlu veriyi taşımanın da anlamı yok).
+
+2. **Daha kritik bir keşif**: Bunu düzeltince veri döndü ama JSON anahtarları Türkçeydi (`program_adi`, `kurum`, `kategori`...) — İngilizce (`title`, `source`, `category`) değil. Sebep: FastAPI'nin `response_model_by_alias` varsayılanı `True`; `SupportProgram`/`ExtractedSupportInfo` modelinde Türkçe `alias`'lar tanımlı olduğu için API yanıtı otomatik olarak alias'ları kullanıyor. Bu, benim biraz önce düzelttiğim frontend adapter'ının (İngilizce alan adı bekleyen) tamamen boş/undefined veri almasına yol açacaktı — fark edilmeseydi sessizce kırılırdı. **Düzeltme**: `routes.py`'de `SupportProgram` döndüren 4 route'a (`/programs`, `/programs/{id}`, `/match`, `/assist`) `response_model_by_alias=False` eklendi.
+
+**Neden önemli**: Bu, "kod İngilizce, veri Türkçe" tasarımının (Hatice'nin scraping/ingestion pipeline'ı için doğru bir seçim) FastAPI'nin HTTP katmanına da sızmasıydı — hâlbuki frontend hep İngilizce alan adı bekliyordu. Alias'lar sadece dosya/DB seviyesinde kalmalıydı, HTTP sözleşmesine karışmamalıydı.
+
+**Tam doğrulama** (gerçek Gemini + gerçek Supabase, mock yok):
+- `/api/programs` → gerçek KOSGEB/TÜBİTAK verisi, doğru (İngilizce) alan adlarıyla, hatasız
+- `/api/match` (query: "Ar-Ge hibesi arayan yazılım girişimi") → gerçek embedding + gerçek pgvector araması, anlamlı sonuçlar (TÜBİTAK 1507, 1501, KOSGEB Teknoloji Merkezi)
+- `/api/assist` → `gemini-3.5-flash`'ın o an Google tarafında genel bir "yüksek talep" (503) yaşaması nedeniyle 3 denemede de tamamlanamadı; bu bizim kodumuzla ilgisiz — chat-model'e bağlı olmayan iki uç (`/programs`, `/match`) zaten asıl düzeltmeyi (doğru şema + doğru serileştirme) kanıtladı.
+- 8 backend testi + `tsc --noEmit` yeşil.
+
+**Sıradaki adım**: Bu hotfix'i (`fix_schema_migration_breakage`) develop'a PR'lamak, sonra PR #18 (orchestrator, `program_name`/`institution` referanslarını düzeltmek gerekiyor), PR #19 (frontend, muhtemelen değişiklik gerekmiyor) ve PR #10'u (zaten bu dala alındı) yeni develop'a göre sırayla kapatmak.
