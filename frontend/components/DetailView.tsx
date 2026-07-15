@@ -55,10 +55,12 @@ export default function DetailView({
 
         <p style={{ fontSize: 14.5, lineHeight: 1.7, color: "#414f57", marginTop: 20 }}>{c.summary}</p>
 
+        {c.criteria.length > 0 && (
+        <>
         <h2 style={{ fontSize: 13, fontWeight: 700, color: "#76858d", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 28 }}>
           Temel kriterler
         </h2>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
+        <div className="detail-criteria-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
           {c.criteria.map((cr) => (
             <div key={cr.label} style={{ display: "flex", alignItems: "center", gap: 11, background: "#fff", border: "1px solid #e7e4dc", borderRadius: 12, padding: "11px 13px" }}>
               <Ms name={cr.icon} size={19} color="#5a6b75" />
@@ -69,6 +71,8 @@ export default function DetailView({
             </div>
           ))}
         </div>
+        </>
+        )}
 
         <div
           style={{

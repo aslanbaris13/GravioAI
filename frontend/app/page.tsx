@@ -9,7 +9,6 @@ import DetailView from "@/components/DetailView";
 import EligibilityView from "@/components/EligibilityView";
 import ApplicationView from "@/components/ApplicationView";
 import DashboardView from "@/components/DashboardView";
-import { getProgram } from "@/lib/programs";
 import { assist, fetchApplicationDraft, fetchSession, saveSession } from "@/lib/api";
 import type { BackendAssistResult, BackendUserProfile, ConversationTurn } from "@/lib/api";
 import { getSessionId } from "@/lib/session";
@@ -48,7 +47,7 @@ const EMPTY_PROFILE: BackendUserProfile = {
 export default function Home() {
   const [view, setView] = useState<ViewName>("chat");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState("bigg");
+  const [selectedId, setSelectedId] = useState("");
   const [filterCat, setFilterCat] = useState<"all" | ProgramCategory>("all");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [typing, setTyping] = useState(false);
@@ -410,15 +409,16 @@ export default function Home() {
   }
 
   /**
-   * Chat'teki program kartları için program çözümleme.
-   * Önce API'den gelen gerçek programlara bak; yoksa mock'a düş.
+   * Chat'teki program kartları için program çözümleme — yalnızca API'den
+   * gelen gerçek programlara bakar. Bulunamazsa null döner (eskiden burada
+   * sessizce sahte bir mock programa düşülüyordu — kaldırıldı).
    */
-  function resolveProgram(id: string) {
-    return apiPrograms.find((p) => p.id === id) ?? getProgram(id);
+  function resolveProgram(id: string): Program | null {
+    return apiPrograms.find((p) => p.id === id) ?? null;
   }
 
   const selectedProgram = resolveProgram(selectedId);
-  const matchCount = apiPrograms.length > 0 ? apiPrograms.length : 7;
+  const matchCount = apiPrograms.length;
 
   return (
     <div style={{ display: "flex", height: "100vh", background: "#f4f3ef" }}>
@@ -495,18 +495,26 @@ export default function Home() {
           />
         )}
         {view === "detail" && (
-          <DetailView
-            program={selectedProgram}
-            onBack={() => setView("matches")}
-            onCheckEligibility={() => setView("eligibility")}
-          />
+          selectedProgram ? (
+            <DetailView
+              program={selectedProgram}
+              onBack={() => setView("matches")}
+              onCheckEligibility={() => setView("eligibility")}
+            />
+          ) : (
+            <ProgramNotFound onBack={() => setView("matches")} />
+          )
         )}
         {view === "eligibility" && (
-          <EligibilityView
-            program={selectedProgram}
-            onBack={() => setView("detail")}
-            onPrimaryAction={() => applyProgram(selectedProgram.id)}
-          />
+          selectedProgram ? (
+            <EligibilityView
+              program={selectedProgram}
+              onBack={() => setView("detail")}
+              onPrimaryAction={() => applyProgram(selectedProgram.id)}
+            />
+          ) : (
+            <ProgramNotFound onBack={() => setView("matches")} />
+          )
         )}
         {view === "application" && (
           <ApplicationView
@@ -525,5 +533,36 @@ export default function Home() {
       </main>
       <Toast show={toastShow} text={toastText} />
     </div>
+  );
+}
+
+/** Seçili program artık bilinen eşleşmeler arasında yoksa gösterilir (mock veriye düşmek yerine). */
+function ProgramNotFound({ onBack }: { onBack: () => void }) {
+  return (
+    <section style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ textAlign: "center", maxWidth: 360 }}>
+        <Ms name="search_off" size={40} color="#d0cdc4" />
+        <div style={{ fontSize: 16, fontWeight: 700, color: "#27353e", marginTop: 14 }}>
+          Program bulunamadı
+        </div>
+        <div style={{ fontSize: 13.5, color: "#8a96a0", marginTop: 8, lineHeight: 1.6 }}>
+          Bu program artık bilinen eşleşmeler arasında değil. Sohbete dönüp tekrar sorabilirsin.
+        </div>
+        <button
+          onClick={onBack}
+          style={{
+            marginTop: 18,
+            padding: "10px 18px",
+            borderRadius: 10,
+            background: "linear-gradient(160deg,#f97316,#ea580c)",
+            color: "#fff",
+            fontSize: 13.5,
+            fontWeight: 600,
+          }}
+        >
+          Eşleşmelere dön
+        </button>
+      </div>
+    </section>
   );
 }
