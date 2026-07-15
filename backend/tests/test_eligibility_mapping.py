@@ -23,12 +23,14 @@ def mock_profile():
 @pytest.fixture
 def mock_program():
     return SupportProgram(
-        id="test-1",
-        program_name="Test Programı",
-        institution="KOSGEB",
+        program_id="test-1",
+        title="Test Programı",
+        source="KOSGEB",
         category="Kamu Destekleri",
         support_type="Hibe",
-        description="Test açıklaması"
+        conditions_summary="Test açıklaması",
+        source_url="https://example.com",
+        body_chunk="Test içerik",
     )
 
 def test_profile_brief(mock_profile):

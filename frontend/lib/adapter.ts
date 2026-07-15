@@ -95,6 +95,12 @@ function formatDeadline(isoDate: string | null | undefined): {
   if (!isoDate) return { deadlineText: "Belirtilmemiş", deadlineDays: null };
 
   const deadline = new Date(isoDate);
+  if (Number.isNaN(deadline.getTime())) {
+    // Backend, tarih bulunamadığında ISO tarih yerine açıklayıcı bir
+    // Türkçe mesaj gönderebilir (bkz. BOS_ALAN_MESAJLARI) — o durumda
+    // mesajı olduğu gibi göster.
+    return { deadlineText: isoDate, deadlineDays: null };
+  }
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diffMs = deadline.getTime() - today.getTime();
@@ -137,7 +143,7 @@ export function adaptProgram(
     sp.amount_max,
     sp.currency,
   );
-  const { deadlineText, deadlineDays } = formatDeadline(sp.application_deadline);
+  const { deadlineText, deadlineDays } = formatDeadline(sp.deadline);
   const { status, statusLabel } = adaptStatus(sp.application_status);
 
   const conditions: Condition[] = er.conditions.map((c) => ({
@@ -148,9 +154,9 @@ export function adaptProgram(
   }));
 
   return {
-    id: sp.id,
-    name: sp.program_name,
-    org: sp.institution ?? "",
+    id: sp.program_id,
+    name: sp.title,
+    org: sp.source ?? "",
     category,
     categoryLabel: CATEGORY_LABEL[category],
     icon: CATEGORY_ICON[category],
@@ -164,15 +170,15 @@ export function adaptProgram(
     statusLabel,
     deadlineText,
     deadlineDays,
-    sourceLink: sp.official_source ?? sp.application_link ?? "",
-    sourceHref: sp.application_link ?? sp.official_source ?? "#",
+    sourceLink: sp.official_url ?? "",
+    sourceHref: sp.official_url ?? "#",
     updated: new Date().toLocaleDateString("tr-TR"),
     elig: {
       state: er.state,
       score: er.score,
       label: er.label,
     },
-    summary: sp.description ?? "",
+    summary: sp.conditions_summary ?? "",
     /** Detay ekranı için statik kriterler; backend şu an göndermez */
     criteria: [],
     conditions,

@@ -30,21 +30,17 @@ def _profile_brief(p: UserProfile) -> str:
 def _program_brief(prog: SupportProgram) -> str:
     """Programın uygunlukla ilgili alanlarını LLM için okunaklı bloğa dönüştürür."""
     fields = {
-        "Program": prog.program_name,
-        "Kurum": prog.institution,
+        "Program": prog.title,
+        "Kurum": prog.source,
         "Kategori": prog.category,
         "Destek türü": prog.support_type,
-        "Açıklama": prog.description,
-        "Hedef kitle": prog.target_audience,
-        "Sektör": prog.sector,
+        "Şartlar özeti": prog.conditions_summary,
+        "Bölge şartı": prog.region,
+        "Kuruluş tarihi şartı": prog.founded_after,
         "Şirket gerekli": prog.company_required,
-        "Min. çalışan": prog.min_employees,
-        "Maks. çalışan": prog.max_employees,
-        "Yaş sınırı": prog.age_limit,
         "Kadın girişimci odaklı": prog.women_entrepreneur,
         "Öğrenci odaklı": prog.student,
         "Teknopark şartı": prog.technopark,
-        "Şehir": prog.city,
     }
     return "\n".join(f"- {k}: {v}" for k, v in fields.items() if v is not None)
 

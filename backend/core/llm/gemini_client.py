@@ -1,10 +1,23 @@
 """Google Gemini adaptörü — sağlayıcı-bağımsız LLM katmanının bir uygulaması."""
+
+import os
+import asyncio
 from google import genai
 from google.genai import types
-
 from .base import LLMClient, LLMMessage
+from dotenv import load_dotenv
+from ...models.program import ExtractedSupportInfo
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+# Pydantic modelimizi ve base sınıfları içeri alıyoruz
+
+
+
+load_dotenv() 
 
 _ROLE_MAP = {"user": "user", "assistant": "model"}
+
+
 
 
 class GeminiClient(LLMClient):
@@ -36,3 +49,39 @@ class GeminiClient(LLMClient):
             config=config,
         )
         return resp.text
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=4, max=15),reraise=True)
+
+    async def extract_program_details(self, body_text: str, source_name: str = "Destek/Hibe") -> ExtractedSupportInfo | None:
+        
+        #raw metni alır gemini gönderir 
+        # ve doldurulmuş pydantic modelini döndürür
+        
+        await asyncio.sleep(1)
+        
+        system_instruction = (
+            "Sen uzman bir hibe ve teşvik danışmanısın. Sana verilen web sitesi metnini dikkatlice oku. "
+            "Metindeki bilgileri kullanarak bütçe, başvuru şartları ve sektör gibi alanları çıkar. "
+            "Eğer bir bilgi metinde kesin olarak yoksa, o alanı boş (null) bırak, asla uydurma."
+        )
+
+       
+        # Asenkron istek atıyoruz (self._client.aio kullanımına dikkat)
+            
+        response = await self._client.aio.models.generate_content(
+                model=self._model,
+                contents=f"Aşağıdaki {source_name} programı metnini analiz et:\n\n{body_text}",
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=ExtractedSupportInfo,
+                    system_instruction=system_instruction,
+                    temperature=0.1
+                )
+            )
+
+            # # Gemini'dan dönen metni (JSON string) Pydantic objesine çeviriyoruz.
+        
+        return ExtractedSupportInfo.model_validate_json(response.text)
+        
+
+            
