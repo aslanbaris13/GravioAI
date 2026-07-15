@@ -3,8 +3,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
-from ..agents import EligibilityAgent, Orchestrator, ProfileExtractor
-from ..core.embedding.gemini_embedding import embed_text
+from ..agents import (
+    ApplicationAgent,
+    EligibilityAgent,
+    Orchestrator,
+    ProfileExtractor,
+)
+from ..core.embedder import get_embedding_client
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
 from ..data import repo
 from ..models import (
@@ -48,7 +53,7 @@ class MatchRequest(BaseModel):
 @router.post("/match", response_model=list[SupportProgram])
 async def match(body: MatchRequest) -> list[SupportProgram]:
     """Serbest metin sorgusuna en yakın programları döner (vektör araması / RAG)."""
-    embedding = await run_in_threadpool(embed_text, body.query)
+    embedding = await get_embedding_client().embed_text(body.query)
     return await run_in_threadpool(
         lambda: repo.match_programs(
             embedding, match_count=body.limit, category=body.category
@@ -79,6 +84,21 @@ async def evaluate_eligibility(body: EligibilityRequest) -> EligibilityResult:
     if program is None:
         raise HTTPException(status_code=404, detail="Program bulunamadı")
     agent = EligibilityAgent()
+    return await agent.run(body.profile, program)
+
+
+class ApplicationRequest(BaseModel):
+    profile: UserProfile
+    program_id: str
+
+
+@router.post("/application", response_model=ApplicationDraft)
+async def draft_application(body: ApplicationRequest) -> ApplicationDraft:
+    """Bir profil + program için başvuru taslağı üretir (Başvuru Ajanı)."""
+    program = await run_in_threadpool(repo.get_program, body.program_id)
+    if program is None:
+        raise HTTPException(status_code=404, detail="Program bulunamadı")
+    agent = ApplicationAgent()
     return await agent.run(body.profile, program)
 
 

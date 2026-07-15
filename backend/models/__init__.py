@@ -1,3 +1,4 @@
+from .application import ApplicationDraft, PlanSection, RequiredDocument
 from .eligibility import (
     ConditionState,
     EligibilityCondition,
@@ -24,4 +25,7 @@ __all__ = [
     "AssistResult",
     "ProgramMatch",
     "ConversationTurn",
+    "ApplicationDraft",
+    "PlanSection",
+    "RequiredDocument",
 ]
