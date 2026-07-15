@@ -5,7 +5,7 @@ profilden bir arama metni kurar, embed'ler ve pgvector'da en yakın programları
 bulur. Bu yüzden LLM-merkezli `Agent` temelinden türemez; ama aynı `run(...)`
 arayüzünü sunar ki orkestratör tüm ajanları tek tip çağırabilsin.
 """
-from ..core.embedding.gemini_embedding import embed_text
+from ..core.embedder import get_embedding_client
 from ..data import repo
 from ..models import Category, SupportProgram, UserProfile
 
@@ -24,5 +24,5 @@ class MatchingAgent:
         query = profile.to_query_text()
         if not query:
             return []
-        embedding = embed_text(query)
+        embedding = await get_embedding_client().embed_text(query)
         return repo.match_programs(embedding, match_count=limit, category=category)

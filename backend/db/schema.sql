@@ -4,6 +4,13 @@
 
 -- 1) pgvector eklentisi
 create extension if not exists vector;
+create extension if not exists pgcrypto;
+
+-- ============================================================
+-- LEGACY — eski düz şema. `programs_v2` bölümü bunun yerini aldı
+-- (bkz. feature/connector-layer). Var olan veriyi bozmamak için
+-- tablo siliniyor değil, artık hiçbir kod buraya yazmıyor/okumuyor.
+-- ============================================================
 
 -- 2) Destek programları tablosu
 --    Kolon adları backend domain modeliyle (İngilizce alan adları) eşleşir.
@@ -51,18 +58,102 @@ create index if not exists programs_embedding_idx
 --    RLS açık + public policy yok => anon/authenticated erişemez, service_role bypass eder.
 alter table public.programs enable row level security;
 
--- 6) Vektör benzerlik araması (RAG) — backend bunu RPC olarak çağırır.
-create or replace function public.match_programs(
+-- 6) [LEGACY] Bu fonksiyon artık aşağıdaki programs_v2 sürümüyle
+--    değiştiriliyor (aynı isim+imza, farklı dönüş tipi — bu yüzden
+--    CREATE OR REPLACE değil, önce DROP gerekiyor, aşağıda yapılıyor).
+--    Burada sadece belgesel referans olarak bırakıldı, çalıştırılmıyor.
+
+-- ============================================================
+-- programs_v2 — güncel veri şeması (feature/connector-layer, PR #16).
+-- backend/data/repo.py ve backend/models/program.py buradaki alan
+-- adlarıyla birebir eşleşir.
+-- ============================================================
+
+-- 7) Ana program tablosu
+create table if not exists public.programs_v2 (
+    program_id           text primary key,
+    title                text not null,
+    category             text,
+    source                text,
+    support_type         text,
+    amount_min           numeric,
+    amount_max           numeric,
+    currency             text default 'TRY',
+    support_rate         text,
+    application_status   text,
+    region               text,
+    founded_after        text,
+    deadline             text,
+    official_url         text,
+    conditions_summary   text,
+    women_entrepreneur   boolean,
+    technopark           boolean,
+    company_required     boolean,
+    student              boolean,
+    source_url           text not null,
+    body_chunk           text not null,
+    chunk_index          integer not null default 0,
+    embedding            vector(768),
+    created_at           timestamptz not null default now(),
+    updated_at           timestamptz not null default now()
+);
+
+create index if not exists programs_v2_category_idx on public.programs_v2 (category);
+
+create index if not exists programs_v2_embedding_idx
+    on public.programs_v2 using hnsw (embedding vector_cosine_ops);
+
+alter table public.programs_v2 enable row level security;
+
+-- 8) Hiyerarşik chunking (core/chunker.py) — parent (anlamsal) bloklar
+create table if not exists public.program_parents (
+    id            uuid primary key default gen_random_uuid(),
+    program_id    text not null references public.programs_v2 (program_id) on delete cascade,
+    parent_index  integer not null,
+    section_title text,
+    text          text not null,
+    created_at    timestamptz not null default now()
+);
+
+create index if not exists program_parents_program_id_idx on public.program_parents (program_id);
+
+-- 9) Hiyerarşik chunking — embed edilip aranan child parçalar
+create table if not exists public.program_chunks (
+    id            uuid primary key default gen_random_uuid(),
+    program_id    text not null references public.programs_v2 (program_id) on delete cascade,
+    parent_id     uuid not null references public.program_parents (id) on delete cascade,
+    chunk_index   integer not null,
+    section_title text,
+    text          text not null,
+    embedding     vector(768),
+    created_at    timestamptz not null default now()
+);
+
+create index if not exists program_chunks_program_id_idx on public.program_chunks (program_id);
+
+create index if not exists program_chunks_embedding_idx
+    on public.program_chunks using hnsw (embedding vector_cosine_ops);
+
+alter table public.program_parents enable row level security;
+alter table public.program_chunks enable row level security;
+
+-- 10) Vektör benzerlik araması (RAG) — backend/data/repo.py bunu RPC
+--     olarak çağırır. Eski (LEGACY) sürüm `programs` tablosunu
+--     hedefliyordu; dönüş tipi değiştiği için CREATE OR REPLACE
+--     yetmiyor, önce eski tanım düşürülüyor.
+drop function if exists public.match_programs(vector(768), int, text);
+
+create function public.match_programs(
     query_embedding vector(768),
     match_count int default 5,
     filter_category text default null
 )
-returns setof public.programs
+returns setof public.programs_v2
 language sql
 stable
 as $$
     select *
-    from public.programs
+    from public.programs_v2
     where embedding is not null
       and (filter_category is null or category = filter_category)
     order by embedding <=> query_embedding

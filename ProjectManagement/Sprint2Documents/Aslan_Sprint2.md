@@ -40,3 +40,52 @@ Bu dosya, Sprint 2 kapsamında yaptığım işlerin **ne, neden, nasıl** yapıl
 **Nasıl karar verdim**: Var olan `Orchestrator.run()` imzasını ve `AssistResult` şemasını **değiştirmeden** dallanma ekleme yaklaşımını seçtim — böylece frontend (`lib/api.ts`, `adapter.ts`) hiç dokunulmadan Faz 2 tamamlanabilir. Tek istisna: `program_question` niyetinde profil olmadan uygunluk skorlanamayacağı için "unscored/Bilgi" rozeti gerekiyor — bunu adapter'a küçük bir ek olarak Faz 2'de not düştüm, şimdiden büyütmedim.
 
 **Sıradaki adım**: Bu dokümanları gözden geçirip onaylamak, sonra Faz 2'ye (SCRUM-96: `agents/intent_classifier.py`, orchestrator'da dallanma, `logging` entegrasyonu) geçmek.
+
+---
+
+## 2026-07-14/15 — PR'lar, Supabase migration eksikliği ve şema geçişinin kırdıkları
+
+**Ne yaptım** (özet, ayrıntılar Jira/PR'larda):
+1. Faz 2 (SCRUM-96) ve Faz 3 (SCRUM-173) tamamlanıp PR #18/#19 olarak açıldı; Faz 1 PR #17 olarak açılıp merge edildi.
+2. Daha önce hiç merge edilmemiş `feat_application_agent` dalı (PR #10) bulundu, çakışmaları çözülüp mergeable hale getirildi.
+3. Gerçek backend + Gemini ile uçtan uca test sırasında Supabase'de `match_programs` RPC fonksiyonunun hiç var olmadığı (`PGRST202`) ortaya çıktı — bu, ilk Hatice review'ünde işaretlediğim "schema.sql güncel değil" notunun canlıda patlamış hali. Barış, eski `db/schema.sql`'i (o an `programs` tablosunu hedefleyen) Supabase dashboard'undan uyguladı; fonksiyon çalışır hale geldi ama artık **yanlış** (eski) tabloyu hedefliyordu.
+
+**Barış'ın talimatı**: "Hatice'ninkini uygulayacağız ve developu en güncel haline getirmeliyiz" — yani Hatice'nin `feature/connector-layer` dalını (PR #16) develop'a merge edip her şeyi buna göre senkronlamak.
+
+**Ne oldu (PR #16 merge sonrası)**: PR #16 git seviyesinde çakışmasız merge oldu (mergeable), ama Hatice'nin `SupportProgram` modelini yeniden adlandırması (`program_name`→`title`, `institution`→`source`, `sector`/`city`/`min_employees`/`max_employees`/`age_limit`/`description`/`target_audience` tamamen kaldırıldı) git tarafından "çakışma" olarak görülmedi (aynı satırlara dokunulmadı) ama **çalışma zamanında** şunları kırdı:
+
+- `agents/eligibility.py::_program_brief` — artık var olmayan alanları okuyordu
+- `agents/matching.py` — Hatice'nin `core/embedding/` klasörünü `core/embedder.py`'de birleştirmesinden sonra artık var olmayan bir modülü import ediyordu
+- `core/llm/base.py`, `core/llm/gemini_client.py`, `core/embedder.py`, `data/repo.py` — Hatice'nin connector/script kodu `cd backend && python -m ...` şeklinde çalıştırılmak üzere **mutlak** import (`from models...`, `from core...`) kullanıyor; ama canlı FastAPI uygulaması her şeyi `backend` paketi olarak root'tan import ediyor — bu yüzden mutlak importlar canlı uygulamada `ModuleNotFoundError` veriyordu
+- `core/llm/base.py`'deki `LLMClient` arayüzüne eklenen yeni `extract_program_details` **abstract** metodu, onu implemente etmeyen `AnthropicClient`'ı ve test mock'larını da kırmıştı
+- `requirements.txt` hiç güncellenmemiş — `langchain-experimental`, `langchain-google-genai`, `langchain-text-splitters`, `beautifulsoup4`, `tenacity` bağımlılıkları kodda var ama dosyada yoktu
+- `frontend/lib/adapter.ts` + `api.ts` — backend'in artık göndermediği eski alan adlarını (`program_name`, `institution`, `application_deadline`, `official_source`/`application_link`, `description`) okumaya çalışıyordu
+- `db/schema.sql` — Hatice'nin `repo.py`'si `programs_v2`/`program_parents`/`program_chunks` tablolarını hedefliyordu ama şema dosyası hâlâ eski düz `programs` tablosunu tanımlıyordu (bu yüzden Barış'ın uyguladığı ilk düzeltme yanlış tabloyu hedefliyordu)
+
+**Nasıl düzelttim**: `fix_schema_migration_breakage` dalını `develop`'tan açtım, yukarıdaki her kırığı tek tek düzelttim (alan adlarını yeni şemaya taşıdım, mutlak importları relative'e çevirdim, `extract_program_details`'i abstract olmaktan çıkarıp varsayılan `NotImplementedError` verecek şekilde yumuşattım, `requirements.txt`'i tamamladım, `db/schema.sql`'e eski `programs` tablosunu **silmeden** yeni `programs_v2` + `program_parents` + `program_chunks` tablolarını ve `match_programs` fonksiyonunun `programs_v2`'yi hedefleyen yeni sürümünü ekledim). Ayrıca bu dala `feat_application_agent`'ı (PR #10) da birleştirdim çünkü `routes.py`'nin `ApplicationDraft` ihtiyacı zaten oradan geliyordu ve `ApplicationAgent` kodu (`_profile_brief`/`_program_brief`'i yeniden kullandığı için) şema değişikliğinden etkilenmiyordu.
+
+**Doğrulama**: 8 test yeşil, `tsc --noEmit` temiz, backend gerçekten ayağa kalktı (`/health`, `/api/health` 200). `/api/programs` (programs_v2'yi doğrudan okuyan) hâlâ 500 veriyor çünkü **yeni schema.sql bölümü henüz Supabase'e uygulanmadı** — bu sıradaki adım.
+
+**Ders**: Pydantic model alan adı değişiklikleri git için "çakışma" değildir (farklı satırlar), ama çalışma zamanı için tam bir kırılmadır. Büyük bir şema/model refactor'u merge etmeden önce, o modeli tüketen HER dosyayı (agents, repo, frontend adapter, testler) taramak gerekiyor — sadece `git merge`'in "temiz" demesine güvenmemeli.
+
+**Sıradaki adım**: Barış'tan güncellenmiş `db/schema.sql`'i (programs_v2 + program_parents + program_chunks + yeni match_programs) Supabase'e uygulamasını istedim. Uygulandıktan sonra gerçek `/api/assist` ve `/api/match` ile tam uçtan uca doğrulama yapılacak, sonra bu hotfix develop'a PR'lanacak, ardından PR #18/#19/#10 yeni develop'a göre güncellenip (alan adı düzeltmeleri dahil) sırayla merge edilecek.
+
+---
+
+## 2026-07-15 — Migration uygulandı, iki bug daha bulundu, tam doğrulama
+
+**Ne oldu**: Barış güncel `db/schema.sql`'i Supabase'e uyguladı. `/api/programs`'ı tekrar denedim, iki yeni (ayrı) hata çıktı:
+
+1. **`_from_row` embedding alanında patlıyordu**: Supabase'in gerçek verisi (Hatice'nin ingest ettiği KOSGEB/TÜBİTAK programları) döndü ama `embedding` alanı `list[float]` değil düz metin ("[-0.001,...]") olarak geliyordu — pgvector kolonlarının PostgREST üzerinden JSON listesi değil metin olarak serileştirilmesinden kaynaklanıyor (bilinen bir davranış). **Düzeltme**: `repo.py::_from_row`, response'tan `embedding` alanını atıyor artık (zaten API tüketicileri kullanmıyor, 768 boyutlu veriyi taşımanın da anlamı yok).
+
+2. **Daha kritik bir keşif**: Bunu düzeltince veri döndü ama JSON anahtarları Türkçeydi (`program_adi`, `kurum`, `kategori`...) — İngilizce (`title`, `source`, `category`) değil. Sebep: FastAPI'nin `response_model_by_alias` varsayılanı `True`; `SupportProgram`/`ExtractedSupportInfo` modelinde Türkçe `alias`'lar tanımlı olduğu için API yanıtı otomatik olarak alias'ları kullanıyor. Bu, benim biraz önce düzelttiğim frontend adapter'ının (İngilizce alan adı bekleyen) tamamen boş/undefined veri almasına yol açacaktı — fark edilmeseydi sessizce kırılırdı. **Düzeltme**: `routes.py`'de `SupportProgram` döndüren 4 route'a (`/programs`, `/programs/{id}`, `/match`, `/assist`) `response_model_by_alias=False` eklendi.
+
+**Neden önemli**: Bu, "kod İngilizce, veri Türkçe" tasarımının (Hatice'nin scraping/ingestion pipeline'ı için doğru bir seçim) FastAPI'nin HTTP katmanına da sızmasıydı — hâlbuki frontend hep İngilizce alan adı bekliyordu. Alias'lar sadece dosya/DB seviyesinde kalmalıydı, HTTP sözleşmesine karışmamalıydı.
+
+**Tam doğrulama** (gerçek Gemini + gerçek Supabase, mock yok):
+- `/api/programs` → gerçek KOSGEB/TÜBİTAK verisi, doğru (İngilizce) alan adlarıyla, hatasız
+- `/api/match` (query: "Ar-Ge hibesi arayan yazılım girişimi") → gerçek embedding + gerçek pgvector araması, anlamlı sonuçlar (TÜBİTAK 1507, 1501, KOSGEB Teknoloji Merkezi)
+- `/api/assist` → `gemini-3.5-flash`'ın o an Google tarafında genel bir "yüksek talep" (503) yaşaması nedeniyle 3 denemede de tamamlanamadı; bu bizim kodumuzla ilgisiz — chat-model'e bağlı olmayan iki uç (`/programs`, `/match`) zaten asıl düzeltmeyi (doğru şema + doğru serileştirme) kanıtladı.
+- 8 backend testi + `tsc --noEmit` yeşil.
+
+**Sıradaki adım**: Bu hotfix'i (`fix_schema_migration_breakage`) develop'a PR'lamak, sonra PR #18 (orchestrator, `program_name`/`institution` referanslarını düzeltmek gerekiyor), PR #19 (frontend, muhtemelen değişiklik gerekmiyor) ve PR #10'u (zaten bu dala alındı) yeni develop'a göre sırayla kapatmak.

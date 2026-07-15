@@ -7,7 +7,7 @@ değişse bile ajan kodu değişmez.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Literal, Optional
-from models.program import ExtractedSupportInfo
+from ...models.program import ExtractedSupportInfo
 
 Role = Literal["user", "assistant"]
 
@@ -33,7 +33,14 @@ class LLMClient(ABC):
         raise NotImplementedError
 
 
-    @abstractmethod
     async def extract_program_details(self, body_text: str, source_name: str) -> ExtractedSupportInfo | None:
-        """Raw metni alır, LLM'e gönderir ve yapılandırılmış veri döndürür."""
-        raise NotImplementedError
+        """Raw metni alır, LLM'e gönderir ve yapılandırılmış veri döndürür.
+
+        Zorunlu değil — henüz her sağlayıcı (ör. Anthropic) veri toplama
+        pipeline'ını desteklemiyor. Yalnızca gerçekten çağrıldığında hata verir,
+        böylece bu yeteneği implemente etmeyen sağlayıcılar/mock'lar da
+        `LLMClient`'ı örnekleyebilir.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__} extract_program_details'i desteklemiyor"
+        )

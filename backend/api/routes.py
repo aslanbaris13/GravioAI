@@ -3,8 +3,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
-from ..agents import EligibilityAgent, Orchestrator, ProfileExtractor
-from ..core.embedding.gemini_embedding import embed_text
+from ..agents import (
+    ApplicationAgent,
+    EligibilityAgent,
+    Orchestrator,
+    ProfileExtractor,
+)
+from ..core.embedder import get_embedding_client
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
 from ..data import repo
 from ..models import (
@@ -25,13 +30,13 @@ async def health() -> dict:
     return {"status": "ok"}
 
 
-@router.get("/programs", response_model=list[SupportProgram])
+@router.get("/programs", response_model=list[SupportProgram], response_model_by_alias=False)
 async def list_programs(category: Category | None = None) -> list[SupportProgram]:
     """Destek programlarını listeler; opsiyonel kategori filtresi."""
     return await run_in_threadpool(repo.get_programs, category)
 
 
-@router.get("/programs/{program_id}", response_model=SupportProgram)
+@router.get("/programs/{program_id}", response_model=SupportProgram, response_model_by_alias=False)
 async def read_program(program_id: str) -> SupportProgram:
     program = await run_in_threadpool(repo.get_program, program_id)
     if program is None:
@@ -45,10 +50,10 @@ class MatchRequest(BaseModel):
     category: Category | None = None
 
 
-@router.post("/match", response_model=list[SupportProgram])
+@router.post("/match", response_model=list[SupportProgram], response_model_by_alias=False)
 async def match(body: MatchRequest) -> list[SupportProgram]:
     """Serbest metin sorgusuna en yakın programları döner (vektör araması / RAG)."""
-    embedding = await run_in_threadpool(embed_text, body.query)
+    embedding = await get_embedding_client().embed_text(body.query)
     return await run_in_threadpool(
         lambda: repo.match_programs(
             embedding, match_count=body.limit, category=body.category
@@ -82,12 +87,27 @@ async def evaluate_eligibility(body: EligibilityRequest) -> EligibilityResult:
     return await agent.run(body.profile, program)
 
 
+class ApplicationRequest(BaseModel):
+    profile: UserProfile
+    program_id: str
+
+
+@router.post("/application", response_model=ApplicationDraft)
+async def draft_application(body: ApplicationRequest) -> ApplicationDraft:
+    """Bir profil + program için başvuru taslağı üretir (Başvuru Ajanı)."""
+    program = await run_in_threadpool(repo.get_program, body.program_id)
+    if program is None:
+        raise HTTPException(status_code=404, detail="Program bulunamadı")
+    agent = ApplicationAgent()
+    return await agent.run(body.profile, program)
+
+
 class AssistRequest(BaseModel):
     message: str
     history: list[ConversationTurn] = []
 
 
-@router.post("/assist", response_model=AssistResult)
+@router.post("/assist", response_model=AssistResult, response_model_by_alias=False)
 async def assist(body: AssistRequest) -> AssistResult:
     """Uçtan uca akış: mesaj + geçmiş → profil → eşleştirme → uygunluk (Orkestratör)."""
     return await Orchestrator().run(body.message, history=body.history or None)
