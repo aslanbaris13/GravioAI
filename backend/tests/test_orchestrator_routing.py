@@ -10,7 +10,13 @@ from backend.models.program import SupportProgram
 
 
 def _program(pid: str) -> SupportProgram:
-    return SupportProgram(id=pid, program_name=f"Program {pid}", category="Kamu Destekleri")
+    return SupportProgram(
+        program_id=pid,
+        title=f"Program {pid}",
+        category="Kamu Destekleri",
+        source_url="https://example.com",
+        body_chunk="Test içerik",
+    )
 
 
 def _eligibility(score: int) -> EligibilityResult:

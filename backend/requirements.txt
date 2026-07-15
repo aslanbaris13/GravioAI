@@ -8,9 +8,16 @@ httpx>=0.27
 # LLM sağlayıcıları (sağlayıcı-bağımsız katman üzerinden kullanılır)
 anthropic>=0.40
 google-genai>=1.0
+tenacity>=8.2
 
 # Veri katmanı (Supabase REST + pgvector RAG)
 supabase>=2.0
+
+# Veri toplama pipeline'ı (connectors/cleaner/chunker/embedder)
+beautifulsoup4>=4.12
+langchain-text-splitters>=0.2
+langchain-experimental>=0.0.60
+langchain-google-genai>=1.0
 
 # Test
 pytest>=8.0

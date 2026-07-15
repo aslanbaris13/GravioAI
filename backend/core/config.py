@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     gemini_api_key: str = ""
 
+    # Embedding katmanı
+    embedding_provider: str = "gemini"
+    embedding_model: str = "gemini-embedding-001"
+
     # Supabase
     supabase_url: str = ""
     supabase_key: str = ""

@@ -228,7 +228,7 @@ class Orchestrator:
             p = m.program
             e = m.eligibility
             program_lines.append(
-                f"{i}. {p.program_name} ({getattr(p, 'institution', '') or ''}) — "
+                f"{i}. {p.title} ({p.source or ''}) — "
                 f"{e.label} (skor: {e.score}/100)"
             )
         programs_text = "\n".join(program_lines)
@@ -255,6 +255,6 @@ class Orchestrator:
             top = matches[0]
             return (
                 f"Profiline göre {len(matches)} uygun destek buldum. "
-                f"En uygunu {top.program.program_name} ({top.eligibility.label}). "
+                f"En uygunu {top.program.title} ({top.eligibility.label}). "
                 "Detaylar ve uygunluk koşulları listede."
             )
