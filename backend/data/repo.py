@@ -57,7 +57,14 @@ def _to_row(p: SupportProgram, embedding: list[float] | None = None) -> dict:
 
 
 def _from_row(row: dict) -> SupportProgram:
-    """DB satırını modele çevirir (fazladan kolonlar varsa yok sayılır)."""
+    """DB satırını modele çevirir (fazladan kolonlar varsa yok sayılır).
+
+    `embedding` alanı atılır: pgvector kolonu PostgREST üzerinden JSON listesi
+    değil, düz metin ("[-0.001,...]") olarak döner ve model bunu doğrulayamaz.
+    API tüketicileri zaten embedding'i kullanmıyor, bu yüzden parse etmek yerine
+    (gereksiz 768 boyutlu veri de taşımamak için) alanı boş bırakıyoruz.
+    """
+    row = {**row, "embedding": None}
     return SupportProgram.model_validate(row)
 
 

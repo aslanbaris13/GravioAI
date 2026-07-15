@@ -30,13 +30,13 @@ async def health() -> dict:
     return {"status": "ok"}
 
 
-@router.get("/programs", response_model=list[SupportProgram])
+@router.get("/programs", response_model=list[SupportProgram], response_model_by_alias=False)
 async def list_programs(category: Category | None = None) -> list[SupportProgram]:
     """Destek programlarını listeler; opsiyonel kategori filtresi."""
     return await run_in_threadpool(repo.get_programs, category)
 
 
-@router.get("/programs/{program_id}", response_model=SupportProgram)
+@router.get("/programs/{program_id}", response_model=SupportProgram, response_model_by_alias=False)
 async def read_program(program_id: str) -> SupportProgram:
     program = await run_in_threadpool(repo.get_program, program_id)
     if program is None:
@@ -50,7 +50,7 @@ class MatchRequest(BaseModel):
     category: Category | None = None
 
 
-@router.post("/match", response_model=list[SupportProgram])
+@router.post("/match", response_model=list[SupportProgram], response_model_by_alias=False)
 async def match(body: MatchRequest) -> list[SupportProgram]:
     """Serbest metin sorgusuna en yakın programları döner (vektör araması / RAG)."""
     embedding = await get_embedding_client().embed_text(body.query)
@@ -107,7 +107,7 @@ class AssistRequest(BaseModel):
     history: list[ConversationTurn] = []
 
 
-@router.post("/assist", response_model=AssistResult)
+@router.post("/assist", response_model=AssistResult, response_model_by_alias=False)
 async def assist(body: AssistRequest) -> AssistResult:
     """Uçtan uca akış: mesaj + geçmiş → profil → eşleştirme → uygunluk (Orkestratör)."""
     return await Orchestrator().run(body.message, history=body.history or None)
