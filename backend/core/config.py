@@ -32,6 +32,14 @@ class Settings(BaseSettings):
     # pgvector ile doğrudan SQL/vektör arama için Postgres bağlantı dizesi
     database_url: str = Field(default="", validation_alias="CONNECTION_URL")
 
+    # Hız sınırlama — LLM çağrısı yapan uçlar için (bkz. core/rate_limit.py)
+    # IP başına dakikada izin verilen istek sayısı (kötüye kullanıma karşı).
+    rate_limit_per_minute: int = 10
+    # Tüm sunucu için günlük toplam LLM isteği bütçesi (gerçek sağlayıcı
+    # kotasını aşmadan önce anlaşılır bir hata vermek için — bkz. Sprint 2'de
+    # yaşanan 429 RESOURCE_EXHAUSTED deneyimi). 0 = sınırsız.
+    daily_llm_budget: int = 0
+
     @field_validator("supabase_url", mode="before")
     @classmethod
     def _normalize_supabase_url(cls, v):

@@ -11,6 +11,7 @@ from ..agents import (
 )
 from ..core.embedder import get_embedding_client
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
+from ..core.rate_limit import enforce_llm_rate_limit
 from ..data import repo
 from ..models import (
     ApplicationDraft,
@@ -51,7 +52,12 @@ class MatchRequest(BaseModel):
     category: Category | None = None
 
 
-@router.post("/match", response_model=list[SupportProgram], response_model_by_alias=False)
+@router.post(
+    "/match",
+    response_model=list[SupportProgram],
+    response_model_by_alias=False,
+    dependencies=[Depends(enforce_llm_rate_limit)],
+)
 async def match(body: MatchRequest) -> list[SupportProgram]:
     """Serbest metin sorgusuna en yakın programları döner (vektör araması / RAG)."""
     embedding = await get_embedding_client().embed_text(body.query)
@@ -66,7 +72,7 @@ class ProfileRequest(BaseModel):
     message: str
 
 
-@router.post("/profile", response_model=UserProfile)
+@router.post("/profile", response_model=UserProfile, dependencies=[Depends(enforce_llm_rate_limit)])
 async def extract_profile(body: ProfileRequest) -> UserProfile:
     """Serbest metinden yapılandırılmış kullanıcı profili çıkarır (Profil Çıkarma Ajanı)."""
     agent = ProfileExtractor()
@@ -78,7 +84,11 @@ class EligibilityRequest(BaseModel):
     program_id: str
 
 
-@router.post("/eligibility", response_model=EligibilityResult)
+@router.post(
+    "/eligibility",
+    response_model=EligibilityResult,
+    dependencies=[Depends(enforce_llm_rate_limit)],
+)
 async def evaluate_eligibility(body: EligibilityRequest) -> EligibilityResult:
     """Bir profili belirli bir programa karşı değerlendirir (Uygunluk Ajanı)."""
     program = await run_in_threadpool(repo.get_program, body.program_id)
@@ -93,7 +103,11 @@ class ApplicationRequest(BaseModel):
     program_id: str
 
 
-@router.post("/application", response_model=ApplicationDraft)
+@router.post(
+    "/application",
+    response_model=ApplicationDraft,
+    dependencies=[Depends(enforce_llm_rate_limit)],
+)
 async def draft_application(body: ApplicationRequest) -> ApplicationDraft:
     """Bir profil + program için başvuru taslağı üretir (Başvuru Ajanı)."""
     program = await run_in_threadpool(repo.get_program, body.program_id)
@@ -108,7 +122,12 @@ class AssistRequest(BaseModel):
     history: list[ConversationTurn] = []
 
 
-@router.post("/assist", response_model=AssistResult, response_model_by_alias=False)
+@router.post(
+    "/assist",
+    response_model=AssistResult,
+    response_model_by_alias=False,
+    dependencies=[Depends(enforce_llm_rate_limit)],
+)
 async def assist(body: AssistRequest) -> AssistResult:
     """Uçtan uca akış: mesaj + geçmiş → profil → eşleştirme → uygunluk (Orkestratör)."""
     return await Orchestrator().run(body.message, history=body.history or None)
@@ -136,7 +155,11 @@ class ChatResponse(BaseModel):
     reply: str
 
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post(
+    "/chat",
+    response_model=ChatResponse,
+    dependencies=[Depends(enforce_llm_rate_limit)],
+)
 async def chat(
     body: ChatRequest,
     llm: LLMClient = Depends(get_llm_client),
