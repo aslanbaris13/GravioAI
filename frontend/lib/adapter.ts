@@ -14,7 +14,7 @@ import type {
   BackendSupportProgram,
   BackendUserProfile,
 } from "./api";
-import type { Condition, DocItem, Program, ProgramCategory } from "./types";
+import type { Condition, Criterion, DocItem, Program, ProgramCategory } from "./types";
 
 /* ------------------------------------------------------------------ */
 /* Kategori dönüşümü                                                   */
@@ -130,6 +130,50 @@ function adaptStatus(
 }
 
 /* ------------------------------------------------------------------ */
+/* Temel kriterler                                                      */
+/* ------------------------------------------------------------------ */
+
+/** Backend, bilgi bulunamadığında null yerine bu açıklayıcı mesajları
+ * gönderir (bkz. backend/core/constants.py::BOS_ALAN_MESAJLARI) — kriter
+ * listesinde anlamsız bir chip olarak görünmesinler diye eleniyor. */
+const EMPTY_FIELD_MESSAGES = new Set([
+  "Kuruluş tarihi şartı belirtilmemiş",
+  "Son başvuru tarihi belirtilmemiş",
+  "Destek oranı belirtilmemiş",
+  "Resmi link belirtilmemiş",
+]);
+
+/** SupportProgram'ın gerçek alanlarından "Temel kriterler" chip'lerini üretir. */
+function buildCriteria(sp: BackendSupportProgram): Criterion[] {
+  const criteria: Criterion[] = [];
+
+  if (sp.region) {
+    criteria.push({ icon: "public", label: "Bölge", value: sp.region });
+  }
+  if (sp.company_required != null) {
+    criteria.push({
+      icon: "apartment",
+      label: "Şirket şartı",
+      value: sp.company_required ? "Kurulu şirket gerekli" : "Şirket şartı yok",
+    });
+  }
+  if (sp.founded_after && !EMPTY_FIELD_MESSAGES.has(sp.founded_after)) {
+    criteria.push({ icon: "event", label: "Kuruluş şartı", value: sp.founded_after });
+  }
+  if (sp.women_entrepreneur) {
+    criteria.push({ icon: "badge", label: "Kadın girişimci", value: "Özel avantaj var" });
+  }
+  if (sp.student) {
+    criteria.push({ icon: "school", label: "Öğrenci", value: "Başvurabilir" });
+  }
+  if (sp.technopark) {
+    criteria.push({ icon: "location_city", label: "Teknopark", value: "Şartı var" });
+  }
+
+  return criteria;
+}
+
+/* ------------------------------------------------------------------ */
 /* Ana dönüştürücüler                                                  */
 /* ------------------------------------------------------------------ */
 
@@ -180,8 +224,7 @@ export function adaptProgram(
       label: er.label,
     },
     summary: sp.conditions_summary ?? "",
-    /** Detay ekranı için statik kriterler; backend şu an göndermez */
-    criteria: [],
+    criteria: buildCriteria(sp),
     conditions,
   };
 }

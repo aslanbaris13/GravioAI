@@ -155,8 +155,21 @@ textarea {
 
   /* Sohbet dışındaki ekranlar (Eşleşmeler/Detay/Uygunluk/Başvuru/Panelim) kendi
      header'ını içermiyor; hamburger butonuyla çakışmaması için içeriğin ilk
-     bloğuna üstten boşluk ekleniyor. */
+     bloğuna üstten boşluk, dar ekranda da daha az yatay boşluk ekleniyor. */
   [data-screen-label] > div:first-child {
     padding-top: 56px !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  /* Eşleşmeler ekranı — istatistik kartları ve program kartları grid'i */
+  .matches-stats-grid,
+  .matches-cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Program detayı — temel kriterler grid'i */
+  .detail-criteria-grid {
+    grid-template-columns: 1fr !important;
   }
 }

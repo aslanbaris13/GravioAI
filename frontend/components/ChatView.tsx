@@ -38,7 +38,7 @@ export default function ChatView({
   onOpenProgram: (id: string) => void;
   onApplyProgram: (id: string) => void;
   onCtaAction: (action: "go-matches" | "apply-bigg") => void;
-  resolveProgram: (id: string) => Program;
+  resolveProgram: (id: string) => Program | null;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const showEmpty = messages.length === 0 && !typing;
@@ -295,7 +295,7 @@ function MessageRow({
   onOpenProgram: (id: string) => void;
   onApplyProgram: (id: string) => void;
   onCtaAction: (action: "go-matches" | "apply-bigg") => void;
-  resolveProgram: (id: string) => Program;
+  resolveProgram: (id: string) => Program | null;
 }) {
   const rowStyle = {
     display: "flex",
@@ -389,7 +389,9 @@ function MessageRow({
       <div style={rowStyle}>
         <div style={{ marginLeft: 41, width: "calc(100% - 41px)", display: "flex", flexDirection: "column", gap: 10 }}>
           {m.programIds.map((id) => {
-            const c = toVM(resolveProgram(id));
+            const program = resolveProgram(id);
+            if (!program) return null;
+            const c = toVM(program);
             return (
               <button
                 key={id}
@@ -410,8 +412,8 @@ function MessageRow({
                   <Ms name={c.icon} size={21} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#14222c" }}>{c.name}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#14222c", minWidth: 0 }}>{c.name}</span>
                     <span style={c.eligBadgeStyle}>
                       <Ms name={c.eligIconName} size={14} />
                       {c.eligLabel}

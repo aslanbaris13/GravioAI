@@ -68,7 +68,7 @@ export default function MatchesView({
         </p>
 
         {/* İstatistik kartları */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 22 }}>
+        <div className="matches-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 22 }}>
           {stats.map((s) => (
             <div
               key={s.label}
@@ -164,7 +164,7 @@ export default function MatchesView({
               })}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 22 }}>
+            <div className="matches-cards-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 22 }}>
               {filtered.map((p) => {
                 const c = toVM(p);
                 return (
