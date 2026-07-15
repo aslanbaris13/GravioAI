@@ -176,3 +176,34 @@ Barış Faz 1'den (kalıcılık) başlamayı seçti, Supabase'de gerçek bir otu
 **Önemli yan bulgu**: Gerçek bir sohbet mesajı denerken `429 RESOURCE_EXHAUSTED` aldık — Gemini anahtarı ücretsiz katmanda, `gemini-3.5-flash` için dakikada 5 istek limitiyle. Bu, Sprint 2 boyunca gördüğümüz "yüksek talep" (503) hatalarının bir kısmının aslında kota sınırı olabileceğini gösteriyor. Barış'a token/kota konusunu netleştirmesini önerdim.
 
 **Sıradaki adım**: Barış'tan güncellenmiş `db/schema.sql`'i (yeni `user_sessions` bölümü) Supabase'e uygulamasını istemek, sonra gerçek bir mesajla tam kaydet→yenile→geri-yükle döngüsünü uçtan uca doğrulamak, sonra PR açıp develop'a almak.
+
+---
+
+## 2026-07-16 — Faz 1 kapandı, Faz 2/3/4 otonom olarak tamamlandı
+
+**Bağlam**: `user_sessions` migration'ını Supabase'e uyguladıktan sonra ("İstediğin sorguyu çalıştırdım supabasede") ben uyurken Faz 1'i bitirip Faz 2, 3 ve 4'ü de tek başıma tamamlamamı istedim — soru sormadan, sadece benim karar vermem gereken şeyleri not alıp en sonda toplu rapor olarak sunması şartıyla. Aşağıdaki maddeler o gece boyunca açılan PR'lar (#21–#28), hepsi develop'a merge edildi.
+
+### Faz 1 — kapanış
+`user_sessions` migration'ı uygulandıktan sonra gerçek kaydet→yenile→geri-yükle zincirini curl ile (Gemini kotasını tüketmeden) uçtan uca doğruladım. PR #21 develop'a merge edildi.
+
+### Faz 2
+1. **Rate limiting** (PR #23): `backend/core/rate_limit.py` — bağımlılıksız, bellek-içi sliding-window limiter. Per-IP dakikalık limit (`RATE_LIMIT_PER_MINUTE`, varsayılan 10) + opsiyonel global günlük LLM bütçesi (`DAILY_LLM_BUDGET`, varsayılan sınırsız/0). `/match`, `/profile`, `/eligibility`, `/application`, `/assist`, `/chat` route'larına dependency olarak eklendi. Canlıda doğrulandı: 12 hızlı istekten ilk 10'u 422, sonrakiler 429 (Gemini kotası hiç harcanmadan).
+2. **Kriter verisi** (PR #22 — `feat_frontend_polish` içinde): `frontend/lib/adapter.ts`'e `buildCriteria()` eklendi, DetailView'daki "Temel kriterler" artık her zaman boş liste değil gerçek `region`/`company_required`/`founded_after`/`women_entrepreneur`/`student`/`technopark` alanlarından üretiliyor.
+3. **Responsive düzeltmeler** (aynı PR): MatchesView ve DetailView'daki grid'lere responsive class'lar eklendi. Bu arada tesadüfen gerçek bir bug bulundu ve düzeltildi: ChatView'daki program kartlarında uzun başlıklar mobilde tutar/uygunluk rozetiyle üst üste biniyordu (`flexWrap`/`minWidth` eksikliği).
+4. **Mock veri temizliği** (aynı PR): `frontend/lib/programs.ts` (320 satırlık sahte katalog) tamamen silindi; `resolveProgram()` artık bulunamayan programda sessizce mock'a düşmüyor, dürüst bir "Program bulunamadı" ekranı gösteriyor; `matchCount` sahte "7" fallback'i yerine gerçek API sonuç sayısını kullanıyor.
+
+### Faz 3
+5. **`apply_request` için ayrı zincir** (PR #24): Orchestrator'da başvuru niyeti artık genel akışın (5 aday eşleşme + 3 uygunluk kontrolü) tamamını çalıştırmak yerine, tek hedefli bir zincir kullanıyor (limit=1 eşleşme, profil boşsa mesaj sorgusuna düşme, 1 uygunluk kontrolü, başvuruya özel yanıt promptu) — hem daha isabetli hem Gemini kotasını daha az harcıyor.
+6. **Frontend test altyapısı** (PR #25): Vitest kuruldu (`frontend/vitest.config.ts`, `npm run test`), `lib/adapter.ts` için 16 test yazıldı (tutar/tarih formatlama, kriter üretimi, session/assist dönüşümleri).
+7. **Pipeline testleri** (PR #26): `backend/core/cleaner.py` (6 test) ve `backend/connectors/base.py` (14 test) için ilk kez test eklendi — connector'ların mutlak import kullanması nedeniyle test dosyasında `sys.path` çözümü gerekti (üretim kodu değişmedi, sadece test importu connector'ların gerçek çalışma şekline uyduruldu).
+
+### Faz 4
+8. **CI kuruldu** (PR #27): `.github/workflows/ci.yml` — her PR/push'ta backend testleri (`pytest`, 46 test) + backend "boot smoke test" (uvicorn'u gerçekten başlatıp `/health`'e istek atıyor, gerçek Supabase/Gemini kimlik bilgisi gerektirmiyor) + frontend `tsc --noEmit` + `npm run test` (16 test) çalışıyor. İlk denemede `pytest` (düz komut, `python -m pytest` değil) repo kökünü sys.path'e eklemediği için `ModuleNotFoundError: No module named 'backend'` ile patladı — bunu farkedip düzelttim, ikinci denemede tüm job'lar yeşil.
+9. **`is_relevant` karar noktaları belgelendi** (PR #28): `kosgeb.py`, `kalkinma_ajansi.py`, `tubitak.py`'de alaka filtresinin neden kapalı/kullanılmadığını ve hangi kararın (kota tasarrufu vs. yanlış eleme riski) beklediğini açıklayan yorumlar eklendi — kod davranışı değişmedi, bu bir ürün kararı olduğu için.
+
+**Doğrulama**: Her PR açılışında CI (PR #27'den itibaren) + lokal `pytest`/`tsc --noEmit`/`npm run test` yeşil görüldükten sonra merge edildi. Toplamda backend 46 test, frontend 16 test.
+
+**Kararı bende olmayan, Barış'ın karar vermesi/yapması gereken konular** (toplu rapor olarak ayrıca iletildi):
+- Gemini ücretsiz katman günlük kotası (20 istek/gün) — canlı E2E test kapasitesini ciddi kısıtlıyor, ücretli anahtar veya kota artışı gerekebilir.
+- `is_relevant` filtresini açıp açmama kararı (yukarıda #9).
+- Test sırasında Supabase `user_sessions` tablosuna eklenen `test-e2e-1`/`test-e2e-2` id'li deneme satırları — zararsız ama silme endpoint'i olmadığı için elle temizlenmesi gerekiyor.
