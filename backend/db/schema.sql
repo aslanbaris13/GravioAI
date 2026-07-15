@@ -159,3 +159,36 @@ as $$
     order by embedding <=> query_embedding
     limit match_count;
 $$;
+
+-- ============================================================
+-- user_sessions — sohbetin çıkardığı profil + eşleşmelerin kalıcılığı.
+-- session_id'yi frontend (localStorage) üretir; burada auth yok,
+-- session_id fiilen tahmin edilemeyen bir bearer-token gibi davranır.
+-- ============================================================
+
+-- 11) Oturum tablosu
+create table if not exists public.user_sessions (
+    session_id text primary key,
+    profile     jsonb not null default '{}'::jsonb,
+    matches     jsonb not null default '[]'::jsonb,
+    updated_at  timestamptz not null default now()
+);
+
+-- 12) updated_at'i her upsert'te otomatik güncelleyen tetikleyici
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+    new.updated_at = now();
+    return new;
+end;
+$$;
+
+drop trigger if exists user_sessions_set_updated_at on public.user_sessions;
+
+create trigger user_sessions_set_updated_at
+    before insert or update on public.user_sessions
+    for each row execute function public.set_updated_at();
+
+alter table public.user_sessions enable row level security;

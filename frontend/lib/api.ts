@@ -104,6 +104,12 @@ export interface BackendAssistResult {
   reply: string;
 }
 
+/** Bir oturumun kalıcı durumu — profil + son bilinen eşleşmeler (reply yok) */
+export interface BackendSessionState {
+  profile: BackendUserProfile;
+  matches: BackendProgramMatch[];
+}
+
 export interface BackendPlanSection {
   heading: string;
   body: string;
@@ -168,4 +174,25 @@ export async function getPrograms(
 ): Promise<BackendSupportProgram[]> {
   const qs = category ? `?category=${encodeURIComponent(category)}` : "";
   return apiFetch<BackendSupportProgram[]>(`/programs${qs}`);
+}
+
+/**
+ * Bir oturumun kayıtlı profil + eşleşmelerini getirir.
+ * Hiç kayıt yoksa backend boş bir durum döner (profil alanları null, matches: []).
+ */
+export async function fetchSession(sessionId: string): Promise<BackendSessionState> {
+  return apiFetch<BackendSessionState>(`/session/${encodeURIComponent(sessionId)}`);
+}
+
+/**
+ * Bir oturumun profil + eşleşmelerini kaydeder (üzerine yazar).
+ */
+export async function saveSession(
+  sessionId: string,
+  state: BackendSessionState,
+): Promise<void> {
+  await apiFetch<{ status: string }>(`/session/${encodeURIComponent(sessionId)}`, {
+    method: "PUT",
+    body: JSON.stringify(state),
+  });
 }

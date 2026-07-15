@@ -18,6 +18,7 @@ from ..models import (
     Category,
     ConversationTurn,
     EligibilityResult,
+    SessionState,
     SupportProgram,
     UserProfile,
 )
@@ -111,6 +112,20 @@ class AssistRequest(BaseModel):
 async def assist(body: AssistRequest) -> AssistResult:
     """Uçtan uca akış: mesaj + geçmiş → profil → eşleştirme → uygunluk (Orkestratör)."""
     return await Orchestrator().run(body.message, history=body.history or None)
+
+
+@router.get("/session/{session_id}", response_model=SessionState, response_model_by_alias=False)
+async def read_session(session_id: str) -> SessionState:
+    """Bir oturumun kayıtlı profil + eşleşmelerini getirir; hiç kayıt yoksa boş durum döner."""
+    state = await run_in_threadpool(repo.get_session, session_id)
+    return state or SessionState()
+
+
+@router.put("/session/{session_id}")
+async def write_session(session_id: str, body: SessionState) -> dict:
+    """Bir oturumun profil + eşleşmelerini kaydeder (üzerine yazar)."""
+    await run_in_threadpool(repo.save_session, session_id, body)
+    return {"status": "ok"}
 
 
 class ChatRequest(BaseModel):

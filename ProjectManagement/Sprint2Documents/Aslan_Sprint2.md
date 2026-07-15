@@ -150,3 +150,29 @@ Bu dosya, Sprint 2 kapsamında yaptığım işlerin **ne, neden, nasıl** yapıl
 **Ne yaptım**: PR #20 (hotfix) develop'a merge edildi (PR #10 içeriği zaten onun içindeydi, GitHub otomatik "merged" işaretledi). Ardından `feat_planner_orchestrator`'a güncel develop'u alıp `orchestrator.py`'deki son iki eski alan adı referansını (`program_name`→`title`, `institution`→`source`) düzelttim, 15 test yeşil, PR #18 develop'a merge edildi. Son olarak `feat_chat_responsive`'e güncel develop'u aldım (sadece bu ilerleme dosyasında basit ard arda ekleme çakışması çıktı, kod tarafında çakışma yok — frontend zaten şema değişikliğinden PR #20'de düzeltilmişti).
 
 **Sıradaki adım**: PR #19'u da develop'a merge edip Sprint 2'nin backend/entegrasyon kısmını kapatmak.
+
+---
+
+## 2026-07-15/16 — Uygulama geneli inceleme + Faz 1: oturum kalıcılığı
+
+**Ne yaptım**: Barış'ın isteğiyle tüm uygulamayı (backend + frontend + veri pipeline'ı) baştan sona gözden geçirip bir Artifact raporu + fazlı geliştirme planı hazırladım. En kritik iki bulgu: (1) şema değişikliklerinin git tarafından yakalanmaması sorunu (bu sprint 3 kez yaşandı), (2) kalıcılık/hafızanın hiç olmaması — "Panelim" ekranı %100 hardcoded ("Nova AI Yazılım"), sayfa yenilenince profil/eşleşmeler kayboluyor.
+
+Barış Faz 1'den (kalıcılık) başlamayı seçti, Supabase'de gerçek bir oturum tablosu ile (localStorage-only alternatifi yerine).
+
+**Ne yaptım (uygulama)**:
+1. `backend/models/session.py` — `SessionState` (profile + matches).
+2. `backend/data/repo.py` — `save_session`/`get_session`, yeni `user_sessions` tablosu için.
+3. `backend/db/schema.sql` — `user_sessions` tablosu (jsonb profile/matches, `updated_at` tetikleyicisi), eski tablolara dokunmadan eklendi.
+4. `backend/api/routes.py` — `GET/PUT /api/session/{session_id}` uçları (`response_model_by_alias=False` ile — geçen seferki alias hatasını tekrarlamamak için).
+5. `frontend/lib/session.ts` — `localStorage`'da üretilen `session_id` (auth yok, id fiilen bearer-token gibi davranıyor).
+6. `frontend/lib/api.ts` + `adapter.ts` — `fetchSession`/`saveSession`/`adaptSessionState`.
+7. `frontend/app/page.tsx` — açılışta oturumu geri yükleyen `useEffect` (varsa "Önceki oturumundan devam ediyorsun" notu + profil çipi + kartlar), her başarılı `/api/assist` sonrası `persistSession`, "Yeni sohbet"te oturumu da temizleme.
+8. `frontend/components/DashboardView.tsx` — tamamen yeniden yazıldı: hardcoded `PROFILE_CHIPS`/`DEADLINES` kaldırıldı, gerçek `profile`/`programs` prop'larından hesaplanıyor, ikisi de boşsa dürüst bir boş durum gösteriyor.
+
+**Bilinçli kapsam dışı bıraktığım**: Tam sohbet geçmişi (mesaj mesaj) kalıcılığı — sadece son profil + eşleşmeler saklanıyor. Kullanıcı sayfayı yenileyince önceki mesaj mesaj konuşmayı değil, "son bilinen durumu" (profil çipi + kartlar + kısa not) görüyor.
+
+**Doğrulama**: 18/18 backend testi (3 yeni: `test_session_repo.py`, mock Supabase client ile), `tsc --noEmit` temiz. Tarayıcıda: Panelim'in boş durumu doğru render oldu (artık "Nova AI Yazılım" değil, dürüst bir mesaj). `GET /api/session/{id}` route→repo→Supabase zincirinin doğru çalıştığı loglardan doğrulandı — sadece `user_sessions` tablosu henüz Supabase'e uygulanmadığı için `PGRST205` hatası alındı (beklenen, migration bekliyor).
+
+**Önemli yan bulgu**: Gerçek bir sohbet mesajı denerken `429 RESOURCE_EXHAUSTED` aldık — Gemini anahtarı ücretsiz katmanda, `gemini-3.5-flash` için dakikada 5 istek limitiyle. Bu, Sprint 2 boyunca gördüğümüz "yüksek talep" (503) hatalarının bir kısmının aslında kota sınırı olabileceğini gösteriyor. Barış'a token/kota konusunu netleştirmesini önerdim.
+
+**Sıradaki adım**: Barış'tan güncellenmiş `db/schema.sql`'i (yeni `user_sessions` bölümü) Supabase'e uygulamasını istemek, sonra gerçek bir mesajla tam kaydet→yenile→geri-yükle döngüsünü uçtan uca doğrulamak, sonra PR açıp develop'a almak.

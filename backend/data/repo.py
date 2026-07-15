@@ -11,11 +11,13 @@ from functools import lru_cache
 from supabase import Client, create_client
 
 from ..core.config import get_settings
-from ..models import Category, SupportProgram
+from ..models import Category, ProgramMatch, SupportProgram
+from ..models.session import SessionState
 
 _TABLE = "programs_v2"  # yeni tablo
 _CHİLD = "program_chunks" #child
 _PARENT = "program_parents" #parent
+_SESSIONS = "user_sessions"
 
 @lru_cache
 def _client() -> Client:
@@ -123,3 +125,34 @@ def match_programs(
         },
     ).execute()
     return [_from_row(r) for r in (resp.data or [])]
+
+
+def save_session(session_id: str, state: SessionState) -> None:
+    """Bir oturumun profil + eşleşmelerini kaydeder (üzerine yazar)."""
+    row = {
+        "session_id": session_id,
+        "profile": state.profile.model_dump(mode="json"),
+        "matches": [m.model_dump(mode="json") for m in state.matches],
+    }
+    _client().table(_SESSIONS).upsert(row, on_conflict="session_id").execute()
+
+
+def get_session(session_id: str) -> SessionState | None:
+    """Bir oturumun kayıtlı profil + eşleşmelerini getirir; hiç yoksa None döner."""
+    resp = (
+        _client()
+        .table(_SESSIONS)
+        .select("*")
+        .eq("session_id", session_id)
+        .limit(1)
+        .execute()
+    )
+    data = resp.data or []
+    if not data:
+        return None
+    row = data[0]
+    matches = [
+        ProgramMatch.model_validate({**m, "program": {**m["program"], "embedding": None}})
+        for m in (row.get("matches") or [])
+    ]
+    return SessionState(profile=row.get("profile") or {}, matches=matches)

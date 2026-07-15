@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import Toast from "@/components/Toast";
 import Ms from "@/components/Ms";
@@ -10,9 +10,15 @@ import EligibilityView from "@/components/EligibilityView";
 import ApplicationView from "@/components/ApplicationView";
 import DashboardView from "@/components/DashboardView";
 import { getProgram } from "@/lib/programs";
-import { assist, fetchApplicationDraft } from "@/lib/api";
-import type { BackendUserProfile, ConversationTurn } from "@/lib/api";
-import { adaptAssistResult, adaptApplicationDraft, profileToChips } from "@/lib/adapter";
+import { assist, fetchApplicationDraft, fetchSession, saveSession } from "@/lib/api";
+import type { BackendAssistResult, BackendUserProfile, ConversationTurn } from "@/lib/api";
+import { getSessionId } from "@/lib/session";
+import {
+  adaptAssistResult,
+  adaptApplicationDraft,
+  adaptSessionState,
+  profileToChips,
+} from "@/lib/adapter";
 import type {
   ApplicationDraft,
   ChatMessage,
@@ -25,6 +31,19 @@ import type {
 } from "@/lib/types";
 
 const TOAST_MS = 2200;
+
+const EMPTY_PROFILE: BackendUserProfile = {
+  sector: null,
+  city: null,
+  team_size: null,
+  company_exists: null,
+  company_age_years: null,
+  women_entrepreneur: null,
+  student: null,
+  in_technopark: null,
+  goals: [],
+  summary: null,
+};
 
 export default function Home() {
   const [view, setView] = useState<ViewName>("chat");
@@ -47,6 +66,40 @@ export default function Home() {
 
   const idRef = useRef(1);
   const nextId = () => String(idRef.current++);
+
+  /** Oturumun profil + eşleşmelerini kalıcı kılar; başarısız olursa sohbeti bozmadan yutar. */
+  function persistSession(raw: BackendAssistResult) {
+    saveSession(getSessionId(), { profile: raw.profile, matches: raw.matches }).catch(() => {});
+  }
+
+  /** Uygulama açılışında önceki oturumdan kalan profil + eşleşmeleri geri yükler. */
+  useEffect(() => {
+    const sessionId = getSessionId();
+    if (!sessionId) return;
+
+    fetchSession(sessionId)
+      .then((raw) => {
+        const { profile, programs } = adaptSessionState(raw);
+        const chips = profileToChips(profile);
+        if (chips.length === 0 && programs.length === 0) return;
+
+        setCurrentProfile(profile);
+        setApiPrograms(programs);
+
+        const responses: ChatMessageDraft[] = [
+          { role: "assistant", kind: "note", text: "Önceki oturumundan devam ediyorsun." },
+        ];
+        if (chips.length > 0) responses.push({ role: "assistant", kind: "profile", chips });
+        if (programs.length > 0) {
+          responses.push({ role: "assistant", kind: "cards", programIds: programs.map((p) => p.id) });
+        }
+        replaceLastWith(responses);
+      })
+      .catch(() => {
+        // Oturum çekilemezse sessizce yeni bir sohbet gibi devam et
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /** Mevcut mesaj listesini backend history formatına dönüştürür.
    * Yalnızca text mesajları alır; profil/kart/cta gibi UI-özel turlar kapsam dışı.
@@ -90,6 +143,8 @@ export default function Home() {
     setCurrentProfile(null);
     setApiPrograms([]);
     setApplicationDraft(null);
+    // Kalıcı oturumu da temizle — aksi halde sayfa yenilenince eski profil/eşleşmeler geri gelir
+    saveSession(getSessionId(), { profile: EMPTY_PROFILE, matches: [] }).catch(() => {});
   }
 
   /** Ana gönderme fonksiyonu — gerçek API çağrısı yapar */
@@ -114,6 +169,7 @@ export default function Home() {
 
     try {
       const raw = await assist(text, buildHistory(messages));
+      persistSession(raw);
       const { profile, programs, reply } = adaptAssistResult(raw);
 
       setCurrentProfile(profile);
@@ -214,6 +270,7 @@ export default function Home() {
 
         assist(label, snapshotHistory)
           .then((raw) => {
+            persistSession(raw);
             const { profile, programs, reply } = adaptAssistResult(raw);
             setCurrentProfile(profile);
             setApiPrograms((prev2) => {
@@ -462,7 +519,9 @@ export default function Home() {
             onDownloadPlan={onDownloadPlan}
           />
         )}
-        {view === "dashboard" && <DashboardView onOpenProgram={openProgram} />}
+        {view === "dashboard" && (
+          <DashboardView profile={currentProfile} programs={apiPrograms} onOpenProgram={openProgram} />
+        )}
       </main>
       <Toast show={toastShow} text={toastText} />
     </div>

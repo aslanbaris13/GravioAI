@@ -10,6 +10,7 @@ import type {
   BackendApplicationDraft,
   BackendAssistResult,
   BackendEligibilityResult,
+  BackendSessionState,
   BackendSupportProgram,
   BackendUserProfile,
 } from "./api";
@@ -195,6 +196,15 @@ export function adaptAssistResult(raw: BackendAssistResult): {
     adaptProgram(m.program, m.eligibility),
   );
   return { profile: raw.profile, programs, reply: raw.reply };
+}
+
+/** Backend SessionState (kalıcı oturum) → UI'da kullanılacak yapı — reply yok */
+export function adaptSessionState(raw: BackendSessionState): {
+  profile: BackendUserProfile;
+  programs: Program[];
+} {
+  const programs = raw.matches.map((m) => adaptProgram(m.program, m.eligibility));
+  return { profile: raw.profile, programs };
 }
 
 /** Backend UserProfile → Profil chip'leri (ChatView'de gösterilir) */
