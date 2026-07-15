@@ -104,6 +104,13 @@ class KalkinmaAjansiConnector(BaseConnector):
                     except Exception as e:
                         print(f" -> Detay sayfası okunamadı ({redirect_url}): {e}")
 
+                # KARAR BEKLİYOR: Başlık bazlı ön filtre (yukarıda) aktif ama bu
+                # tam-metin ikinci filtre kapalı — yani başlığı belirsiz/uygun
+                # görünen her ilan (gerçekten alakasız olsa bile) LLM'e gidiyor.
+                # Gemini günlük kotası (20 istek/gün, ücretsiz katman) düşünülünce
+                # bu filtreyi açmak kota tasarrufu sağlar; ama relevance_keywords
+                # (base.py) dar kalırsa gerçek programları da eleyebilir. Açıp
+                # açmama kararı ürün tarafının onayını gerektiriyor.
                 # if not self.is_relevant(detail_text, title):
                 #     print(f" -> ELENDİ (tam metin kontrolünde alakasız çıktı): {title}")
                 #     continue

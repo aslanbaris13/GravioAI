@@ -60,7 +60,12 @@ class KOSGEBConnector(BaseConnector):
                 title = soup.title.string.replace("KOSGEB - ", "").strip() if soup.title else "Başlıksız"
 
                 # Ön filtreleme: Girişimclere uygun mu değil mi diye
-                
+                # KARAR BEKLİYOR: Bu filtre kapalı, yani her KOSGEB ilanı (alakasız
+                # olsa bile) LLM'e gidiyor. Gemini ücretsiz katmanda günlük kota 20
+                # istek ile sınırlı (bkz. Sprint2Documents/Aslan_Sprint2.md), bu
+                # yüzden filtreyi açmak kota tasarrufu sağlar; ama relevance_keywords
+                # listesi (base.py) dar kalırsa gerçekten uygun bazı programları da
+                # eleyebilir. Açıp açmama kararı ürün tarafının onayını gerektiriyor.
                 # if not self.is_relevant(clean_txt, title):
                 #     print(f" -> ELENDİ (Girişimci odaklı değil): {title}")
                 #     continue
