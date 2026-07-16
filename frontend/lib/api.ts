@@ -128,6 +128,32 @@ export interface BackendApplicationDraft {
   documents: BackendRequiredDocument[];
 }
 
+export interface BackendRequiredField {
+  key: string;
+  label: string;
+  description: string;
+  long_text: boolean;
+  prefillable_from_profile: string | null;
+}
+
+export interface BackendReportSection {
+  id: string;
+  title: string;
+  description: string;
+  required_fields: BackendRequiredField[];
+  char_limit: number | null;
+}
+
+export interface BackendReportSchema {
+  key: string;
+  program_name: string;
+  institution: string;
+  match_keywords: string[];
+  summary: string;
+  sections: BackendReportSection[];
+  required_documents: string[];
+}
+
 /* ------------------------------------------------------------------ */
 /* API fonksiyonları                                                    */
 /* ------------------------------------------------------------------ */
@@ -174,6 +200,17 @@ export async function getPrograms(
 ): Promise<BackendSupportProgram[]> {
   const qs = category ? `?category=${encodeURIComponent(category)}` : "";
   return apiFetch<BackendSupportProgram[]>(`/programs${qs}`);
+}
+
+/**
+ * Bir programın başlığından hangi rapor gereksinim şemasının eşleştiğini
+ * bulur — henüz her program için hazır bir şema yok, eşleşme yoksa null döner.
+ */
+export async function resolveReportSchema(
+  programTitle: string,
+): Promise<BackendReportSchema | null> {
+  const qs = `?program_title=${encodeURIComponent(programTitle)}`;
+  return apiFetch<BackendReportSchema | null>(`/report-schemas/resolve${qs}`);
 }
 
 /**
