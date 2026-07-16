@@ -9,6 +9,7 @@ import DetailView from "@/components/DetailView";
 import EligibilityView from "@/components/EligibilityView";
 import ApplicationView from "@/components/ApplicationView";
 import DashboardView from "@/components/DashboardView";
+import OnboardingView from "@/components/OnboardingView";
 import { assist, fetchApplicationDraft, fetchSession, saveSession } from "@/lib/api";
 import type { BackendAssistResult, BackendUserProfile, ConversationTurn } from "@/lib/api";
 import { getSessionId } from "@/lib/session";
@@ -30,6 +31,7 @@ import type {
 } from "@/lib/types";
 
 const TOAST_MS = 2200;
+const ONBOARDING_DONE_KEY = "gravioai_onboarding_complete";
 
 const EMPTY_PROFILE: BackendUserProfile = {
   sector: null,
@@ -70,6 +72,14 @@ export default function Home() {
   function persistSession(raw: BackendAssistResult) {
     saveSession(getSessionId(), { profile: raw.profile, matches: raw.matches }).catch(() => {});
   }
+
+  /** İlk ziyarette (localStorage'da tamamlanma işareti yoksa) onboarding'i gösterir.
+   * SSR ile hydration uyumsuzluğu yaşamamak için varsayılan view her zaman "chat" —
+   * bu effect çalışıp gerekiyorsa "onboarding"e geçiriyor (tek kare gecikme, sorun değil). */
+  useEffect(() => {
+    const done = window.localStorage.getItem(ONBOARDING_DONE_KEY);
+    if (!done) setView("onboarding");
+  }, []);
 
   /** Uygulama açılışında önceki oturumdan kalan profil + eşleşmeleri geri yükler. */
   useEffect(() => {
@@ -144,6 +154,27 @@ export default function Home() {
     setApplicationDraft(null);
     // Kalıcı oturumu da temizle — aksi halde sayfa yenilenince eski profil/eşleşmeler geri gelir
     saveSession(getSessionId(), { profile: EMPTY_PROFILE, matches: [] }).catch(() => {});
+  }
+
+  /** Onboarding tamamlandığında: profil çıkarma ajanına hiç uğramadan (LLM
+   * çağrısı yok) profili doğrudan kaydeder ve sohbete devam eder. */
+  function onOnboardingComplete(profile: BackendUserProfile) {
+    window.localStorage.setItem(ONBOARDING_DONE_KEY, "1");
+    setCurrentProfile(profile);
+    push({
+      role: "assistant",
+      kind: "text",
+      text: "Harika, seni tanıdım! Sana uygun destekleri bulmak için bir soru sorabilir ya da \"bana uygun destekleri göster\" diyebilirsin.",
+    });
+    const chips = profileToChips(profile);
+    if (chips.length > 0) push({ role: "assistant", kind: "profile", chips });
+    saveSession(getSessionId(), { profile, matches: [] }).catch(() => {});
+    setView("chat");
+  }
+
+  function onOnboardingSkip() {
+    window.localStorage.setItem(ONBOARDING_DONE_KEY, "1");
+    setView("chat");
   }
 
   /** Ana gönderme fonksiyonu — gerçek API çağrısı yapar */
@@ -414,6 +445,10 @@ export default function Home() {
 
   const selectedProgram = resolveProgram(selectedId);
   const matchCount = apiPrograms.length;
+
+  if (view === "onboarding") {
+    return <OnboardingView onComplete={onOnboardingComplete} onSkip={onOnboardingSkip} />;
+  }
 
   return (
     <div style={{ display: "flex", height: "100vh", background: "#f4f3ef" }}>

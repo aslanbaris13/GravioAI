@@ -56,6 +56,7 @@ export interface Program {
 }
 
 export type ViewName =
+  | "onboarding"
   | "chat"
   | "matches"
   | "detail"
