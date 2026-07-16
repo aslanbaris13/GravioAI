@@ -348,7 +348,13 @@ export default function OnboardingView({
                 />
                 <span>
                   Kişisel verilerimin{" "}
-                  <a href="#" onClick={(e) => e.preventDefault()} style={{ color: "#ea580c", textDecoration: "underline" }}>
+                  <a
+                    href="/legal/aydinlatma-metni"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ color: "#ea580c", textDecoration: "underline" }}
+                  >
                     Aydınlatma Metni
                   </a>{" "}
                   kapsamında işlenmesini kabul ediyorum.
