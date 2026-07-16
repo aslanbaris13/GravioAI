@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AppStateProvider } from "@/lib/AppStateContext";
+import AppChrome from "@/components/AppChrome";
 
 export const metadata: Metadata = {
   title: "GravioAI — Fırsat asistanı",
@@ -29,7 +31,11 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <AppStateProvider>
+          <AppChrome>{children}</AppChrome>
+        </AppStateProvider>
+      </body>
     </html>
   );
 }
