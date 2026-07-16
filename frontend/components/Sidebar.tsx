@@ -1,7 +1,7 @@
 "use client";
 import type { CSSProperties } from "react";
+import { usePathname } from "next/navigation";
 import Ms from "./Ms";
-import type { ViewName } from "@/lib/types";
 
 function navStyle(active: boolean): CSSProperties {
   const base: CSSProperties = {
@@ -23,7 +23,6 @@ function navStyle(active: boolean): CSSProperties {
 }
 
 export default function Sidebar({
-  view,
   matchCount,
   open,
   onNewChat,
@@ -31,7 +30,6 @@ export default function Sidebar({
   onNavMatches,
   onNavProfile,
 }: {
-  view: ViewName;
   matchCount: number;
   open: boolean;
   onNewChat: () => void;
@@ -39,7 +37,10 @@ export default function Sidebar({
   onNavMatches: () => void;
   onNavProfile: () => void;
 }) {
-  const matchActive = view === "matches" || view === "detail" || view === "eligibility" || view === "application";
+  const pathname = usePathname();
+  const chatActive = pathname === "/chat";
+  const matchActive = pathname.startsWith("/matches") || pathname.startsWith("/program");
+  const profileActive = pathname === "/panel";
 
   return (
     <aside
@@ -110,7 +111,7 @@ export default function Sidebar({
         Çalışma alanı
       </div>
 
-      <button onClick={onNavChat} style={navStyle(view === "chat")}>
+      <button onClick={onNavChat} style={navStyle(chatActive)}>
         <Ms name="forum" size={20} />
         <span>Sohbet</span>
       </button>
@@ -131,7 +132,7 @@ export default function Sidebar({
           {matchCount}
         </span>
       </button>
-      <button onClick={onNavProfile} style={navStyle(view === "dashboard")}>
+      <button onClick={onNavProfile} style={navStyle(profileActive)}>
         <Ms name="dashboard" size={20} />
         <span>Panelim</span>
       </button>
