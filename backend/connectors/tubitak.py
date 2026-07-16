@@ -23,9 +23,34 @@ from core.llm.factory import get_llm_client
 from core.cleaner import BaseCleaner
 
 
+"""
+connectors/tubitak.py
+
+TÜBİTAK'ın "Açık Çağrılar" sayfasından (sadece ulusal/sanayi odaklı,
+o an aktif olan çağrılar) güncel destek programlarını çeker.
+
+Not: Uluslararası/global çağrılar bu sayfada yer almıyor, TÜBİTAK'ın
+ayrı bir duyuru sistemi üzerinden yayınlanıyor. Bu, ileride ayrı bir
+connector/iterasyon olarak ele alınacak.
+
+Sayfadaki tüm <a> etiketleri (menü, footer dahil) taranıyor. Menü/
+kategori linklerini (örn. /tr/destekler/sanayi) gerçek program
+sayfalarından (örn. /tr/destekler/.../cagri-1831-yesil-inovasyon-...)
+ayırt etmek için, TÜBİTAK'ın program sayfalarının URL'inin son
+parçasının bir program numarasıyla (ör. "1831-...") ya da "icerik-"
+öneki + numarayla (ör. "icerik-1509-...") başlamasından yararlanıyoruz.
+"""
+from bs4 import BeautifulSoup
+
+from connectors.base import BaseConnector
+from core.fetcher import BaseFetcher
+from core.llm.factory import get_llm_client
+from core.cleaner import BaseCleaner
+
+
 class TubitakConnector(BaseConnector):
     
-    SOURCE_NAME = "TUBİTAK"
+    SOURCE_NAME = "TUBITAK"
     
     forbidden_terms = []
 
