@@ -8,10 +8,12 @@ export default function DetailView({
   program,
   onBack,
   onCheckEligibility,
+  onViewReportRequirements,
 }: {
   program: Program;
   onBack: () => void;
   onCheckEligibility: () => void;
+  onViewReportRequirements?: () => void;
 }) {
   const c = toVM(program);
 
@@ -116,6 +118,30 @@ export default function DetailView({
           <Ms name={c.eligIconName} size={20} />
           Uygunluğumu kontrol et
         </button>
+
+        {onViewReportRequirements && (
+          <button
+            onClick={onViewReportRequirements}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              width: "100%",
+              marginTop: 10,
+              padding: "12px 0",
+              borderRadius: 13,
+              background: "#fff",
+              border: "1.5px solid #e7e4dc",
+              color: "#27353e",
+              fontSize: 13.5,
+              fontWeight: 600,
+            }}
+          >
+            <Ms name="fact_check" size={18} color="#5a6b75" />
+            Rapor gereksinimlerini gör
+          </button>
+        )}
       </div>
     </section>
   );

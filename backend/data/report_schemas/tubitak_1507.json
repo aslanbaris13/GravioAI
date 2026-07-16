@@ -1,0 +1,73 @@
+{
+  "key": "tubitak_1507",
+  "program_name": "TÜBİTAK 1507 - KOBİ Ar-Ge Başlangıç Destek Programı",
+  "institution": "TÜBİTAK",
+  "match_keywords": ["1507", "kobi ar-ge başlangıç", "kobi arge baslangic"],
+  "summary": "KOBİ ölçeğindeki işletmelerin Ar-Ge ve yenilik projelerine yönelik ilk destek programı. Proje bazlı, hibe niteliğinde geri ödemesiz destek.",
+  "sections": [
+    {
+      "id": "ozet",
+      "title": "Proje Özeti",
+      "description": "Projenin ne olduğunu, hangi soruna çözüm getirdiğini ve beklenen çıktıyı 1-2 paragrafta özetleyin.",
+      "char_limit": 1500,
+      "required_fields": [
+        { "key": "problem", "label": "Çözülmek istenen problem", "description": "Mevcut durumda hangi teknik/ticari sorun var?" },
+        { "key": "cozum", "label": "Önerilen çözüm", "description": "Projeyle önerilen çözümün özeti" }
+      ]
+    },
+    {
+      "id": "ozgunluk",
+      "title": "Özgün Değer ve Yenilikçi Yön",
+      "description": "Projenin mevcut ürün/hizmetlerden ve literatürden farkını, teknik belirsizliklerini açıklayın.",
+      "char_limit": 3000,
+      "required_fields": [
+        { "key": "farklilasma", "label": "Rakip/mevcut çözümlerden farkı", "long_text": true },
+        { "key": "teknik_belirsizlik", "label": "Aşılması gereken teknik belirsizlikler", "long_text": true }
+      ]
+    },
+    {
+      "id": "is_paketleri",
+      "title": "İş Paketleri ve Zaman Planlaması",
+      "description": "Proje faaliyetlerini iş paketlerine bölün, her paket için süre ve sorumlu belirtin.",
+      "required_fields": [
+        { "key": "is_paketleri_listesi", "label": "İş paketleri (paket adı, süre, sorumlu)", "long_text": true }
+      ]
+    },
+    {
+      "id": "butce",
+      "title": "Bütçe",
+      "description": "Personel, alet/teçhizat, hizmet alımı ve malzeme kalemlerini ayrı ayrı belirtin.",
+      "required_fields": [
+        { "key": "personel_gideri", "label": "Personel gideri (kişi × ay × maliyet)", "long_text": true },
+        { "key": "teçhizat_gideri", "label": "Alet/teçhizat gideri", "long_text": true },
+        { "key": "hizmet_alimi", "label": "Hizmet alımı / danışmanlık", "long_text": true },
+        { "key": "malzeme_gideri", "label": "Malzeme ve sarf gideri", "long_text": true }
+      ]
+    },
+    {
+      "id": "ekip",
+      "title": "Ekip ve Yetkinlik",
+      "description": "Proje ekibinin ilgili konudaki deneyim ve yetkinliğini gösterin.",
+      "required_fields": [
+        { "key": "ekip_buyuklugu", "label": "Ekip büyüklüğü", "prefillable_from_profile": "team_size" },
+        { "key": "ekip_cv", "label": "Anahtar personel özgeçmişleri", "long_text": true }
+      ]
+    },
+    {
+      "id": "ticarilestirme",
+      "title": "Ticarileştirme ve Pazara Sunum Planı",
+      "description": "Proje sonucu ortaya çıkacak ürün/hizmetin nasıl ticarileştirileceği.",
+      "char_limit": 2000,
+      "required_fields": [
+        { "key": "hedef_pazar", "label": "Hedef pazar ve müşteri kitlesi", "long_text": true },
+        { "key": "gelir_modeli", "label": "Gelir modeli / satış stratejisi", "long_text": true }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Vergi levhası",
+    "Faaliyet belgesi / ticaret sicil gazetesi",
+    "Son 2 yıla ait bilanço (varsa)",
+    "Anahtar personel özgeçmişleri"
+  ]
+}

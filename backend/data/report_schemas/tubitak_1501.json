@@ -1,0 +1,83 @@
+{
+  "key": "tubitak_1501",
+  "program_name": "TÜBİTAK 1501 - Sanayi Ar-Ge Destek Programı",
+  "institution": "TÜBİTAK",
+  "match_keywords": ["1501", "sanayi ar-ge destek", "sanayi arge destek"],
+  "summary": "Sanayi kuruluşlarının Ar-Ge ve yenilik faaliyetlerini teşvik etmek için, KOBİ sınırı olmaksızın verilen proje bazlı hibe destek programı.",
+  "sections": [
+    {
+      "id": "ozet",
+      "title": "Proje Özeti",
+      "description": "Projenin amacını, kapsamını ve beklenen teknolojik/ekonomik çıktısını özetleyin.",
+      "char_limit": 1500,
+      "required_fields": [
+        { "key": "amac_kapsam", "label": "Amaç ve kapsam", "long_text": true },
+        { "key": "beklenen_cikti", "label": "Beklenen teknolojik çıktı", "long_text": true }
+      ]
+    },
+    {
+      "id": "ozgunluk",
+      "title": "Teknolojik Belirsizlik ve Özgün Değer",
+      "description": "Projenin aşmayı hedeflediği teknolojik belirsizlikleri ve literatüre/sektöre kattığı özgün değeri açıklayın.",
+      "char_limit": 3000,
+      "required_fields": [
+        { "key": "teknolojik_belirsizlik", "label": "Teknolojik belirsizlikler", "long_text": true },
+        { "key": "literatur_karsilastirma", "label": "Literatür ve mevcut çözümlerle karşılaştırma", "long_text": true }
+      ]
+    },
+    {
+      "id": "is_paketleri",
+      "title": "İş Paketleri ve Zaman Planı",
+      "description": "Faaliyetleri iş paketlerine bölün; her paket için süre, çıktı ve risk belirtin.",
+      "required_fields": [
+        { "key": "is_paketleri_listesi", "label": "İş paketleri (paket adı, süre, çıktı, risk)", "long_text": true }
+      ]
+    },
+    {
+      "id": "butce",
+      "title": "Bütçe",
+      "description": "Personel, seyahat, alet/teçhizat, hizmet alımı, malzeme ve diğer giderleri kalem kalem belirtin.",
+      "required_fields": [
+        { "key": "personel_gideri", "label": "Personel gideri", "long_text": true },
+        { "key": "seyahat_gideri", "label": "Seyahat gideri", "long_text": true },
+        { "key": "teçhizat_gideri", "label": "Alet/teçhizat gideri", "long_text": true },
+        { "key": "hizmet_alimi", "label": "Hizmet alımı / danışmanlık", "long_text": true },
+        { "key": "malzeme_gideri", "label": "Malzeme ve sarf gideri", "long_text": true }
+      ]
+    },
+    {
+      "id": "yaygin_etki",
+      "title": "Yaygın Etki (Ekonomik / Sosyal)",
+      "description": "Proje çıktısının şirket, sektör ve ülke ekonomisine olası katkısı.",
+      "char_limit": 2000,
+      "required_fields": [
+        { "key": "ekonomik_etki", "label": "Ekonomik etki", "long_text": true },
+        { "key": "istihdam_etkisi", "label": "İstihdam etkisi", "long_text": true }
+      ]
+    },
+    {
+      "id": "fikri_mulkiyet",
+      "title": "Fikri ve Sınai Mülkiyet Hakları",
+      "description": "Proje çıktısıyla ilgili patent/faydalı model başvurusu planı varsa belirtin.",
+      "required_fields": [
+        { "key": "fikri_mulkiyet_plani", "label": "Fikri mülkiyet stratejisi", "long_text": true }
+      ]
+    },
+    {
+      "id": "ekip",
+      "title": "Ekip ve Yetkinlik",
+      "description": "Proje ekibinin ilgili konudaki deneyim ve yetkinliğini gösterin.",
+      "required_fields": [
+        { "key": "ekip_buyuklugu", "label": "Ekip büyüklüğü", "prefillable_from_profile": "team_size" },
+        { "key": "ekip_cv", "label": "Anahtar personel özgeçmişleri", "long_text": true }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Vergi levhası",
+    "Faaliyet belgesi / ticaret sicil gazetesi",
+    "Son 2 yıla ait bilanço",
+    "Anahtar personel özgeçmişleri",
+    "Varsa mevcut patent/faydalı model belgeleri"
+  ]
+}

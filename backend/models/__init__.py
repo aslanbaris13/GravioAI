@@ -9,6 +9,7 @@ from .intent import Intent, IntentResult
 from .orchestration import AssistResult, ConversationTurn, ProgramMatch
 from .profile import UserProfile
 from .program import ApplicationStatus, Currency, ExtractedSupportInfo, SupportProgram, SupportType
+from .report_schema import ReportSchema, ReportSection, RequiredField
 from .session import SessionState
 from .taxonomy import Category
 
@@ -33,4 +34,7 @@ __all__ = [
     "PlanSection",
     "RequiredDocument",
     "SessionState",
+    "ReportSchema",
+    "ReportSection",
+    "RequiredField",
 ]

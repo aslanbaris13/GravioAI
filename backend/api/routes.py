@@ -12,13 +12,14 @@ from ..agents import (
 from ..core.embedder import get_embedding_client
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
 from ..core.rate_limit import enforce_llm_rate_limit
-from ..data import repo
+from ..data import repo, report_schema_loader
 from ..models import (
     ApplicationDraft,
     AssistResult,
     Category,
     ConversationTurn,
     EligibilityResult,
+    ReportSchema,
     SessionState,
     SupportProgram,
     UserProfile,
@@ -173,3 +174,26 @@ async def chat(
         system="Sen GravioAI'sın; Türkiye'deki girişim ve KOBİ'lere destek/hibe konusunda yardımcı olan bir asistansın. Kısa ve net cevap ver.",
     )
     return ChatResponse(reply=reply)
+
+
+@router.get("/report-schemas", response_model=list[ReportSchema])
+async def list_report_schemas() -> list[ReportSchema]:
+    """Rapor üretimi için hazır gereksinim şablonu bulunan programları listeler."""
+    return await run_in_threadpool(report_schema_loader.load_report_schemas)
+
+
+@router.get("/report-schemas/resolve", response_model=ReportSchema | None)
+async def resolve_report_schema(program_title: str) -> ReportSchema | None:
+    """Bir programın başlığından hangi rapor şemasının eşleştiğini bulur —
+    eşleşme yoksa null döner (arayüz bunu "henüz hazır değil" olarak gösterir)."""
+    return await run_in_threadpool(
+        report_schema_loader.resolve_report_schema_for_program, program_title
+    )
+
+
+@router.get("/report-schemas/{key}", response_model=ReportSchema)
+async def read_report_schema(key: str) -> ReportSchema:
+    schema = await run_in_threadpool(report_schema_loader.get_report_schema, key)
+    if schema is None:
+        raise HTTPException(status_code=404, detail="Rapor şeması bulunamadı")
+    return schema

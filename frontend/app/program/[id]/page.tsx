@@ -6,7 +6,7 @@ import { useAppState } from "@/lib/AppStateContext";
 
 export default function ProgramDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { resolveProgram, goToMatches, goToEligibility } = useAppState();
+  const { resolveProgram, goToMatches, goToEligibility, goToReport } = useAppState();
   const program = resolveProgram(id);
 
   if (!program) return <ProgramNotFound onBack={goToMatches} />;
@@ -16,6 +16,7 @@ export default function ProgramDetailPage() {
       program={program}
       onBack={goToMatches}
       onCheckEligibility={() => goToEligibility(id)}
+      onViewReportRequirements={() => goToReport(id)}
     />
   );
 }
