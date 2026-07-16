@@ -4,16 +4,25 @@ FastAPI tabanlı backend ve sağlayıcı-bağımsız LLM katmanı.
 
 ## Kurulum
 
-Paket içi modüller birbirini relative import ile çağırıyor, bu yüzden
-proje kökünden (`GravioAI/`) `backend.main` paketi olarak çalıştırılmalı —
-`backend/` dizinine girip `uvicorn main:app` ile çalıştırmayın.
-
 ```bash
 python -m venv backend/.venv && source backend/.venv/bin/activate   # Windows: backend\.venv\Scripts\activate
 pip install -r backend/requirements.txt
 cp backend/.env.example backend/.env        # GEMINI_API_KEY vb. doldur
-uvicorn backend.main:app --reload
 ```
+
+Sunucuyu iki şekilde de çalıştırabilirsin:
+
+```bash
+# Proje kökünden (GravioAI/)
+uvicorn backend.main:app --reload
+
+# ya da backend/ dizininin içinden, venv aktifken
+cd backend && uvicorn main:app --reload
+```
+
+`backend/main.py` her iki durumda da `backend` paketini doğru şekilde bulup
+yükleyecek şekilde ayarlı; testler ve CI yine proje kökünden `backend.main`
+üzerinden çalışır.
 
 - API: `http://localhost:8000`
 - Sağlık kontrolü: `GET /health`
