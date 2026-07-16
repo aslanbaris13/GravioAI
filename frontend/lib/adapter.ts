@@ -102,9 +102,13 @@ function formatDeadline(isoDate: string | null | undefined): {
     // mesajı olduğu gibi göster.
     return { deadlineText: isoDate, deadlineDays: null };
   }
+  // "YYYY-MM-DD" biçimindeki tarihler JS'te UTC gece yarısı olarak parse
+  // edilir — bu yüzden karşılaştırılacak "bugün" de UTC gece yarısına göre
+  // hesaplanmalı, yoksa UTC'nin ilerisindeki dilimlerde (ör. Türkiye, UTC+3)
+  // gün sayısı bir fazla çıkar.
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diffMs = deadline.getTime() - today.getTime();
+  const todayUTCMidnight = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const diffMs = deadline.getTime() - todayUTCMidnight;
   const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
   const formatted = deadline.toLocaleDateString("tr-TR", {
