@@ -252,63 +252,58 @@ export default function Home() {
     setInput(label);
     // Kısa gecikme ile gönder
     setTimeout(() => {
-      // History snapshot'ını gecikme öncesinde al
-      setMessages((prev) => {
-        const snapshotHistory = buildHistory(prev);
-        const withUser = [
-          ...prev,
-          { id: nextId(), role: "user", text: label } as ChatMessage,
-        ];
-        setFollowups([]);
-        setTyping(true);
+      // Not: assist() (gerçek ağ isteği) bilerek setMessages updater'ının
+      // DIŞINDA çağrılıyor — updater'ın içine konursa React 18 StrictMode
+      // dev modda updater'ı iki kere çalıştırıp isteği ikiye katlıyor
+      // (Gemini kotası kısıtlıyken canlıda gözlemlenen bug tam buydu).
+      const snapshotHistory = buildHistory(messages);
+      setMessages((prev) => [
+        ...prev,
+        { id: nextId(), role: "user", text: label } as ChatMessage,
+        { id: nextId(), role: "assistant", kind: "loading" } as ChatMessage,
+      ]);
+      setFollowups([]);
+      setTyping(true);
 
-        const withLoading = [
-          ...withUser,
-          { id: nextId(), role: "assistant", kind: "loading" } as ChatMessage,
-        ];
-
-        assist(label, snapshotHistory)
-          .then((raw) => {
-            persistSession(raw);
-            const { profile, programs, reply } = adaptAssistResult(raw);
-            setCurrentProfile(profile);
-            setApiPrograms((prev2) => {
-              const existingIds = new Set(prev2.map((p) => p.id));
-              const fresh = programs.filter((p) => !existingIds.has(p.id));
-              return [...prev2, ...fresh];
-            });
-
-            const chips = profileToChips(profile);
-            const programIds = programs.map((p) => p.id);
-            const responses: ChatMessageDraft[] = [];
-            if (chips.length > 0) responses.push({ role: "assistant", kind: "profile", chips });
-            if (programIds.length > 0) responses.push({ role: "assistant", kind: "cards", programIds });
-            if (reply) responses.push({ role: "assistant", kind: "text", text: reply });
-
-            replaceLastWith(responses);
-
-            if (programIds.length > 0) {
-              setFollowups([
-                { key: "apply", label: `${programs[0].name} başvurusunu hazırla` },
-                { key: "more", label: "Daha fazla destek göster" },
-              ]);
-            }
-          })
-          .catch((err: unknown) => {
-            removeLastLoading();
-            const msg = err instanceof Error ? err.message : "Hata oluştu.";
-            setMessages((m) => [
-              ...m,
-              { id: nextId(), role: "assistant", kind: "error", text: msg } as ChatMessage,
-            ]);
-          })
-          .finally(() => {
-            setTyping(false);
-            setInput("");
+      assist(label, snapshotHistory)
+        .then((raw) => {
+          persistSession(raw);
+          const { profile, programs, reply } = adaptAssistResult(raw);
+          setCurrentProfile(profile);
+          setApiPrograms((prev2) => {
+            const existingIds = new Set(prev2.map((p) => p.id));
+            const fresh = programs.filter((p) => !existingIds.has(p.id));
+            return [...prev2, ...fresh];
           });
 
-        return withLoading;
-      });
+          const chips = profileToChips(profile);
+          const programIds = programs.map((p) => p.id);
+          const responses: ChatMessageDraft[] = [];
+          if (chips.length > 0) responses.push({ role: "assistant", kind: "profile", chips });
+          if (programIds.length > 0) responses.push({ role: "assistant", kind: "cards", programIds });
+          if (reply) responses.push({ role: "assistant", kind: "text", text: reply });
+
+          replaceLastWith(responses);
+
+          if (programIds.length > 0) {
+            setFollowups([
+              { key: "apply", label: `${programs[0].name} başvurusunu hazırla` },
+              { key: "more", label: "Daha fazla destek göster" },
+            ]);
+          }
+        })
+        .catch((err: unknown) => {
+          removeLastLoading();
+          const msg = err instanceof Error ? err.message : "Hata oluştu.";
+          setMessages((m) => [
+            ...m,
+            { id: nextId(), role: "assistant", kind: "error", text: msg } as ChatMessage,
+          ]);
+        })
+        .finally(() => {
+          setTyping(false);
+          setInput("");
+        });
     }, 50);
   }
 
