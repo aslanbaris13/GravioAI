@@ -158,7 +158,7 @@ export default function Home() {
     ]);
     setInput("");
     setFollowups([]);
-    setTyping(true);
+    //setTyping(true); iki kere chatView'de setTyping çağrısı yapıldığı için burada kaldırıldı
 
     // Yükleniyor göstergesi
     setMessages((prev) => [
