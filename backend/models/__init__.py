@@ -7,6 +7,7 @@ from .eligibility import (
 )
 from .intent import Intent, IntentResult
 from .orchestration import AssistResult, ConversationTurn, ProgramMatch
+from .presentation import PRESENTATION_SKELETON, GeneratedPresentation, PresentationSlide, PresentationSlideSpec
 from .profile import UserProfile
 from .program import ApplicationStatus, Currency, ExtractedSupportInfo, SupportProgram, SupportType
 from .report import GeneratedReport, GeneratedReportSection
@@ -40,4 +41,8 @@ __all__ = [
     "RequiredField",
     "GeneratedReport",
     "GeneratedReportSection",
+    "GeneratedPresentation",
+    "PresentationSlide",
+    "PresentationSlideSpec",
+    "PRESENTATION_SKELETON",
 ]
