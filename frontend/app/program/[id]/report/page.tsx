@@ -11,7 +11,7 @@ type LoadState = "loading" | "found" | "not-found" | "error";
 
 export default function ProgramReportPage() {
   const { id } = useParams<{ id: string }>();
-  const { resolveProgram, goToMatches, goToProgram, currentProfile } = useAppState();
+  const { resolveProgram, goToMatches, goToProgram, goToReportGenerate, currentProfile } = useAppState();
   const program = resolveProgram(id);
 
   const [schema, setSchema] = useState<BackendReportSchema | null>(null);
@@ -163,18 +163,17 @@ export default function ProgramReportPage() {
             </div>
 
             <button
-              disabled
+              onClick={() => goToReportGenerate(id)}
               style={{
                 width: "100%",
                 marginTop: 20,
                 padding: "13px 0",
                 borderRadius: 12,
                 border: "none",
-                background: "#e7e4dc",
-                color: "#a8a296",
+                background: "linear-gradient(160deg,#f97316,#ea580c)",
+                color: "#fff",
                 fontSize: 14,
                 fontWeight: 700,
-                cursor: "not-allowed",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -182,7 +181,7 @@ export default function ProgramReportPage() {
               }}
             >
               <Ms name="auto_awesome" size={18} />
-              Rapor hazırlamaya başla — yakında
+              Rapor hazırlamaya başla
             </button>
           </>
         )}

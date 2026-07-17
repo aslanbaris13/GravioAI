@@ -154,6 +154,22 @@ export interface BackendReportSchema {
   required_documents: string[];
 }
 
+export interface BackendGeneratedReportSection {
+  section_id: string;
+  heading: string;
+  body: string;
+}
+
+export interface BackendGeneratedReport {
+  schema_key: string;
+  program_name: string;
+  title: string;
+  sections: BackendGeneratedReportSection[];
+}
+
+/** section_id -> {field_key: value} */
+export type ReportFieldValues = Record<string, Record<string, string>>;
+
 /* ------------------------------------------------------------------ */
 /* API fonksiyonları                                                    */
 /* ------------------------------------------------------------------ */
@@ -232,4 +248,41 @@ export async function saveSession(
     method: "PUT",
     body: JSON.stringify(state),
   });
+}
+
+/**
+ * Bir rapor şemasına göre, bölüm bölüm rapor içeriği üretir (Rapor Yazma Ajanı).
+ */
+export async function generateReport(
+  schemaKey: string,
+  profile: BackendUserProfile,
+  fieldValues: ReportFieldValues,
+): Promise<BackendGeneratedReport> {
+  return apiFetch<BackendGeneratedReport>("/reports/generate", {
+    method: "POST",
+    body: JSON.stringify({ schema_key: schemaKey, profile, field_values: fieldValues }),
+  });
+}
+
+/**
+ * Üretilmiş bir raporu düzenlenebilir .docx dosyası olarak indirir.
+ * apiFetch kullanmıyor çünkü yanıt JSON değil, ikili (binary) dosya içeriği.
+ */
+export async function exportReportDocx(report: BackendGeneratedReport): Promise<Blob> {
+  const url = `${BASE}/api/reports/export-docx`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(report),
+    });
+  } catch {
+    throw new ApiError(0, "Sunucuya ulaşılamıyor. Backend çalışıyor mu?");
+  }
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new ApiError(res.status, body || `HTTP ${res.status}`);
+  }
+  return res.blob();
 }

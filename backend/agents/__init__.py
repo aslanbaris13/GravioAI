@@ -15,6 +15,7 @@ from .intent_classifier import IntentClassifier
 from .matching import MatchingAgent
 from .orchestrator import Orchestrator
 from .profile_extractor import ProfileExtractor
+from .report_writer import ReportWriterAgent
 
 __all__ = [
     "Agent",
@@ -24,4 +25,5 @@ __all__ = [
     "EligibilityAgent",
     "ApplicationAgent",
     "Orchestrator",
+    "ReportWriterAgent",
 ]
