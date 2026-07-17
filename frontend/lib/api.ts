@@ -286,3 +286,53 @@ export async function exportReportDocx(report: BackendGeneratedReport): Promise<
   }
   return res.blob();
 }
+
+export interface BackendPresentationSlide {
+  slide_id: string;
+  heading: string;
+  bullets: string[];
+}
+
+export interface BackendGeneratedPresentation {
+  title: string;
+  subtitle: string;
+  slides: BackendPresentationSlide[];
+}
+
+/**
+ * Sabit slayt iskeletinden, profile özel bir yatırımcı/müşteri sunumu üretir.
+ */
+export async function generatePresentation(
+  profile: BackendUserProfile,
+  companyName: string,
+  extraContext: string,
+): Promise<BackendGeneratedPresentation> {
+  return apiFetch<BackendGeneratedPresentation>("/presentations/generate", {
+    method: "POST",
+    body: JSON.stringify({ profile, company_name: companyName, extra_context: extraContext }),
+  });
+}
+
+/**
+ * Üretilmiş bir sunumu düzenlenebilir .pptx dosyası olarak indirir.
+ */
+export async function exportPresentationPptx(
+  presentation: BackendGeneratedPresentation,
+): Promise<Blob> {
+  const url = `${BASE}/api/presentations/export-pptx`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(presentation),
+    });
+  } catch {
+    throw new ApiError(0, "Sunucuya ulaşılamıyor. Backend çalışıyor mu?");
+  }
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new ApiError(res.status, body || `HTTP ${res.status}`);
+  }
+  return res.blob();
+}

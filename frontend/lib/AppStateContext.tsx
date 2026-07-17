@@ -88,6 +88,7 @@ interface AppState {
   goToReport: (id: string) => void;
   goToReportGenerate: (id: string) => void;
   goToPanel: () => void;
+  goToNewPresentation: () => void;
 }
 
 const AppStateCtx = createContext<AppState | null>(null);
@@ -377,6 +378,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     router.push("/panel");
   }
 
+  function goToNewPresentation() {
+    router.push("/presentations/new");
+  }
+
   /** Başvuru taslağını backend'den çeker ve başvuru sayfasına geçer. */
   async function applyProgram(id: string) {
     if (!currentProfile) {
@@ -501,6 +506,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     goToReport,
     goToReportGenerate,
     goToPanel,
+    goToNewPresentation,
   };
 
   return <AppStateCtx.Provider value={value}>{children}</AppStateCtx.Provider>;

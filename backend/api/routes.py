@@ -10,12 +10,14 @@ from ..agents import (
     ApplicationAgent,
     EligibilityAgent,
     Orchestrator,
+    PresentationWriterAgent,
     ProfileExtractor,
     ReportWriterAgent,
 )
 from ..core.docx_export import build_report_docx
 from ..core.embedder import get_embedding_client
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
+from ..core.pptx_export import build_presentation_pptx
 from ..core.rate_limit import enforce_llm_rate_limit
 from ..data import repo, report_schema_loader
 from ..models import (
@@ -24,6 +26,7 @@ from ..models import (
     Category,
     ConversationTurn,
     EligibilityResult,
+    GeneratedPresentation,
     GeneratedReport,
     ReportSchema,
     SessionState,
@@ -32,6 +35,17 @@ from ..models import (
 )
 
 router = APIRouter()
+
+
+def _content_disposition(name_stem: str, suffix: str, extension: str) -> str:
+    """Dosya indirme header'ı üretir. Content-Disposition yalnızca Latin-1
+    kabul eder; Türkçe karakterler (İ, ş, ğ...) bunu kırar — ASCII bir yedek
+    isim + RFC 5987 filename* (UTF-8) ile hem eski hem yeni istemcilerde
+    doğru dosya adı görünür."""
+    safe_stem = name_stem.encode("ascii", "ignore").decode("ascii").replace(" ", "-") or "Belge"
+    ascii_filename = f"{safe_stem}-{suffix}.{extension}"
+    utf8_filename = quote(f"{name_stem.replace(' ', '-')}-{suffix}.{extension}")
+    return f"attachment; filename=\"{ascii_filename}\"; filename*=UTF-8''{utf8_filename}"
 
 
 @router.get("/health")
@@ -230,21 +244,36 @@ async def generate_report(body: GenerateReportRequest) -> GeneratedReport:
 async def export_report_docx(report: GeneratedReport) -> Response:
     """Üretilmiş bir raporu düzenlenebilir .docx dosyası olarak döner."""
     content = await run_in_threadpool(build_report_docx, report)
-
-    # Content-Disposition header'ı yalnızca Latin-1 kabul eder; Türkçe
-    # karakterler (İ, ş, ğ...) içeren dosya adları bunu kırar. ASCII bir
-    # yedek isim + RFC 5987 filename* (UTF-8) ile hem eski hem yeni
-    # istemcilerde doğru dosya adı görünür.
-    safe_stem = report.program_name.encode("ascii", "ignore").decode("ascii").replace(" ", "-") or "Rapor"
-    ascii_filename = f"{safe_stem}-Rapor.docx"
-    utf8_filename = quote(f"{report.program_name.replace(' ', '-')}-Rapor.docx")
-
     return Response(
         content=content,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        headers={
-            "Content-Disposition": (
-                f'attachment; filename="{ascii_filename}"; filename*=UTF-8\'\'{utf8_filename}'
-            )
-        },
+        headers={"Content-Disposition": _content_disposition(report.program_name, "Rapor", "docx")},
+    )
+
+
+class GeneratePresentationRequest(BaseModel):
+    profile: UserProfile
+    company_name: str = ""
+    extra_context: str = ""
+
+
+@router.post(
+    "/presentations/generate",
+    response_model=GeneratedPresentation,
+    dependencies=[Depends(enforce_llm_rate_limit)],
+)
+async def generate_presentation(body: GeneratePresentationRequest) -> GeneratedPresentation:
+    """Sabit slayt iskeletinden, profile özel bir sunum üretir (Sunum Ajanı)."""
+    agent = PresentationWriterAgent()
+    return await agent.write_presentation(body.profile, body.company_name, body.extra_context)
+
+
+@router.post("/presentations/export-pptx")
+async def export_presentation_pptx(presentation: GeneratedPresentation) -> Response:
+    """Üretilmiş bir sunumu düzenlenebilir .pptx dosyası olarak döner."""
+    content = await run_in_threadpool(build_presentation_pptx, presentation)
+    return Response(
+        content=content,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={"Content-Disposition": _content_disposition(presentation.title, "Sunum", "pptx")},
     )

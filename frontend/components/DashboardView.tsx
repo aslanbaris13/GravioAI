@@ -29,11 +29,13 @@ export default function DashboardView({
   programs,
   onOpenProgram,
   onGoToChat,
+  onNewPresentation,
 }: {
   profile: BackendUserProfile | null;
   programs: Program[];
   onOpenProgram: (id: string) => void;
   onGoToChat?: () => void;
+  onNewPresentation?: () => void;
 }) {
   const chips = profile ? profileToChips(profile) : [];
 
@@ -168,6 +170,32 @@ export default function DashboardView({
           <div style={{ marginTop: 12, padding: "16px 18px", background: "#fff", border: "1px solid #e7e4dc", borderRadius: 12, fontSize: 13.5, color: "#8a96a0" }}>
             Yaklaşan bir son tarih yok.
           </div>
+        )}
+
+        {onNewPresentation && (
+          <button
+            onClick={onNewPresentation}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              width: "100%",
+              marginTop: 28,
+              padding: "14px 16px",
+              borderRadius: 13,
+              background: "#fff",
+              border: "1.5px dashed #d8c9b0",
+              textAlign: "left",
+            }}
+          >
+            <Ms name="slideshow" size={20} color="#ea580c" />
+            <div>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: "#27353e" }}>Şirket sunumu oluştur</div>
+              <div style={{ fontSize: 12, color: "#8a96a0", marginTop: 1 }}>
+                Yatırımcı/müşteri sunumu — düzenlenebilir PPTX olarak indir
+              </div>
+            </div>
+          </button>
         )}
       </div>
     </section>
