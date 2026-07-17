@@ -86,6 +86,7 @@ interface AppState {
   goToProgram: (id: string) => void;
   goToEligibility: (id: string) => void;
   goToReport: (id: string) => void;
+  goToReportGenerate: (id: string) => void;
   goToPanel: () => void;
 }
 
@@ -368,6 +369,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     router.push(`/program/${id}/report`);
   }
 
+  function goToReportGenerate(id: string) {
+    router.push(`/program/${id}/report/generate`);
+  }
+
   function goToPanel() {
     router.push("/panel");
   }
@@ -494,6 +499,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     goToProgram,
     goToEligibility,
     goToReport,
+    goToReportGenerate,
     goToPanel,
   };
 

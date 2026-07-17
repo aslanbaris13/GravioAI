@@ -1,6 +1,9 @@
 """HTTP uç noktaları."""
+from urllib.parse import quote
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.concurrency import run_in_threadpool
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 from ..agents import (
@@ -8,7 +11,9 @@ from ..agents import (
     EligibilityAgent,
     Orchestrator,
     ProfileExtractor,
+    ReportWriterAgent,
 )
+from ..core.docx_export import build_report_docx
 from ..core.embedder import get_embedding_client
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
 from ..core.rate_limit import enforce_llm_rate_limit
@@ -19,6 +24,7 @@ from ..models import (
     Category,
     ConversationTurn,
     EligibilityResult,
+    GeneratedReport,
     ReportSchema,
     SessionState,
     SupportProgram,
@@ -197,3 +203,48 @@ async def read_report_schema(key: str) -> ReportSchema:
     if schema is None:
         raise HTTPException(status_code=404, detail="Rapor şeması bulunamadı")
     return schema
+
+
+class GenerateReportRequest(BaseModel):
+    schema_key: str
+    profile: UserProfile
+    # section_id -> {field_key: value}
+    field_values: dict[str, dict[str, str]] = {}
+
+
+@router.post(
+    "/reports/generate",
+    response_model=GeneratedReport,
+    dependencies=[Depends(enforce_llm_rate_limit)],
+)
+async def generate_report(body: GenerateReportRequest) -> GeneratedReport:
+    """Bölüm bölüm rapor içeriği üretir (Rapor Yazma Ajanı)."""
+    schema = await run_in_threadpool(report_schema_loader.get_report_schema, body.schema_key)
+    if schema is None:
+        raise HTTPException(status_code=404, detail="Rapor şeması bulunamadı")
+    agent = ReportWriterAgent()
+    return await agent.write_report(schema, body.profile, body.field_values)
+
+
+@router.post("/reports/export-docx")
+async def export_report_docx(report: GeneratedReport) -> Response:
+    """Üretilmiş bir raporu düzenlenebilir .docx dosyası olarak döner."""
+    content = await run_in_threadpool(build_report_docx, report)
+
+    # Content-Disposition header'ı yalnızca Latin-1 kabul eder; Türkçe
+    # karakterler (İ, ş, ğ...) içeren dosya adları bunu kırar. ASCII bir
+    # yedek isim + RFC 5987 filename* (UTF-8) ile hem eski hem yeni
+    # istemcilerde doğru dosya adı görünür.
+    safe_stem = report.program_name.encode("ascii", "ignore").decode("ascii").replace(" ", "-") or "Rapor"
+    ascii_filename = f"{safe_stem}-Rapor.docx"
+    utf8_filename = quote(f"{report.program_name.replace(' ', '-')}-Rapor.docx")
+
+    return Response(
+        content=content,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="{ascii_filename}"; filename*=UTF-8\'\'{utf8_filename}'
+            )
+        },
+    )
