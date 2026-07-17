@@ -207,3 +207,36 @@ Barış Faz 1'den (kalıcılık) başlamayı seçti, Supabase'de gerçek bir otu
 - Gemini ücretsiz katman günlük kotası (20 istek/gün) — canlı E2E test kapasitesini ciddi kısıtlıyor, ücretli anahtar veya kota artışı gerekebilir.
 - `is_relevant` filtresini açıp açmama kararı (yukarıda #9).
 - Test sırasında Supabase `user_sessions` tablosuna eklenen `test-e2e-1`/`test-e2e-2` id'li deneme satırları — zararsız ama silme endpoint'i olmadığı için elle temizlenmesi gerekiyor.
+
+---
+
+## 2026-07-17 — Production geliştirme planı + otonom Faz B2-C3 inşası
+
+**Bağlam**: Barış'ın isteğiyle tüm uygulama gözden geçirilip production seviyesine taşıyan yeni bir fazlı plan (Faz A-D) çıkarıldı; kredi/anahtar netleşmesinin ardından ("sadece Gemini kullanılacak, kredi akşam yüklenecek") Barış uyurken bu planın LLM'siz/düşük riskli maddeleri sırayla, her biri kendi PR'ında, test edilip merge edilerek tamamlandı.
+
+### Faz B1 — Onboarding akışı
+Sektör (görsel kartlar), şehir + kuruluş durumu, ekip + özel durumlar, hedefler (çoklu seçim), KVKK rızası — tamamen istemci tarafında, LLM'siz. Tamamlanınca doğrudan `BackendUserProfile` üretiyor, `localStorage` bayrağıyla yalnızca ilk ziyarette gösteriliyor. PR #34.
+
+### Faz B2 — App Router refactor
+`page.tsx`'teki 600 satırlık tek dosyalık view-switching, `lib/AppStateContext.tsx` (layout seviyesinde bir provider) + gerçek rotalara (`/onboarding`, `/chat`, `/matches`, `/program/[id]`, `/program/[id]/eligibility`, `/program/[id]/application`, `/panel`) taşındı. Derin bağlantı ve tarayıcı geri tuşu artık çalışıyor. PR #35.
+
+### Faz A3 — KVKK metinleri
+`/legal/aydinlatma-metni` (KVKK m.10 uyarınca tam metin — veri sorumlusu, veri kategorileri, Gemini'ye yurt dışı aktarım dahil) ve `/legal/kvkk-riza` (onboarding/profil ve başvuru/rapor verisi için ayrı rıza). Şirket henüz tüzel kişilik olarak tescilli olmadığı için MERSİS/vergi no/adres alanları metin içinde açıkça işaretlendi. PR #36.
+
+### Faz C1 — Rapor gereksinim şemaları + önizleme
+`report_schemas/*.json` (TÜBİTAK 1507 + 1501, Supabase migration gerektirmeyen statik veri) + `/program/[id]/report` önizleme ekranı — kullanıcı rapor yazımına başlamadan önce "neyle karşılaşacağını" görüyor. PR #37.
+
+### Faz B3 — Panelim 2.0
+Özet istatistik şeridi (toplam eşleşme, tam uygun, 30 gün içinde son tarih) + eksik profil alanı uyarısı. Başvuru durumu takibi (taslak→hazırlanıyor→gönderildi) yeni bir Supabase tablosu gerektirdiği için kapsam dışı bırakıldı — migration onayı Barış'ın kararı. PR #38.
+
+### Faz C2 — Rapor Yazma Ajanı + DOCX export
+Bölüm bölüm üretim (her bölüm ayrı LLM çağrısı), python-docx ile gerçek düzenlenebilir .docx. Canlı testte gerçek bir bug bulundu ve düzeltildi: `Content-Disposition` header'ı Latin-1 ile sınırlı, Türkçe karakterli dosya adları (TÜBİTAK gibi) `UnicodeEncodeError` ile 500 veriyordu — ASCII yedek + RFC 5987 `filename*` ile çözüldü. PR #39.
+
+### Faz C3 — Sunum Ajanı v1 + PPTX export
+10 slaytlık sabit iskelet (kapak→kapanış), python-pptx ile gerçek düzenlenebilir sunum. Aynı desen: her slayt ayrı LLM çağrısı. PR #40.
+
+**Bilinçli olarak yapılmayan/ertelenen**:
+- **Faz B4 (streaming)**: Mimarisi tasarlandı ama uygulanmadı — orkestratörün ana `onSend` akışını canlı Gemini doğrulaması olmadan değiştirmek, uygulamanın en kritik yolunu riske atardı. Gerçek kredi gelince yapılması öneriliyor.
+- **Faz D1+D2 (deploy)**: Barış'ın kendi talimatıyla zaten en sona planlanmıştı ("önce geliştirme, deploy sonra").
+
+**Doğrulama**: Her PR için `pytest` (62/62), `tsc --noEmit`, `npm run test` (16/16), `npm run build` (14 rota) yeşil görüldükten sonra merge edildi. Canlı Gemini gerektiren kısımlar (rapor/sunum içerik kalitesi) dummy anahtarla uçtan uca doğru hata verdiği doğrulanarak (kod yolu çalışıyor) kredi gelene kadar bekletildi.
