@@ -192,3 +192,35 @@ create trigger user_sessions_set_updated_at
     for each row execute function public.set_updated_at();
 
 alter table public.user_sessions enable row level security;
+
+-- ============================================================
+-- applications — Panelim'deki başvuru durumu takibi (Faz B3'ün
+-- ertelenen kısmı). Bir oturumun, bir programa dair başvuru sürecini
+-- (taslak → hazırlanıyor → gönderildi) takip etmesini sağlar.
+-- ============================================================
+
+-- 13) Başvuru takip tablosu
+create table if not exists public.applications (
+    id             uuid primary key default gen_random_uuid(),
+    session_id     text not null references public.user_sessions(session_id) on delete cascade,
+    program_id     text not null,
+    program_name   text not null,
+    status         text not null default 'taslak'
+                       check (status in ('taslak', 'hazirlaniyor', 'gonderildi')),
+    note           text,
+    reminder_date  date,
+    created_at     timestamptz not null default now(),
+    updated_at     timestamptz not null default now(),
+    unique (session_id, program_id)
+);
+
+create index if not exists applications_session_id_idx on public.applications(session_id);
+
+-- 14) updated_at tetikleyicisi (12'deki fonksiyonu yeniden kullanır)
+drop trigger if exists applications_set_updated_at on public.applications;
+
+create trigger applications_set_updated_at
+    before insert or update on public.applications
+    for each row execute function public.set_updated_at();
+
+alter table public.applications enable row level security;
