@@ -22,6 +22,8 @@ from connectors.kosgeb import KOSGEBConnector
 from connectors.kalkinma_ajansi import KalkinmaAjansiConnector
 from connectors.tubitak import TubitakConnector
 from connectors.manager import ConnectorManager
+from connectors.google_cloud import GoogleCloudConnector
+from connectors.aws import AwsConnector
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -31,8 +33,9 @@ KURUM_MAP = {
     "kosgeb": (KOSGEBConnector, "kosgeb_taslak.json"),
     "kalkinma": (KalkinmaAjansiConnector, "kalkinma_taslak.json"),
     "tubitak": (TubitakConnector, "tubitak_taslak.json"),
+    "google": (GoogleCloudConnector, "google_taslak.json"),  
+    "aws": (AwsConnector, "aws_taslak.json"),              
 }
-
 
 async def main():
     print("Scraper veri toplama için başlatılıyor..\n")
