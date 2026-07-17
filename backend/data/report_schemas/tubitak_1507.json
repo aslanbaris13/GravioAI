@@ -3,71 +3,71 @@
   "program_name": "TÜBİTAK 1507 - KOBİ Ar-Ge Başlangıç Destek Programı",
   "institution": "TÜBİTAK",
   "match_keywords": ["1507", "kobi ar-ge başlangıç", "kobi arge baslangic"],
-  "summary": "KOBİ ölçeğindeki işletmelerin Ar-Ge ve yenilik projelerine yönelik ilk destek programı. Proje bazlı, hibe niteliğinde geri ödemesiz destek.",
+  "summary": "KOBİ ölçeğindeki işletmelerin Ar-Ge/yenilik projelerine yönelik ilk destek programı. Proje bazında en fazla 8 ay destek süresi, %75 hibe (geri ödemesiz). Resmi başvuru AGY100/AGY101 formuyla PRODİS üzerinden yapılır — bu şema, TÜBİTAK'ın 'Proje Öneri Bilgileri Formu Hazırlama Kılavuzu' (AGY100-101) Bölüm A-E yapısını izler.",
   "sections": [
     {
-      "id": "ozet",
-      "title": "Proje Özeti",
-      "description": "Projenin ne olduğunu, hangi soruna çözüm getirdiğini ve beklenen çıktıyı 1-2 paragrafta özetleyin.",
-      "char_limit": 1500,
+      "id": "kurulus_ve_proje_ozeti",
+      "title": "Kuruluş ve Proje Özeti (Bölüm A)",
+      "description": "Kuruluşun kısa tanıtımı ve projenin başlatılma gerekçesi, projenin amacı, anahtar kelimeler. Resmi formda 'Proje Kısa Tanıtımı' diğer tüm bölümler doldurulduktan sonra hazırlanması önerilen, değiştirilmeden Yürütme Komitesi'ne sunulan kritik bir bölümdür.",
       "required_fields": [
-        { "key": "problem", "label": "Çözülmek istenen problem", "description": "Mevcut durumda hangi teknik/ticari sorun var?" },
-        { "key": "cozum", "label": "Önerilen çözüm", "description": "Projeyle önerilen çözümün özeti" }
+        { "key": "kurulus_tanitimi", "label": "Kuruluşun kısa tanıtımı ve ana faaliyet alanı", "long_text": true },
+        { "key": "baslatilma_gerekcesi", "label": "Projenin başlatılma gerekçesi (hangi ihtiyaç/sorun)", "long_text": true },
+        { "key": "proje_amaci", "label": "Projenin amacı", "long_text": true },
+        { "key": "anahtar_kelimeler", "label": "Anahtar kelimeler" }
       ]
     },
     {
-      "id": "ozgunluk",
-      "title": "Özgün Değer ve Yenilikçi Yön",
-      "description": "Projenin mevcut ürün/hizmetlerden ve literatürden farkını, teknik belirsizliklerini açıklayın.",
-      "char_limit": 3000,
+      "id": "arge_icerigi_teknoloji_duzeyi",
+      "title": "Endüstriyel Ar-Ge İçeriği, Teknoloji Düzeyi ve Yenilikçi Yön (Bölüm B)",
+      "description": "Teknolojik yenilik ve Ar-Ge unsuru içermeyen projeler desteklenmez — bu bölüm değerlendirmede belirleyici niteliktedir.",
+      "char_limit": 4000,
       "required_fields": [
-        { "key": "farklilasma", "label": "Rakip/mevcut çözümlerden farkı", "long_text": true },
-        { "key": "teknik_belirsizlik", "label": "Aşılması gereken teknik belirsizlikler", "long_text": true }
+        { "key": "cagri_hedefler", "label": "Projenin genel amacı ve önerilen çözüm ile ulaşılması planlanan hedefler", "long_text": true },
+        { "key": "teknoloji_duzeyi", "label": "Tekniğin/teknolojinin bilinen güncel durumu (state-of-the-art)", "long_text": true },
+        { "key": "teknik_belirsizlikler", "label": "Aşılması gereken teknik/teknolojik belirsizlik ve zorluklar", "long_text": true },
+        { "key": "yenilikci_yon", "label": "Yenilikçi yönler (ürün/süreç yeniliği, mevcut ürün/sistemlerden farkı)", "long_text": true }
       ]
     },
     {
-      "id": "is_paketleri",
-      "title": "İş Paketleri ve Zaman Planlaması",
-      "description": "Proje faaliyetlerini iş paketlerine bölün, her paket için süre ve sorumlu belirtin.",
+      "id": "proje_plani_kurulus_altyapisi",
+      "title": "Proje Planı ve Kuruluş Altyapısı (Bölüm C)",
+      "description": "İş paketleri, proje yönetimi, kuruluşun mevcut altyapısı ve risk yönetimi.",
       "required_fields": [
-        { "key": "is_paketleri_listesi", "label": "İş paketleri (paket adı, süre, sorumlu)", "long_text": true }
+        { "key": "is_paketleri", "label": "İş paketleri ve iş-zaman planı (paket adı, süre, çıktı)", "long_text": true },
+        { "key": "proje_yonetimi", "label": "Proje yönetimi ve organizasyonu (ekip görevleri)", "long_text": true },
+        { "key": "kurulus_altyapisi", "label": "Kuruluşun mevcut Ar-Ge altyapısı (laboratuvar, donanım vb.)", "long_text": true },
+        { "key": "risk_yonetimi", "label": "Öngörülen riskler ve alınacak önlemler", "long_text": true }
       ]
     },
     {
-      "id": "butce",
-      "title": "Bütçe",
-      "description": "Personel, alet/teçhizat, hizmet alımı ve malzeme kalemlerini ayrı ayrı belirtin.",
-      "required_fields": [
-        { "key": "personel_gideri", "label": "Personel gideri (kişi × ay × maliyet)", "long_text": true },
-        { "key": "teçhizat_gideri", "label": "Alet/teçhizat gideri", "long_text": true },
-        { "key": "hizmet_alimi", "label": "Hizmet alımı / danışmanlık", "long_text": true },
-        { "key": "malzeme_gideri", "label": "Malzeme ve sarf gideri", "long_text": true }
-      ]
-    },
-    {
-      "id": "ekip",
-      "title": "Ekip ve Yetkinlik",
-      "description": "Proje ekibinin ilgili konudaki deneyim ve yetkinliğini gösterin.",
-      "required_fields": [
-        { "key": "ekip_buyuklugu", "label": "Ekip büyüklüğü", "prefillable_from_profile": "team_size" },
-        { "key": "ekip_cv", "label": "Anahtar personel özgeçmişleri", "long_text": true }
-      ]
-    },
-    {
-      "id": "ticarilestirme",
-      "title": "Ticarileştirme ve Pazara Sunum Planı",
-      "description": "Proje sonucu ortaya çıkacak ürün/hizmetin nasıl ticarileştirileceği.",
+      "id": "ekonomik_yarar_ulusal_kazanim",
+      "title": "Ekonomik Yarara ve Ulusal Kazanıma Dönüşebilirlik (Bölüm D)",
+      "description": "Proje çıktısının ticari başarı potansiyeli, ekonomik getiri tahmini ve ülke ekonomisine katkısı.",
       "char_limit": 2000,
       "required_fields": [
-        { "key": "hedef_pazar", "label": "Hedef pazar ve müşteri kitlesi", "long_text": true },
-        { "key": "gelir_modeli", "label": "Gelir modeli / satış stratejisi", "long_text": true }
+        { "key": "ticari_potansiyel", "label": "Ticari başarı potansiyeli ve hedef pazar/müşteri", "long_text": true },
+        { "key": "ekonomik_getiri", "label": "Beklenen ekonomik getiri (satış hasılatı, pazar payı artışı vb.)", "long_text": true },
+        { "key": "ulusal_kazanim", "label": "Ulusal kazanımlar (ithalat azaltımı, istihdam, rekabet gücü vb.)", "long_text": true }
+      ]
+    },
+    {
+      "id": "proje_butcesi",
+      "title": "Proje Bütçesi (Bölüm E)",
+      "description": "TÜBİTAK'ın resmi gider kalemleri (M011-M016) esas alınır. Katma değer vergisi, kâr payı, pazarlama/reklam, patent/marka tescil, kira, kırtasiye gibi giderler desteklenmez.",
+      "required_fields": [
+        { "key": "personel_gideri", "label": "Personel gideri (M011)", "prefillable_from_profile": "team_size", "long_text": true },
+        { "key": "seyahat_gideri", "label": "Seyahat gideri — yalnızca ulaşım (M012)", "long_text": true },
+        { "key": "techizat_gideri", "label": "Alet/teçhizat/yazılım/yayın alımları (M013)", "long_text": true },
+        { "key": "hizmet_alimi", "label": "Ar-Ge/test kuruluşlarına yaptırılan işler + hizmet/danışmanlık alımı (M014-M015)", "long_text": true },
+        { "key": "malzeme_gideri", "label": "Malzeme ve sarf gideri (M016)", "long_text": true }
       ]
     }
   ],
   "required_documents": [
-    "Vergi levhası",
-    "Faaliyet belgesi / ticaret sicil gazetesi",
-    "Son 2 yıla ait bilanço (varsa)",
-    "Anahtar personel özgeçmişleri"
+    "Vergi levhası (onaylı)",
+    "Kuruluşa ait en son tarihli noter onaylı imza sirküleri",
+    "Ticaret Sicil Gazetesi (tescile ilişkin, ana sözleşme değişiklikleri dahil)",
+    "Anahtar personel özgeçmişleri (ARBİS'e kayıtlı)",
+    "Son hesap dönemine ait bilanço"
   ]
 }
