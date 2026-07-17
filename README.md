@@ -265,12 +265,76 @@ Sprint 2 kapsamında farklı veri kaynaklarından veri toplanmasını standartla
 
 # Sprint 2
 
-> ⚪ **Sprint Tarihi:** 6 – 19 Temmuz 2026
-> **Sprint Hedefi:** Uygunluk ajanı · başvuru taslağı ajanı · orkestratör + hafıza · kaynak gösterimli RAG · son tarih takibi
+## Sprint Bilgileri
 
-_(Sprint 2 dokümantasyonu sprint sonunda eklenecek)_
+| Özellik | Açıklama |
+|---------|----------|
+| **Sprint Tarihi** | **7 Temmuz 2026 – 19 Temmuz 2026** |
+| **Sprint Teması** | **Intelligence & Agent Katmanının Geliştirilmesi** |
+| **Sprint Amacı** | Kullanıcı profillerini analiz ederek uygun girişim destek programlarını önerebilen, uygunluk değerlendirmesi yapabilen ve doğal dil üzerinden etkileşim kurabilen karar verme altyapısını geliştirmek. Bu sprintte semantik eşleştirme, ajan mimarisi, veri platformu geliştirmeleri ve sohbet sistemi entegrasyonu üzerine çalışmalar yürütülmektedir. |
 
 ---
+
+## Sprint Planning
+
+| Metrik | Değer |
+|--------|------:|
+| **Sprint Süresi** | 13 Gün |
+| **Takım Kapasitesi** | 4 Kişi (%100) |
+| **Toplam Work Item** | 13 |
+| **Planlanan Story Point** | 71 |
+| **Tamamlanan Story Point** | Devam Ediyor |
+
+---
+
+## Sprint Backlog
+
+> Sprint backlog aşağıda gösterilmektedir.
+
+<img width="705" height="841" alt="Ekran görüntüsü 2026-07-08 224343" src="https://github.com/user-attachments/assets/893c8a51-7067-4546-9181-216ba3629acb" />
+<img width="1672" height="583" alt="Ekran görüntüsü 2026-07-08 224104" src="https://github.com/user-attachments/assets/d80af85b-e671-4b2c-bcdb-db7a65ceb994" />
+<img width="1441" height="863" alt="Ekran görüntüsü 2026-07-17 120934" src="https://github.com/user-attachments/assets/33251640-58b4-41f4-8f8d-e7a8df857a2d" />
+<img width="1377" height="846" alt="Ekran görüntüsü 2026-07-17 120956" src="https://github.com/user-attachments/assets/511ccc93-c75b-4986-bdba-3d11a00c6794" />
+
+
+---
+
+# Sprint Boyunca Gerçekleştirilen Toplantılar
+
+Sprint süresince takım üyelerinin yoğun programları nedeniyle yalnızca iki toplantı gerçekleştirilebilmiştir. Görev takibi ve teknik değerlendirmeler Jira ile takım içi iletişim kanalları üzerinden düzenli olarak sürdürülmüştür.
+
+Toplantı gündemleri ve alınan kararlar aşağıda verilen linkteki Jira dokümanında yer almaktadır.
+
+### Değerlendirme
+
+Tamamlanan çalışmalar:
+
+- ✅ Planner / Orchestrator Agent
+- ✅ Chat Flow
+- ✅ Chat Interface UI
+- ✅ Hierarchical Parent-Child Chunking
+
+Devam eden çalışmalar:
+
+- 🔄 Funding Search System
+- 🔄 Profile Extraction System
+- 🔄 Memory Agent
+- 🔄 Eligibility Checking
+- 🔄 Eligibility Matching
+- 🔄 Retrieval Accuracy Testleri
+- 🔄 Chat Backend Entegrasyonu
+- 🔄 Veri Toplama ve Normalization İyileştirmeleri
+
+### Alınan Kararlar
+
+
+---
+
+## Sprint Durumu
+
+Şu an itibarıyla sprint planlandığı şekilde ilerlemektedir. Planner Agent, Chat Flow, Chat Interface UI ve Hierarchical Chunking geliştirmeleri tamamlanmıştır. Kalan modüllerin sprint bitiş tarihine kadar tamamlanması hedeflenmektedir.
+
+> **Not:** Bu README sprint tamamlanmadan önce hazırlanmıştır. Sprint sonunda Story Point bilgileri ve görev durumları güncellenecektir.
 
 # Sprint 3
 
