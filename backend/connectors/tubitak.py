@@ -1,12 +1,8 @@
 """
 connectors/tubitak.py
 
-TÜBİTAK'ın hem ulusal hem de uluslararası/global odaklı tüm aktif
-çağrılarından ve destek sayfalarından güncel programları çeker.
-
-Sayfadaki tüm <a> etiketleri (menü, footer dahil) taranıyor. Menü/
-kategori linklerini gerçek program sayfalarından ayırt etmek için, 
-TÜBİTAK'ın standart içerik yapıları ve link formatları filtreleniyor.
+Fetches active support programs and calls from multiple TÜBİTAK pages,
+covering both national and international/global opportunities.
 """
 from bs4 import BeautifulSoup
 
@@ -20,6 +16,15 @@ class TubitakConnector(BaseConnector):
     
     SOURCE_NAME = "TUBITAK"
     
+    # Class-level constants for configuration management
+    TARGET_URLS = [
+        "https://tubitak.gov.tr/tr/acik-cagrilar",
+        "https://tubitak.gov.tr/tr/destekler/sanayi/ulusal-destek-programlari",
+        "https://tubitak.gov.tr/tr/destekler/sanayi/uluslararasi-programlar",
+        "https://tubitak.gov.tr/tr/destekler/akademik/ulusal-destek-programlari",
+        "https://tubitak.gov.tr/tr/destekler/akademik/uluslararasi-destek-programlari"
+    ]
+    
     forbidden_terms = []
 
     def __init__(self, fetcher: BaseFetcher, cleaner: BaseCleaner | None = None):
@@ -27,41 +32,28 @@ class TubitakConnector(BaseConnector):
         self.fetcher = fetcher
         self.base_domain = "https://tubitak.gov.tr"
         self.source_name = "TÜBİTAK"
-        
-        # Hatice'nin bahsettiği tüm ulusal ve global destek sayfalarını buraya ekledik kanka.
-        # Sistem bu listeyi sırayla dolaşacak, böylece 14 destek limiti tamamen aşılacak.
-        self.target_urls = [
-            "https://tubitak.gov.tr/tr/acik-cagrilar",
-            "https://tubitak.gov.tr/tr/destekler/sanayi/ulusal-destek-programlari",
-            "https://tubitak.gov.tr/tr/destekler/sanayi/uluslararasi-programlar",
-            "https://tubitak.gov.tr/tr/destekler/akademik/ulusal-destek-programlari",
-            "https://tubitak.gov.tr/tr/destekler/akademik/uluslararasi-destek-programlari"
-        ]
 
     def _is_program_link(self, href: str) -> bool:
-        """TÜBİTAK'ın gerçek program sayfaları, URL'in son parçasında bir
-        program numarasıyla (örn. '1831-...') ya da 'icerik-' öneki +
-        numarayla (örn. 'icerik-1509-...') başlar. Menü/kategori sayfaları
-        (örn. '/tr/destekler/sanayi') bu kalıba uymaz, bu yüzden onları eleriz."""
+        """Validates if the link corresponds to an actual program detail page."""
         son_parca = href.rstrip("/").split("/")[-1]
         if son_parca.startswith("icerik-"):
             son_parca = son_parca[len("icerik-"):]
         return son_parca[:1].isdigit()
 
     async def fetch(self) -> list[dict]:
-        print(f"{self.source_name}: Destek ve açık çağrılar sayfaları taranıyor...\n")
+        print(f"{self.source_name}: Scanning configured support and open call pages...\n")
 
         programs = []
         llm_client = get_llm_client()
         gorulen_linkler = set()
 
-        # Sistemdeki mevcut kod bloklarını bozmamak adına taranacak URL listesini döngüye alıyoruz kanka
-        for target_url in self.target_urls:
-            print(f"-> {target_url} taranıyor...")
+        # Iterate through target URLs to fetch active program updates
+        for target_url in self.TARGET_URLS:
+            print(f"-> Processing: {target_url}")
             try:
                 html = await self.fetcher.fetch_text(target_url)
             except Exception as e:
-                print(f" ⚠️ HATA: {target_url} çekilirken hata oluştu: {e}")
+                print(f" ⚠️ ERROR: Failed to fetch {target_url}: {e}")
                 continue
 
             soup = BeautifulSoup(html, "html.parser")
@@ -72,7 +64,6 @@ class TubitakConnector(BaseConnector):
                     baslik = link_etiketi.text.strip()
                     href = link_etiketi["href"]
 
-                    # Orijinal doğrulamayı esnetmeden koruyoruz
                     if not (href.startswith("/tr/destekler/") and len(baslik) > 20):
                         continue
 
@@ -81,15 +72,14 @@ class TubitakConnector(BaseConnector):
                         continue
                     gorulen_linkler.add(full_url)
 
-                    # Listeleme sayfasından, ücretsiz olarak başvuru tarihini yakala
                     tarih_etiketi = link_etiketi.find_next("time", class_="datetime")
                     listeleme_tarihi = tarih_etiketi.text.strip() if tarih_etiketi else None
 
-                    print(f"detaylar indiriliyor: {full_url}")
+                    print(f"Downloading details: {full_url}")
                     detail_html = await self.fetcher.fetch_text(full_url)
                     clean_txt = self.clean(detail_html)
 
-                    print(f"Yapay zeka analiz ediyor: {baslik}")
+                    print(f"LLM analyzing: {baslik}")
                     extracted_info = await llm_client.extract_program_details(
                         body_text=clean_txt, source_name=self.source_name
                     )
@@ -100,10 +90,10 @@ class TubitakConnector(BaseConnector):
 
                         db_record = self.format_to_db(extracted_info, full_url, clean_txt, source_name=self.source_name)
                         programs.append(db_record)
-                        print(f" Başarıyla ayrıştırıldı ve formatlandı: {baslik}")
+                        print(f" Successfully formatted: {baslik}")
 
                 except Exception as e:
-                    print(f" HATA: Bir link işlenirken hata oluştu: {e}")
+                    print(f" ERROR: Failed to process link: {e}")
 
-        print(f"\n{self.source_name}: Toplam {len(programs)} program işlendi.\n")
+        print(f"\n{self.source_name}: Total of {len(programs)} programs processed.\n")
         return programs
