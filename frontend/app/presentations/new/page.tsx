@@ -69,8 +69,10 @@ export default function NewPresentationPage() {
           Şirket sunumu oluştur
         </h1>
         <p style={{ fontSize: 13.5, color: "#5a6b75", margin: "0 0 24px" }}>
-          Sabit bir yatırımcı/müşteri sunumu iskeletini (kapak, problem, çözüm, ürün, pazar, iş modeli, ekip,
-          finansal projeksiyon, yol haritası, kapanış) profiline göre özelleştiriyoruz.
+          Gerçek yatırımcı sunumu şablonlarına (Airbnb'nin ilk yatırım sunumu, Y Combinator ve Sequoia'nın
+          önerdiği yapı) dayanan sabit bir iskeleti (kapak, problem, çözüm, neden şimdi, ürün, pazar,
+          traksiyon, rekabet, iş modeli, ekip, finansal projeksiyon, yol haritası, kapanış) profiline göre
+          özelleştiriyoruz.
         </p>
 
         {submitState !== "done" && (
