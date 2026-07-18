@@ -196,6 +196,29 @@ export async function assist(
 }
 
 /**
+ * CV/şirket dokümanından (PDF/DOCX/TXT) yapılandırılmış profil çıkarır.
+ * `apiFetch` kullanılmıyor çünkü çok parçalı (multipart) gövde gönderiliyor —
+ * `Content-Type` header'ı tarayıcı tarafından (boundary ile) otomatik ayarlanmalı.
+ */
+export async function parseProfileDocument(file: File): Promise<BackendUserProfile> {
+  const url = `${BASE}/api/profile/parse-document`;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  let res: Response;
+  try {
+    res = await fetch(url, { method: "POST", body: formData });
+  } catch {
+    throw new ApiError(0, "Sunucuya ulaşılamıyor. Backend çalışıyor mu?");
+  }
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new ApiError(res.status, body || `HTTP ${res.status}`);
+  }
+  return res.json() as Promise<BackendUserProfile>;
+}
+
+/**
  * Bir profile ve programa göre başvuru taslağı üretir.
  */
 export async function fetchApplicationDraft(

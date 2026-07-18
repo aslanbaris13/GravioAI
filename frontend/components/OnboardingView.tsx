@@ -11,6 +11,7 @@
 "use client";
 import { useState } from "react";
 import Ms from "./Ms";
+import { ApiError, parseProfileDocument } from "@/lib/api";
 import type { BackendUserProfile } from "@/lib/api";
 
 const SECTORS = [
@@ -102,6 +103,25 @@ function buildProfile(f: FormState): BackendUserProfile {
   };
 }
 
+/** Yüklenen bir CV/şirket dokümanından çıkarılan alanları forma uygular.
+ * Zaten doldurulmuş alanlar korunur, yalnızca boş olanlar dosyadan gelenle doldurulur —
+ * kullanıcının elle girdiği bilgiler üzerine yazılmaz. */
+function applyParsedProfile(f: FormState, p: BackendUserProfile): FormState {
+  return {
+    ...f,
+    sector: f.sector ?? p.sector ?? null,
+    city: f.city || p.city || "",
+    companyExists: f.companyExists ?? p.company_exists ?? null,
+    companyAgeYears: f.companyAgeYears || (p.company_age_years != null ? String(p.company_age_years) : ""),
+    teamSize: f.teamSize || (p.team_size != null ? String(p.team_size) : ""),
+    womenEntrepreneur: f.womenEntrepreneur || Boolean(p.women_entrepreneur),
+    student: f.student || Boolean(p.student),
+    inTechnopark: f.inTechnopark || Boolean(p.in_technopark),
+    goals: f.goals.length > 0 ? f.goals : p.goals ?? [],
+    about: f.about || p.summary || "",
+  };
+}
+
 /* ------------------------------------------------------------------ */
 /* Ortak küçük stiller                                                  */
 /* ------------------------------------------------------------------ */
@@ -145,7 +165,39 @@ export default function OnboardingView({
 }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [docUpload, setDocUpload] = useState<{ status: "idle" | "loading" | "success" | "error"; message?: string }>({
+    status: "idle",
+  });
   const step = STEPS[stepIndex];
+
+  async function handleDocumentUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // aynı dosyayı tekrar seçebilmek için input'u sıfırla
+    if (!file) return;
+
+    setDocUpload({ status: "loading" });
+    try {
+      const parsed = await parseProfileDocument(file);
+      setForm((f) => applyParsedProfile(f, parsed));
+      const detected = [
+        parsed.sector && `Sektör: ${parsed.sector}`,
+        parsed.city && `Şehir: ${parsed.city}`,
+        parsed.team_size != null && `Ekip: ${parsed.team_size} kişi`,
+      ].filter(Boolean);
+      setDocUpload({
+        status: "success",
+        message:
+          detected.length > 0
+            ? `${detected.join(" · ")} tespit edildi.`
+            : "Belge okundu ve aşağıdaki metne eklendi.",
+      });
+    } catch (err) {
+      setDocUpload({
+        status: "error",
+        message: err instanceof ApiError ? err.message : "Belge okunamadı, elle yazmayı deneyebilirsin.",
+      });
+    }
+  }
 
   const isLast = stepIndex === STEPS.length - 1;
   const isFirst = stepIndex === 0;
@@ -572,6 +624,41 @@ export default function OnboardingView({
                   }
                   style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6, fontFamily: "inherit" }}
                 />
+
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14 }}>
+                  <label
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 7,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "#5a6b75",
+                      cursor: docUpload.status === "loading" ? "default" : "pointer",
+                      padding: "9px 15px",
+                      border: "1.5px solid #e0ddd4",
+                      borderRadius: 10,
+                      background: "#fff",
+                    }}
+                  >
+                    <Ms name={docUpload.status === "loading" ? "hourglass_top" : "upload_file"} size={16} color="#5a6b75" />
+                    {docUpload.status === "loading" ? "Okunuyor…" : "CV/şirket dokümanı yükle (PDF/DOCX)"}
+                    <input
+                      type="file"
+                      accept=".pdf,.docx,.txt"
+                      onChange={handleDocumentUpload}
+                      disabled={docUpload.status === "loading"}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+                </div>
+                {docUpload.status === "success" && (
+                  <p style={{ fontSize: 12.5, color: "#1f6f5c", marginTop: 8 }}>{docUpload.message}</p>
+                )}
+                {docUpload.status === "error" && (
+                  <p style={{ fontSize: 12.5, color: "#b94040", marginTop: 8 }}>{docUpload.message}</p>
+                )}
+
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 14, padding: "12px 14px", background: "#fff", border: "1px solid #e7e4dc", borderRadius: 11 }}>
                   <Ms name="tips_and_updates" size={17} color="#a86b12" style={{ marginTop: 1, flexShrink: 0 }} />
                   <p style={{ fontSize: 12.5, color: "#7a6a45", lineHeight: 1.55, margin: 0 }}>
