@@ -1,9 +1,10 @@
 """HTTP uç noktaları."""
+import json
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel
 
 from ..agents import (
@@ -182,6 +183,24 @@ async def assist(body: AssistRequest) -> AssistResult:
     return await Orchestrator().run(
         body.message, history=body.history or None, session_id=body.session_id
     )
+
+
+@router.post(
+    "/assist/stream",
+    dependencies=[Depends(enforce_llm_rate_limit)],
+)
+async def assist_stream(body: AssistRequest) -> StreamingResponse:
+    """`/assist` ile aynı akış, ama yanıt metni Server-Sent Events (SSE) ile
+    token token gönderilir. `/assist` bu uç noktadan etkilenmez, ayrı ve ek
+    bir yoldur (bkz. `Orchestrator.run_stream`)."""
+
+    async def event_source():
+        async for event in Orchestrator().run_stream(
+            body.message, history=body.history or None, session_id=body.session_id
+        ):
+            yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(event_source(), media_type="text/event-stream")
 
 
 @router.get("/session/{session_id}", response_model=SessionState, response_model_by_alias=False)

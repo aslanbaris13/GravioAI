@@ -15,11 +15,10 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { assist, fetchApplicationDraft, fetchSession, saveSession } from "@/lib/api";
-import type { BackendUserProfile, ConversationTurn } from "@/lib/api";
+import { assistStream, fetchApplicationDraft, fetchSession, saveSession } from "@/lib/api";
+import type { AssistStreamEvent, BackendUserProfile, ConversationTurn } from "@/lib/api";
 import { getSessionId } from "@/lib/session";
 import {
-  adaptAssistResult,
   adaptApplicationDraft,
   adaptSessionState,
   profileToChips,
@@ -210,55 +209,80 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     router.push("/chat");
   }
 
-  const onSend = useCallback(async () => {
-    const text = input.trim();
-    if (!text || typing) return;
-
-    setMessages((prev) => [...prev, { id: nextId(), role: "user", text } as ChatMessage]);
-    setInput("");
+  /** onSend ve onSuggestion'ın ortak çekirdeği — assistStream() ile yanıtı
+   * token token alır: "meta" gelince profil/kart mesajları, ilk "token"
+   * gelince yeni bir metin balonu, sonrakilerde o balonun metnine ekleme. */
+  async function sendMessage(text: string, history: ConversationTurn[]) {
+    setMessages((prev) => [
+      ...prev,
+      { id: nextId(), role: "user", text } as ChatMessage,
+      { id: nextId(), role: "assistant", kind: "loading" } as ChatMessage,
+    ]);
     setFollowups([]);
     setTyping(true);
 
-    setMessages((prev) => [
-      ...prev,
-      { id: nextId(), role: "assistant", kind: "loading" } as ChatMessage,
-    ]);
+    let streamingMessageId: string | null = null;
+    let sawAnyContent = false;
+    let lastPrograms: Program[] = [];
+
+    function onEvent(event: AssistStreamEvent) {
+      if (event.type === "meta") {
+        const { profile, programs } = adaptSessionState({ profile: event.profile, matches: event.matches });
+        lastPrograms = programs;
+        setCurrentProfile(profile);
+        setApiPrograms((prev) => {
+          const existingIds = new Set(prev.map((p) => p.id));
+          const fresh = programs.filter((p) => !existingIds.has(p.id));
+          return [...prev, ...fresh];
+        });
+
+        const chips = profileToChips(profile);
+        const programIds = programs.map((p) => p.id);
+        const responses: ChatMessageDraft[] = [];
+        if (chips.length > 0) responses.push({ role: "assistant", kind: "profile", chips });
+        if (programIds.length > 0) responses.push({ role: "assistant", kind: "cards", programIds });
+        if (responses.length > 0) sawAnyContent = true;
+        replaceLastWith(responses);
+      } else if (event.type === "token") {
+        sawAnyContent = true;
+        if (streamingMessageId === null) {
+          const id = nextId();
+          streamingMessageId = id;
+          setMessages((prev) => [
+            ...prev,
+            { id, role: "assistant", kind: "text", text: event.text, delay: 0 } as ChatMessage,
+          ]);
+        } else {
+          const id = streamingMessageId;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === id && m.role === "assistant" && m.kind === "text"
+                ? { ...m, text: m.text + event.text }
+                : m,
+            ),
+          );
+        }
+      } else if (event.type === "error") {
+        push({ role: "assistant", kind: "error", text: `Bir sorun oluştu: ${event.message}` });
+      } else if (event.type === "done") {
+        if (!sawAnyContent) {
+          push({
+            role: "assistant",
+            kind: "text",
+            text: "Profilini tam çıkaramadım. Sektör, şehir, ekip büyüklüğü ve hedefin hakkında biraz daha bilgi verir misin?",
+          });
+        }
+        if (lastPrograms.length > 0) {
+          setFollowups([
+            { key: "apply", label: `${lastPrograms[0].name} başvurusunu hazırla` },
+            { key: "more", label: "Daha fazla destek göster" },
+          ]);
+        }
+      }
+    }
 
     try {
-      const raw = await assist(text, buildHistory(messages), getSessionId());
-      const { profile, programs, reply } = adaptAssistResult(raw);
-
-      setCurrentProfile(profile);
-      setApiPrograms((prev) => {
-        const existingIds = new Set(prev.map((p) => p.id));
-        const fresh = programs.filter((p) => !existingIds.has(p.id));
-        return [...prev, ...fresh];
-      });
-
-      const chips = profileToChips(profile);
-      const programIds = programs.map((p) => p.id);
-      const responses: ChatMessageDraft[] = [];
-
-      if (chips.length > 0) responses.push({ role: "assistant", kind: "profile", chips });
-      if (programIds.length > 0) responses.push({ role: "assistant", kind: "cards", programIds });
-      if (reply) responses.push({ role: "assistant", kind: "text", text: reply });
-
-      if (responses.length === 0) {
-        responses.push({
-          role: "assistant",
-          kind: "text",
-          text: "Profilini tam çıkaramadım. Sektör, şehir, ekip büyüklüğü ve hedefin hakkında biraz daha bilgi verir misin?",
-        });
-      }
-
-      replaceLastWith(responses);
-
-      if (programIds.length > 0) {
-        setFollowups([
-          { key: "apply", label: `${programs[0].name} başvurusunu hazırla` },
-          { key: "more", label: "Daha fazla destek göster" },
-        ]);
-      }
+      await assistStream(text, history, getSessionId(), onEvent);
     } catch (err: unknown) {
       removeLastLoading();
       const msg = err instanceof Error ? err.message : "Beklenmeyen bir hata oluştu.";
@@ -266,6 +290,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     } finally {
       setTyping(false);
     }
+  }
+
+  const onSend = useCallback(async () => {
+    const text = input.trim();
+    if (!text || typing) return;
+    const history = buildHistory(messages);
+    setInput("");
+    await sendMessage(text, history);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, typing]);
 
@@ -291,56 +323,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const label = labelMap[suggestionKey] ?? suggestionKey;
     setInput(label);
     setTimeout(() => {
-      // Not: assist() (gerçek ağ isteği) bilerek setMessages updater'ının
-      // DIŞINDA çağrılıyor — updater'ın içine konursa React 18 StrictMode
-      // dev modda updater'ı iki kere çalıştırıp isteği ikiye katlıyor.
+      // Not: sendMessage() (gerçek ağ isteği) bilerek setTimeout ile
+      // ertelenip çağrılıyor — doğrudan render sırasında tetiklenirse
+      // React 18 StrictMode dev modda iki kere çalışıp isteği ikiye katlıyor.
       const snapshotHistory = buildHistory(messages);
-      setMessages((prev) => [
-        ...prev,
-        { id: nextId(), role: "user", text: label } as ChatMessage,
-        { id: nextId(), role: "assistant", kind: "loading" } as ChatMessage,
-      ]);
-      setFollowups([]);
-      setTyping(true);
-
-      assist(label, snapshotHistory, getSessionId())
-        .then((raw) => {
-          const { profile, programs, reply } = adaptAssistResult(raw);
-          setCurrentProfile(profile);
-          setApiPrograms((prev2) => {
-            const existingIds = new Set(prev2.map((p) => p.id));
-            const fresh = programs.filter((p) => !existingIds.has(p.id));
-            return [...prev2, ...fresh];
-          });
-
-          const chips = profileToChips(profile);
-          const programIds = programs.map((p) => p.id);
-          const responses: ChatMessageDraft[] = [];
-          if (chips.length > 0) responses.push({ role: "assistant", kind: "profile", chips });
-          if (programIds.length > 0) responses.push({ role: "assistant", kind: "cards", programIds });
-          if (reply) responses.push({ role: "assistant", kind: "text", text: reply });
-
-          replaceLastWith(responses);
-
-          if (programIds.length > 0) {
-            setFollowups([
-              { key: "apply", label: `${programs[0].name} başvurusunu hazırla` },
-              { key: "more", label: "Daha fazla destek göster" },
-            ]);
-          }
-        })
-        .catch((err: unknown) => {
-          removeLastLoading();
-          const msg = err instanceof Error ? err.message : "Hata oluştu.";
-          setMessages((m) => [
-            ...m,
-            { id: nextId(), role: "assistant", kind: "error", text: msg } as ChatMessage,
-          ]);
-        })
-        .finally(() => {
-          setTyping(false);
-          setInput("");
-        });
+      setInput("");
+      void sendMessage(label, snapshotHistory);
     }, 50);
   }
 
