@@ -184,14 +184,18 @@ export interface ConversationTurn {
  * Ana orkestratör çağrısı.
  * Kullanıcı mesajından profil → eşleştirme → uygunluk pipeline'ını çalıştırır.
  * `history` ile önceki konuşma turları gönderilir; backend bağlamsal profil çıkarır.
+ * `sessionId` verilirse backend, turu bitirdikten sonra profil + eşleşmeleri
+ * otomatik olarak hafızaya (user_sessions) kaydeder — çağıran taraf ayrıca
+ * `saveSession()` çağırmak zorunda değildir.
  */
 export async function assist(
   message: string,
   history?: ConversationTurn[],
+  sessionId?: string,
 ): Promise<BackendAssistResult> {
   return apiFetch<BackendAssistResult>("/assist", {
     method: "POST",
-    body: JSON.stringify({ message, history: history ?? [] }),
+    body: JSON.stringify({ message, history: history ?? [], session_id: sessionId ?? null }),
   });
 }
 
