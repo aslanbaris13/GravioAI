@@ -4,7 +4,7 @@ Profil Çıkarma Ajanı bunu serbest metinden üretir; Eşleştirme Ajanı bunda
 arama sorgusu kurar; Uygunluk Ajanı bunu program koşullarıyla karşılaştırır.
 Alan açıklamaları (description) LLM'e şema üzerinden ipucu olarak da geçer.
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class UserProfile(BaseModel):
@@ -29,6 +29,21 @@ class UserProfile(BaseModel):
     summary: str | None = Field(
         default=None, description="Profilin kısa serbest-metin özeti (arama/eşleştirme için)"
     )
+
+    @model_validator(mode="after")
+    def _normalize_inconsistent_fields(self) -> "UserProfile":
+        """LLM çıktısındaki tutarsız/anlamsız alan kombinasyonlarını sessizce
+        temizler — hata fırlatmaz, çünkü bu alanlar zaten opsiyonel ve `null`
+        bırakılması "emin değilse uydurma" felsefesiyle tutarlı bir sonuç.
+        """
+        if self.team_size is not None and self.team_size < 0:
+            self.team_size = None
+        if self.company_age_years is not None and self.company_age_years < 0:
+            self.company_age_years = None
+        if self.company_exists is False:
+            # Kurulu şirket yoksa "şirket yaşı" anlamsız.
+            self.company_age_years = None
+        return self
 
     def to_query_text(self) -> str:
         """Eşleştirme (RAG) için embed'lenecek metni üretir."""

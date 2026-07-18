@@ -1,7 +1,7 @@
 """HTTP uç noktaları."""
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import Response
 from pydantic import BaseModel
@@ -14,6 +14,7 @@ from ..agents import (
     ProfileExtractor,
     ReportWriterAgent,
 )
+from ..core import document_parser
 from ..core.docx_export import build_report_docx
 from ..core.embedder import get_embedding_client
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
@@ -98,6 +99,28 @@ async def extract_profile(body: ProfileRequest) -> UserProfile:
     """Serbest metinden yapılandırılmış kullanıcı profili çıkarır (Profil Çıkarma Ajanı)."""
     agent = ProfileExtractor()
     return await agent.run(body.message)
+
+
+@router.post(
+    "/profile/parse-document",
+    response_model=UserProfile,
+    dependencies=[Depends(enforce_llm_rate_limit)],
+)
+async def parse_profile_document(file: UploadFile = File(...)) -> UserProfile:
+    """CV/şirket dokümanından (PDF/DOCX/TXT) yapılandırılmış profil çıkarır.
+
+    Dosyayı düz metne çevirir (`document_parser.extract_text`), sonra var olan
+    Profil Çıkarma Ajanı'na aynen serbest sohbet metni gibi verir — yeni bir
+    çıkarım mantığı gerekmez.
+    """
+    raw = await file.read()
+    try:
+        text = await run_in_threadpool(document_parser.extract_text, raw, file.filename or "")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    agent = ProfileExtractor()
+    return await agent.run(text)
 
 
 class EligibilityRequest(BaseModel):
