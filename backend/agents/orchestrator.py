@@ -28,6 +28,7 @@ from ..models.profile import UserProfile
 from .eligibility import EligibilityAgent
 from .intent_classifier import IntentClassifier
 from .matching import MatchingAgent
+from .memory import MemoryAgent
 from .profile_extractor import ProfileExtractor
 
 logger = logging.getLogger(__name__)
@@ -80,12 +81,14 @@ class Orchestrator:
         self._profile_agent = ProfileExtractor()
         self._matching_agent = MatchingAgent()
         self._eligibility_agent = EligibilityAgent()
+        self._memory_agent = MemoryAgent()
 
     async def run(
         self,
         message: str,
         *,
         history: list[ConversationTurn] | None = None,
+        session_id: str | None = None,
         match_limit: int = 5,
         eligibility_limit: int = 3,
     ) -> AssistResult:
@@ -111,7 +114,18 @@ class Orchestrator:
 
         duration_ms = (time.monotonic() - t0) * 1000
         logger.info("chain_completed intent=%s duration_ms=%.0f", intent_result.intent.value, duration_ms)
+
+        if session_id:
+            await self._save_memory(session_id, result)
+
         return result
+
+    async def _save_memory(self, session_id: str, result: AssistResult) -> None:
+        """Turu hafızaya kaydeder — başarısız olsa bile kullanıcı yanıtsız kalmamalı."""
+        try:
+            await self._memory_agent.save(session_id, result.profile, result.matches)
+        except Exception:  # noqa: BLE001 — kayıt hatası sohbeti kesmemeli
+            logger.exception("memory_save_failed session_id=%s", session_id)
 
     async def _classify_intent(
         self, message: str, history: list[ConversationTurn] | None

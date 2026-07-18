@@ -164,6 +164,7 @@ async def draft_application(body: ApplicationRequest) -> ApplicationDraft:
 class AssistRequest(BaseModel):
     message: str
     history: list[ConversationTurn] = []
+    session_id: str | None = None
 
 
 @router.post(
@@ -173,8 +174,14 @@ class AssistRequest(BaseModel):
     dependencies=[Depends(enforce_llm_rate_limit)],
 )
 async def assist(body: AssistRequest) -> AssistResult:
-    """Uçtan uca akış: mesaj + geçmiş → profil → eşleştirme → uygunluk (Orkestratör)."""
-    return await Orchestrator().run(body.message, history=body.history or None)
+    """Uçtan uca akış: mesaj + geçmiş → profil → eşleştirme → uygunluk (Orkestratör).
+
+    `session_id` verilirse, Orkestratör turu bitirdikten sonra profil +
+    eşleşmeleri otomatik olarak hafızaya (user_sessions) kaydeder.
+    """
+    return await Orchestrator().run(
+        body.message, history=body.history or None, session_id=body.session_id
+    )
 
 
 @router.get("/session/{session_id}", response_model=SessionState, response_model_by_alias=False)

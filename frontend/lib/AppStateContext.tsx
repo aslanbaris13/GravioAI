@@ -16,7 +16,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { assist, fetchApplicationDraft, fetchSession, saveSession } from "@/lib/api";
-import type { BackendAssistResult, BackendUserProfile, ConversationTurn } from "@/lib/api";
+import type { BackendUserProfile, ConversationTurn } from "@/lib/api";
 import { getSessionId } from "@/lib/session";
 import {
   adaptAssistResult,
@@ -119,10 +119,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const idRef = useRef(1);
   const nextId = () => String(idRef.current++);
-
-  function persistSession(raw: BackendAssistResult) {
-    saveSession(getSessionId(), { profile: raw.profile, matches: raw.matches }).catch(() => {});
-  }
 
   /** Uygulama açılışında önceki oturumdan kalan profil + eşleşmeleri geri yükler. */
   useEffect(() => {
@@ -229,8 +225,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     ]);
 
     try {
-      const raw = await assist(text, buildHistory(messages));
-      persistSession(raw);
+      const raw = await assist(text, buildHistory(messages), getSessionId());
       const { profile, programs, reply } = adaptAssistResult(raw);
 
       setCurrentProfile(profile);
@@ -308,9 +303,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setFollowups([]);
       setTyping(true);
 
-      assist(label, snapshotHistory)
+      assist(label, snapshotHistory, getSessionId())
         .then((raw) => {
-          persistSession(raw);
           const { profile, programs, reply } = adaptAssistResult(raw);
           setCurrentProfile(profile);
           setApiPrograms((prev2) => {
