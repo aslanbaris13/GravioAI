@@ -2,11 +2,11 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from backend.agents.orchestrator import Orchestrator
-from backend.models.eligibility import EligibilityResult, EligibilityState
-from backend.models.intent import Intent, IntentResult
-from backend.models.profile import UserProfile
-from backend.models.program import SupportProgram
+from agents.orchestrator import Orchestrator
+from models.eligibility import EligibilityResult, EligibilityState
+from models.intent import Intent, IntentResult
+from models.profile import UserProfile
+from models.program import SupportProgram
 
 
 def _program(pid: str) -> SupportProgram:

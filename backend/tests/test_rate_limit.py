@@ -1,7 +1,7 @@
 import pytest
 from fastapi import HTTPException
 
-from backend.core.rate_limit import SlidingWindowLimiter
+from core.rate_limit import SlidingWindowLimiter
 
 
 def test_allows_requests_under_limit():

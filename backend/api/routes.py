@@ -3,17 +3,17 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
-from ..agents import (
+from agents import (
     ApplicationAgent,
     EligibilityAgent,
     Orchestrator,
     ProfileExtractor,
 )
-from ..core.embedder import get_embedding_client
-from ..core.llm import LLMClient, LLMMessage, get_llm_client
-from ..core.rate_limit import enforce_llm_rate_limit
-from ..data import repo
-from ..models import (
+from core.embedder import get_embedding_client
+from core.llm import LLMClient, LLMMessage, get_llm_client
+from core.rate_limit import enforce_llm_rate_limit
+from data import repo
+from models import (
     ApplicationDraft,
     AssistResult,
     Category,

@@ -7,7 +7,7 @@ değişse bile ajan kodu değişmez.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Literal, Optional
-from ...models.program import ExtractedSupportInfo
+from models.program import ExtractedSupportInfo
 
 Role = Literal["user", "assistant"]
 

@@ -4,9 +4,9 @@ Bir kullanıcı profilini tek bir destek programının koşullarıyla karşıla�
 skor + koşul-koşul değerlendirme (karşılandı/aksiyon/eksik) üretir. Çıktı,
 frontend'in uygunluk ekranını besleyecek `EligibilityResult` modelidir.
 """
-from ..models.eligibility import EligibilityResult
-from ..models.profile import UserProfile
-from ..models.program import SupportProgram
+from models.eligibility import EligibilityResult
+from models.profile import UserProfile
+from models.program import SupportProgram
 from .base import Agent
 
 

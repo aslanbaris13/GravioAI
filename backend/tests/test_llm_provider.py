@@ -2,10 +2,10 @@ import pytest
 from unittest.mock import AsyncMock, patch
 import asyncio
 
-from backend.core.config import Settings
-from backend.core.llm.factory import build_llm_client
-from backend.core.llm.base import LLMClient, LLMMessage
-from backend.agents.base import Agent
+from core.config import Settings
+from core.llm.factory import build_llm_client
+from core.llm.base import LLMClient, LLMMessage
+from agents.base import Agent
 
 class MockLLMClient(LLMClient):
     def __init__(self, responses=None, exceptions=None):
@@ -40,7 +40,7 @@ def test_build_llm_client_anthropic():
         llm_model="test-model"
     )
     client = build_llm_client(settings)
-    from backend.core.llm.anthropic_client import AnthropicClient
+    from core.llm.anthropic_client import AnthropicClient
     assert isinstance(client, AnthropicClient)
     assert client._model == "test-model"
 
@@ -51,7 +51,7 @@ def test_build_llm_client_gemini():
         llm_model="test-model"
     )
     client = build_llm_client(settings)
-    from backend.core.llm.gemini_client import GeminiClient
+    from core.llm.gemini_client import GeminiClient
     assert isinstance(client, GeminiClient)
     assert client._model == "test-model"
 

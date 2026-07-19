@@ -16,8 +16,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api.routes import router
-from backend.core.config import get_settings
+from api.routes import router
+from core.config import get_settings
 
 logging.basicConfig(
     level=logging.INFO,

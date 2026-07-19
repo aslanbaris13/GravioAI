@@ -21,7 +21,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 
-from ..core.llm import LLMClient, LLMMessage, get_llm_client
+from core.llm import LLMClient, LLMMessage, get_llm_client
 
 TModel = TypeVar("TModel", bound=BaseModel)
 

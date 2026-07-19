@@ -1,6 +1,6 @@
 import pytest
 
-from backend.core.cleaner import (
+from core.cleaner import (
     KalkinmaAjansiCleaner,
     KOSGEBCleaner,
     TubitakCleaner,
