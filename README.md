@@ -99,7 +99,10 @@ GravioAI "tek bir LLM çağrısı" değil; bir **orkestratör** tarafından yön
 
 ---
 
-# 🚀 Sprint 1
+<details>
+<summary><h1>🚀 Sprint 1</h1></summary>
+
+<br>
 
 ## 🎯 Sprint Amacı
 
@@ -147,10 +150,7 @@ Sprint backlog'u, projenin ilk sürümünde geliştirilecek kullanıcı hikâyel
   <summary><b>💻 Frontend Arayüz Demosu</b></summary>
   <br>
 
-
 https://github.com/user-attachments/assets/104a3304-f776-4950-9042-9d34f0b2e240
-
-
 
 </details>
 
@@ -161,12 +161,8 @@ https://github.com/user-attachments/assets/104a3304-f776-4950-9042-9d34f0b2e240
 
 Sprint süreci boyunca görev takibi Jira Sprint Board üzerinden gerçekleştirilmiştir.
 
-
 ### Sprint Başlangıcı
  <img width="1440" height="867" alt="Ekran görüntüsü 2026-06-27 145942" src="https://github.com/user-attachments/assets/d23317d0-a5b1-4ec4-aad1-59fe6b87d515" />
-
-
-
 
 ### Sprint İlerlemeleri
 <img width="1230" height="740" alt="Ekran görüntüsü 2026-07-04 143633" src="https://github.com/user-attachments/assets/7160997a-812f-43df-86e0-c9e3e75d1dab" />
@@ -178,7 +174,6 @@ Sprint süreci boyunca görev takibi Jira Sprint Board üzerinden gerçekleştir
 ### Sprint Sonu
 
 <img width="936" height="732" alt="Ekran görüntüsü 2026-07-05 221733" src="https://github.com/user-attachments/assets/42b0ebf6-b0de-4c02-a3ef-579aa0d86bf6" />
-
 
 </details>
 
@@ -202,8 +197,6 @@ Toplantılarda;
 Toplantı gündemleri ve alınan kararlar aşağıda verilen linkteki Jira dokümanında yer almaktadır.
 https://hatiicenurolgun.atlassian.net/wiki/pages/resumedraft.action?draftId=1
 
-
-
 </details>
 
 ---
@@ -218,7 +211,6 @@ https://hatiicenurolgun.atlassian.net/wiki/pages/resumedraft.action?draftId=1
 | Planlanan Story Point | 54 SP |
 | Tamamlanan Story Point | 54 SP |
 | Tamamlanan Görev | 10 |
-|
 
 ### Sprint Çıktıları
 
@@ -227,8 +219,6 @@ https://hatiicenurolgun.atlassian.net/wiki/pages/resumedraft.action?draftId=1
 - Girişim destek programlarının toplanması ve veri şemasının oluşturulması çalışmalarında önemli ilerleme kaydedildi.
 - Embedding Pipeline, Vector Database ve Eligibility modüllerinin ilk sürümleri geliştirildi.
 - Sprint sonunda tamamlanamayan görevlerin Sprint 2'de devam ettirilmesine karar verildi.
-
-
 
 </details>
 
@@ -260,88 +250,274 @@ Sprint 2 kapsamında farklı veri kaynaklarından veri toplanmasını standartla
 
 </details>
 
+</details>
 
 ---
 
-# Sprint 2
+<details>
+<summary><h1>🚀 Sprint 2</h1></summary>
 
-## Sprint Bilgileri
+<br>
+
+<details>
+<summary>📋 <strong>Sprint Bilgileri</strong></summary>
+
+<br>
 
 | Özellik | Açıklama |
 |---------|----------|
-| **Sprint Tarihi** | **7 Temmuz 2026 – 19 Temmuz 2026** |
+| **Sprint Tarihi** | **6 Temmuz 2026 – 19 Temmuz 2026** |
 | **Sprint Teması** | **Intelligence & Agent Katmanının Geliştirilmesi** |
 | **Sprint Amacı** | Kullanıcı profillerini analiz ederek uygun girişim destek programlarını önerebilen, uygunluk değerlendirmesi yapabilen ve doğal dil üzerinden etkileşim kurabilen karar verme altyapısını geliştirmek. Bu sprintte semantik eşleştirme, ajan mimarisi, veri platformu geliştirmeleri ve sohbet sistemi entegrasyonu üzerine çalışmalar yürütülmektedir. |
 
+</details>
+
 ---
 
-## Sprint Planning
+<details>
+<summary>📝 <strong>Sprint Planning</strong></summary>
+
+<br>
 
 | Metrik | Değer |
 |--------|------:|
-| **Sprint Süresi** | 13 Gün |
+| **Sprint Süresi** | 14 Gün |
 | **Takım Kapasitesi** | 4 Kişi (%100) |
 | **Toplam Work Item** | 13 |
 | **Planlanan Story Point** | 71 |
-| **Tamamlanan Story Point** | Devam Ediyor |
+| **Tamamlanan Story Point** |71 |
+
+### Tamamlanan Story Point'lerin Bireysel Dağılımı
+
+- **Barış:** 42 SP
+- **Ferhat:** 18 SP
+- **Hatice:** 13 SP
+- **Sena:** 0 SP
+
+</details>
 
 ---
 
-## Sprint Backlog
+<details>
+<summary>📌 <strong>Sprint Backlog</strong></summary>
+
+<br>
 
 > Sprint backlog aşağıda gösterilmektedir.
 
-<img width="705" height="841" alt="Ekran görüntüsü 2026-07-08 224343" src="https://github.com/user-attachments/assets/893c8a51-7067-4546-9181-216ba3629acb" />
+
 <img width="1672" height="583" alt="Ekran görüntüsü 2026-07-08 224104" src="https://github.com/user-attachments/assets/d80af85b-e671-4b2c-bcdb-db7a65ceb994" />
+
 <img width="1441" height="863" alt="Ekran görüntüsü 2026-07-17 120934" src="https://github.com/user-attachments/assets/33251640-58b4-41f4-8f8d-e7a8df857a2d" />
+
 <img width="1377" height="846" alt="Ekran görüntüsü 2026-07-17 120956" src="https://github.com/user-attachments/assets/511ccc93-c75b-4986-bdba-3d11a00c6794" />
 
+<img width="720" height="867" alt="image" src="https://github.com/user-attachments/assets/713a19cc-0d3a-433a-8f1e-ceee41312f04" />
+
+</details>
 
 ---
 
-# Sprint Boyunca Gerçekleştirilen Toplantılar
+<details>
+<summary>🤝 <strong>Sprint Toplantıları</strong></summary>
+
+<br>
 
 Sprint süresince takım üyelerinin yoğun programları nedeniyle yalnızca iki toplantı gerçekleştirilebilmiştir. Görev takibi ve teknik değerlendirmeler Jira ile takım içi iletişim kanalları üzerinden düzenli olarak sürdürülmüştür.
 
 Toplantı gündemleri ve alınan kararlar aşağıda verilen linkteki Jira dokümanında yer almaktadır.
+https://hatiicenurolgun.atlassian.net/wiki/x/AYCM
 
-### Değerlendirme
 
-Tamamlanan çalışmalar:
+</details>
+
+---
+
+<details>
+<summary>🖥️ <strong>Sprint Değerlendirmesi</strong></summary>
+
+<br>
+
+### Tamamlanan Çalışmalar
 
 - ✅ Planner / Orchestrator Agent
 - ✅ Chat Flow
 - ✅ Chat Interface UI
 - ✅ Hierarchical Parent-Child Chunking
-
-Devam eden çalışmalar:
-
-- 🔄 Funding Search System
-- 🔄 Profile Extraction System
-- 🔄 Memory Agent
-- 🔄 Eligibility Checking
-- 🔄 Eligibility Matching
-- 🔄 Retrieval Accuracy Testleri
-- 🔄 Chat Backend Entegrasyonu
-- 🔄 Veri Toplama ve Normalization İyileştirmeleri
+- ✅ Funding Search System
+- ✅ Profile Extraction System
+- ✅ Memory Agent
+- ✅ Eligibility Checking
+- ✅ Eligibility Matching
+- ✅ Retrieval Accuracy Testleri
+- ✅ Chat Backend Entegrasyonu
+- ✅ Veri Toplama ve Normalization İyileştirmeleri
 
 ### Alınan Kararlar
 
+> Sprint boyunca geliştirilen tüm modüllerin entegrasyonu başarıyla tamamlanmıştır. Sprint hedefleri doğrultusunda planlanan çalışmalar gerçekleştirilmiş olup, bir sonraki sprintte sistemin performansını artırmaya ve yeni özellikler geliştirmeye odaklanılması kararlaştırılmıştır.
+
+</details>
 
 ---
 
-## Sprint Durumu
+<details>
+<summary>✅ <strong>Sprint Review</strong></summary>
 
-Şu an itibarıyla sprint planlandığı şekilde ilerlemektedir. Planner Agent, Chat Flow, Chat Interface UI ve Hierarchical Chunking geliştirmeleri tamamlanmıştır. Kalan modüllerin sprint bitiş tarihine kadar tamamlanması hedeflenmektedir.
+<br>
 
-> **Not:** Bu README sprint tamamlanmadan önce hazırlanmıştır. Sprint sonunda Story Point bilgileri ve görev durumları güncellenecektir.
+Sprint planlandığı şekilde başarıyla tamamlanmıştır. Sprint kapsamında hedeflenen tüm geliştirmeler gerçekleştirilmiş; Funding Search System, Profile Extraction System, Eligibility Checking ve Matching modülleri, Memory Agent, Chat Backend entegrasyonu, veri toplama ve normalization iyileştirmeleri ile Retrieval Accuracy testleri tamamlanmıştır. Ayrıca Planner/Orchestrator Agent, Chat Flow, Chat Interface UI ve Hierarchical Parent-Child Chunking geliştirmeleri sisteme entegre edilerek karar verme katmanının ilk uçtan uca çalışan sürümü oluşturulmuştur.
 
-# Sprint 3
+Bu sprint sonunda proje, kullanıcı profilini analiz edebilen, uygun destek programlarını semantik olarak eşleştirebilen, uygunluk değerlendirmesi yapabilen ve doğal dil üzerinden etkileşim kurabilen bütünleşik bir yapıya ulaşmıştır.
 
-> ⚪ **Sprint Tarihi:** 20 Temmuz – 2 Ağustos 2026
-> **Sprint Hedefi:** Uçtan uca akışın tamamlanması · canlıya alma · cilalama · 3 dk tanıtım videosu · teslim
 
-_(Sprint 3 dokümantasyonu sprint sonunda eklenecek)_
+</details>
+
+---
+
+<br>
+
+<details>
+<summary>🔄 <strong>Sprint Retrospective</strong></summary>
+
+<br>
+
+### 👍 İyi Giden Noktalar
+
+- Sprint başlangıcında belirlenen hedeflerin tamamı başarıyla gerçekleştirildi.
+- Semantik eşleştirme, uygunluk değerlendirme ve ajan mimarisi bileşenleri planlandığı şekilde ilerledi.
+- Planner/Orchestrator Agent, Memory Agent ve Chat sistemi arasındaki entegrasyon başarıyla sağlandı.
+- Hierarchical (Parent-Child) Chunking yapısı geliştirilerek retrieval altyapısı güçlendirildi.
+- Takım üyeleri farklı modüller üzerinde paralel çalışarak geliştirme sürecini verimli şekilde yönetti.
+
+### ⚠️ Karşılaşılan Zorluklar
+
+- Sprint süresince takım üyelerinin yoğun programları nedeniyle yalnızca iki resmi toplantı gerçekleştirilebildi.
+- Farklı modüllerin aynı anda geliştirilmesi entegrasyon sürecinde ek koordinasyon gerektirdi.
+- Veri toplama ve normalization süreçlerinde farklı veri kaynaklarından kaynaklanan uyumluluk problemleriyle karşılaşıldı ve gerekli düzenlemeler yapıldı.
+
+### 🚀 İyileştirme Kararları
+
+- Sprint boyunca iletişim Jira ve takım içi mesajlaşma kanalları üzerinden etkin şekilde sürdürüldü. Bir sonraki sprintte daha düzenli ara değerlendirme toplantıları planlanacaktır.
+- Ortak geliştirme standartları ve kod yapısının korunması için teknik dokümantasyonun sprint boyunca güncel tutulmasına devam edilecektir.
+- Retrieval performansını artırmak amacıyla farklı chunking ve embedding stratejileri değerlendirilecektir.
+- Geliştirilen ajan mimarisi üzerine yeni karar verme yetenekleri ve kullanıcı deneyimini geliştirecek özellikler eklenmesi planlanmaktadır.
+
+</details>
+</details>
+
+</details>
+
+---
+
+<details>
+<summary><h1>🚀 Sprint 3</h1></summary>
+
+<br>
+
+<details>
+<summary>📋 <strong>Sprint Bilgileri</strong></summary>
+
+<br>
+
+| Özellik | Açıklama |
+|---------|----------|
+| **Sprint Tarihi** | **20 Temmuz 2026 – 2 Ağustos 2026** |
+| **Sprint Teması** | **Uçtan uca akışın tamamlanması, canlıya alma ve teslim** |
+| **Sprint Amacı** | Uçtan uca akışın tamamlanması · canlıya alma · cilalama · 3 dk tanıtım videosu · teslim |
+
+</details>
+
+---
+
+<details>
+<summary>📝 <strong>Sprint Planning</strong></summary>
+
+<br>
+
+| Metrik | Değer |
+|--------|------:|
+| **Sprint Süresi** | 14 Gün |
+| **Takım Kapasitesi** | 4 Kişi (%100) |
+| **Toplam Work Item** | Belirlenecek |
+| **Planlanan Story Point** | Belirlenecek |
+| **Tamamlanan Story Point** | Başlamadı |
+
+### Tamamlanan Story Point'lerin Bireysel Dağılımı
+
+- **Barış:** 0 SP
+- **Ferhat:** 0 SP
+- **Hatice:** 0 SP
+- **Sena:** 0 SP
+
+</details>
+
+---
+
+<details>
+<summary>📌 <strong>Sprint Backlog</strong></summary>
+
+<br>
+
+> Sprint backlog aşağıda gösterilmektedir. *(Sprint başladığında güncellenecektir)*
+
+</details>
+
+---
+
+<details>
+<summary>🤝 <strong>Sprint Toplantıları</strong></summary>
+
+<br>
+
+> Sprint süresince gerçekleştirilecek toplantı notları ve Jira linkleri bu bölüme eklenecektir.
+
+</details>
+
+---
+
+<details>
+<summary>🖥️ <strong>Sprint Değerlendirmesi</strong></summary>
+
+<br>
+
+### Tamamlanan Çalışmalar
+
+- ⏳ *(Sprint sonunda eklenecektir)*
+
+### Devam Eden Çalışmalar
+
+- ⏳ *(Sprint sonunda eklenecektir)*
+
+### Alınan Kararlar
+
+> *(Sprint sonunda eklenecektir)*
+
+</details>
+
+---
+
+<details>
+<summary>✅ <strong>Sprint Review</strong></summary>
+
+<br>
+
+> *(Sprint sonu değerlendirmesi bu bölüme eklenecektir)*
+
+</details>
+
+---
+
+<details>
+<summary>🔄 <strong>Sprint Retrospective</strong></summary>
+
+<br>
+
+> *(Sprint tamamlandıktan sonra ekip değerlendirmesi, karşılaşılan problemler ve gelecek sprint için alınan aksiyonlar bu bölümde yer alacaktır)*
+
+</details>
+
+</details>
 
 ---
 
