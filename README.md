@@ -287,13 +287,6 @@ Sprint 2 kapsamında farklı veri kaynaklarından veri toplanmasını standartla
 | **Planlanan Story Point** | 71 |
 | **Tamamlanan Story Point** |71 |
 
-### Tamamlanan Story Point'lerin Bireysel Dağılımı
-
-- **Barış:** 42 SP
-- **Ferhat:** 15 SP
-- **Hatice:** 13 SP
-- **Sena:** 3 SP
-
 </details>
 
 ---
@@ -337,14 +330,32 @@ https://hatiicenurolgun.atlassian.net/wiki/x/AYCM
 
 <br>
 
+<img width="1352" height="800" alt="Ekran Resmi 2026-07-19 15 54 44" src="https://github.com/user-attachments/assets/e9fd2215-b117-46ad-b972-4923c4bbf11f" />
 
-<img width="1600" height="942" alt="WhatsApp Image 2026-07-19 at 15 57 06 (2)" src="https://github.com/user-attachments/assets/59523e5d-60e0-4c12-8a5f-d8ff3b9f1787" />
-<img width="1352" height="799" alt="Ekran Resmi 2026-07-19 15 55 31" src="https://github.com/user-attachments/assets/e095a86b-80a8-4000-942a-41e36bbc60f1" />
-<img width="1352" height="797" alt="Ekran Resmi 2026-07-19 15 55 26" src="https://github.com/user-attachments/assets/8583c5b0-8bed-44da-8586-2bbc4b312b98" />
-<img width="1352" height="796" alt="Ekran Resmi 2026-07-19 15 55 19" src="https://github.com/user-attachments/assets/d0a7755f-a5b2-4407-9c00-67b3ec5173ab" />
-<img width="1352" height="797" alt="Ekran Resmi 2026-07-19 15 55 05" src="https://github.com/user-attachments/assets/35096221-0a1e-4bb3-8b00-165b33e879dd" />
-<img width="1352" height="798" alt="Ekran Resmi 2026-07-19 15 54 50" src="https://github.com/user-attachments/assets/ee518198-a90d-425b-bdd9-d42ec1dee465" />
-<img width="1352" height="797" alt="Ekran Resmi 2026-07-19 15 55 36" src="https://github.com/user-attachments/assets/f15e5f1d-3259-44f9-8f42-65f92d08a886" />
+<img width="1352" height="798" alt="Ekran Resmi 2026-07-19 15 54 50" src="https://github.com/user-attachments/assets/3db1cbad-129f-4435-89bc-b5760550614f" />
+
+<img width="1352" height="797" alt="Ekran Resmi 2026-07-19 15 55 05" src="https://github.com/user-attachments/assets/ebe5228b-59eb-424b-b46c-0c77214ef024" />
+
+<img width="1352" height="796" alt="Ekran Resmi 2026-07-19 15 55 19" src="https://github.com/user-attachments/assets/d0694ec0-38ec-4b1f-b50b-c91a997b563d" />
+
+<img width="1352" height="797" alt="Ekran Resmi 2026-07-19 15 55 26" src="https://github.com/user-attachments/assets/7f284572-3ed9-42c1-8451-0a59c658c933" />
+
+<img width="1352" height="799" alt="Ekran Resmi 2026-07-19 15 55 31" src="https://github.com/user-attachments/assets/e016aad8-0cc4-424f-b5af-08a398b4eaf3" />
+
+<img width="1352" height="797" alt="Ekran Resmi 2026-07-19 15 55 36" src="https://github.com/user-attachments/assets/8840904b-034a-45b0-a444-01591dd17828" />
+
+<img width="1600" height="942" alt="WhatsApp Image 2026-07-19 at 15 57 06" src="https://github.com/user-attachments/assets/e767a09e-33ae-4934-96e5-e55e9fde457d" />
+
+<img width="1600" height="942" alt="WhatsApp Image 2026-07-19 at 15 57 18" src="https://github.com/user-attachments/assets/722611e5-88f7-403c-93a5-e89543e4ede2" />
+
+<img width="1600" height="944" alt="WhatsApp Image 2026-07-19 at 15 57 57" src="https://github.com/user-attachments/assets/d053fdd1-b1b5-4701-9c9c-e6473bc985af" />
+
+<img width="1600" height="942" alt="WhatsApp Image 2026-07-19 at 15 57 30" src="https://github.com/user-attachments/assets/02819a7f-1900-440b-bf65-3366a128ad39" />
+
+<img width="1600" height="946" alt="WhatsApp Image 2026-07-19 at 15 58 36" src="https://github.com/user-attachments/assets/71d36c72-4a85-4521-ad7d-4ca5a2ba0480" />
+
+
+
 
 
 </details>
