@@ -17,11 +17,11 @@ import asyncio
 import json
 import re
 from abc import ABC
-from typing import TypeVar
+from typing import AsyncIterator, TypeVar
 
 from pydantic import BaseModel
 
-from ..core.llm import LLMClient, LLMMessage, get_llm_client
+from core.llm import LLMClient, LLMMessage, get_llm_client
 
 TModel = TypeVar("TModel", bound=BaseModel)
 
@@ -115,6 +115,43 @@ class Agent(ABC):
                     raise
                 await asyncio.sleep(2 * (attempt + 1))
         raise RuntimeError("ulaşılamaz")
+
+    async def _chat_stream_with_history(
+        self,
+        history: list[LLMMessage],
+        *,
+        system: str | None,
+        max_tokens: int,
+        retries: int = 3,
+    ) -> AsyncIterator[str]:
+        """Konuşma geçmişini gönderir, yanıtı parça parça (chunk) yield eder.
+
+        `_chat_with_history`'den farkı: retry yalnızca **ilk parça gelmeden
+        önceki** hatalarda yapılır. Stream başladıktan sonra bir hata olursa
+        (yarım kalmış bir yanıtı sessizce baştan başlatmak kullanıcıya
+        çelişkili görünür) hata olduğu gibi çağırana yansıtılır.
+        """
+        last_error: Exception | None = None
+        for attempt in range(retries):
+            stream = self._llm.chat_stream(history, system=system, max_tokens=max_tokens)
+            try:
+                first_chunk = await stream.__anext__()
+            except StopAsyncIteration:
+                return
+            except Exception as e:  # noqa: BLE001 — sağlayıcıya özgü hata tipleri değişebilir
+                transient = any(t in str(e).lower() for t in _TRANSIENT)
+                last_error = e
+                if not transient or attempt == retries - 1:
+                    raise
+                await asyncio.sleep(2 * (attempt + 1))
+                continue
+
+            yield first_chunk
+            async for chunk in stream:
+                yield chunk
+            return
+        if last_error:  # pragma: no cover — döngü ya döner ya yükseltir
+            raise last_error
 
     async def _complete(
         self,

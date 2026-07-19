@@ -184,15 +184,100 @@ export interface ConversationTurn {
  * Ana orkestratör çağrısı.
  * Kullanıcı mesajından profil → eşleştirme → uygunluk pipeline'ını çalıştırır.
  * `history` ile önceki konuşma turları gönderilir; backend bağlamsal profil çıkarır.
+ * `sessionId` verilirse backend, turu bitirdikten sonra profil + eşleşmeleri
+ * otomatik olarak hafızaya (user_sessions) kaydeder — çağıran taraf ayrıca
+ * `saveSession()` çağırmak zorunda değildir.
  */
 export async function assist(
   message: string,
   history?: ConversationTurn[],
+  sessionId?: string,
 ): Promise<BackendAssistResult> {
   return apiFetch<BackendAssistResult>("/assist", {
     method: "POST",
-    body: JSON.stringify({ message, history: history ?? [] }),
+    body: JSON.stringify({ message, history: history ?? [], session_id: sessionId ?? null }),
   });
+}
+
+/** `/assist/stream`'in yaydığı olay türleri — bkz. backend `Orchestrator.run_stream`. */
+export type AssistStreamEvent =
+  | { type: "meta"; profile: BackendUserProfile; matches: BackendProgramMatch[] }
+  | { type: "token"; text: string }
+  | { type: "done" }
+  | { type: "error"; message: string };
+
+/**
+ * `assist()`'in streaming karşılığı — yanıt metnini Server-Sent Events (SSE)
+ * üzerinden parça parça alır, her olayı `onEvent`'e iletir. `apiFetch`
+ * kullanılmıyor çünkü yanıt tek bir JSON değil, satır satır bir SSE akışı.
+ */
+export async function assistStream(
+  message: string,
+  history: ConversationTurn[] | undefined,
+  sessionId: string | undefined,
+  onEvent: (event: AssistStreamEvent) => void,
+): Promise<void> {
+  const url = `${BASE}/api/assist/stream`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, history: history ?? [], session_id: sessionId ?? null }),
+    });
+  } catch {
+    throw new ApiError(0, "Sunucuya ulaşılamıyor. Backend çalışıyor mu?");
+  }
+  if (!res.ok || !res.body) {
+    const body = await res.text().catch(() => "");
+    throw new ApiError(res.status, body || `HTTP ${res.status}`);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    let sep: number;
+    while ((sep = buffer.indexOf("\n\n")) !== -1) {
+      const frame = buffer.slice(0, sep);
+      buffer = buffer.slice(sep + 2);
+      const dataLine = frame.split("\n").find((l) => l.startsWith("data: "));
+      if (!dataLine) continue;
+      try {
+        onEvent(JSON.parse(dataLine.slice("data: ".length)) as AssistStreamEvent);
+      } catch {
+        // Bozuk/eksik bir SSE çerçevesi — sessizce atla, akış devam etsin.
+      }
+    }
+  }
+}
+
+/**
+ * CV/şirket dokümanından (PDF/DOCX/TXT) yapılandırılmış profil çıkarır.
+ * `apiFetch` kullanılmıyor çünkü çok parçalı (multipart) gövde gönderiliyor —
+ * `Content-Type` header'ı tarayıcı tarafından (boundary ile) otomatik ayarlanmalı.
+ */
+export async function parseProfileDocument(file: File): Promise<BackendUserProfile> {
+  const url = `${BASE}/api/profile/parse-document`;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  let res: Response;
+  try {
+    res = await fetch(url, { method: "POST", body: formData });
+  } catch {
+    throw new ApiError(0, "Sunucuya ulaşılamıyor. Backend çalışıyor mu?");
+  }
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new ApiError(res.status, body || `HTTP ${res.status}`);
+  }
+  return res.json() as Promise<BackendUserProfile>;
 }
 
 /**

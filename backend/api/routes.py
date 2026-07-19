@@ -1,12 +1,13 @@
 """HTTP uç noktaları."""
+import json
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel
 
-from ..agents import (
+from agents import (
     ApplicationAgent,
     EligibilityAgent,
     Orchestrator,
@@ -14,6 +15,12 @@ from ..agents import (
     ProfileExtractor,
     ReportWriterAgent,
 )
+from core.embedder import get_embedding_client
+from core.llm import LLMClient, LLMMessage, get_llm_client
+from core.rate_limit import enforce_llm_rate_limit
+from data import repo
+from models import (
+from ..core import document_parser
 from ..core.docx_export import build_report_docx
 from ..core.embedder import get_embedding_client
 from ..core.llm import LLMClient, LLMMessage, get_llm_client
@@ -100,6 +107,28 @@ async def extract_profile(body: ProfileRequest) -> UserProfile:
     return await agent.run(body.message)
 
 
+@router.post(
+    "/profile/parse-document",
+    response_model=UserProfile,
+    dependencies=[Depends(enforce_llm_rate_limit)],
+)
+async def parse_profile_document(file: UploadFile = File(...)) -> UserProfile:
+    """CV/şirket dokümanından (PDF/DOCX/TXT) yapılandırılmış profil çıkarır.
+
+    Dosyayı düz metne çevirir (`document_parser.extract_text`), sonra var olan
+    Profil Çıkarma Ajanı'na aynen serbest sohbet metni gibi verir — yeni bir
+    çıkarım mantığı gerekmez.
+    """
+    raw = await file.read()
+    try:
+        text = await run_in_threadpool(document_parser.extract_text, raw, file.filename or "")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    agent = ProfileExtractor()
+    return await agent.run(text)
+
+
 class EligibilityRequest(BaseModel):
     profile: UserProfile
     program_id: str
@@ -141,6 +170,7 @@ async def draft_application(body: ApplicationRequest) -> ApplicationDraft:
 class AssistRequest(BaseModel):
     message: str
     history: list[ConversationTurn] = []
+    session_id: str | None = None
 
 
 @router.post(
@@ -150,8 +180,32 @@ class AssistRequest(BaseModel):
     dependencies=[Depends(enforce_llm_rate_limit)],
 )
 async def assist(body: AssistRequest) -> AssistResult:
-    """Uçtan uca akış: mesaj + geçmiş → profil → eşleştirme → uygunluk (Orkestratör)."""
-    return await Orchestrator().run(body.message, history=body.history or None)
+    """Uçtan uca akış: mesaj + geçmiş → profil → eşleştirme → uygunluk (Orkestratör).
+
+    `session_id` verilirse, Orkestratör turu bitirdikten sonra profil +
+    eşleşmeleri otomatik olarak hafızaya (user_sessions) kaydeder.
+    """
+    return await Orchestrator().run(
+        body.message, history=body.history or None, session_id=body.session_id
+    )
+
+
+@router.post(
+    "/assist/stream",
+    dependencies=[Depends(enforce_llm_rate_limit)],
+)
+async def assist_stream(body: AssistRequest) -> StreamingResponse:
+    """`/assist` ile aynı akış, ama yanıt metni Server-Sent Events (SSE) ile
+    token token gönderilir. `/assist` bu uç noktadan etkilenmez, ayrı ve ek
+    bir yoldur (bkz. `Orchestrator.run_stream`)."""
+
+    async def event_source():
+        async for event in Orchestrator().run_stream(
+            body.message, history=body.history or None, session_id=body.session_id
+        ):
+            yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(event_source(), media_type="text/event-stream")
 
 
 @router.get("/session/{session_id}", response_model=SessionState, response_model_by_alias=False)

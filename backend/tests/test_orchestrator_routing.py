@@ -2,11 +2,11 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from backend.agents.orchestrator import Orchestrator
-from backend.models.eligibility import EligibilityResult, EligibilityState
-from backend.models.intent import Intent, IntentResult
-from backend.models.profile import UserProfile
-from backend.models.program import SupportProgram
+from agents.orchestrator import Orchestrator
+from models.eligibility import EligibilityResult, EligibilityState
+from models.intent import Intent, IntentResult
+from models.profile import UserProfile
+from models.program import SupportProgram
 
 
 def _program(pid: str) -> SupportProgram:
@@ -92,6 +92,66 @@ async def test_profile_info_runs_full_chain_unchanged(orchestrator):
 
     assert result.profile.sector == "Yazılım"
     assert len(result.matches) == 1
+
+
+@pytest.mark.asyncio
+async def test_session_id_triggers_memory_save(orchestrator):
+    """session_id verilince tur bitiminde MemoryAgent.save doğru profil/eşleşmelerle çağrılmalı."""
+    profile = UserProfile(sector="Yazılım")
+    matches = [_program("p3")]
+    with patch.object(
+        orchestrator._intent_agent, "run",
+        new=AsyncMock(return_value=IntentResult(intent=Intent.PROFILE_INFO, confidence=0.95)),
+    ), patch.object(
+        orchestrator._profile_agent, "run", new=AsyncMock(return_value=profile),
+    ), patch.object(
+        orchestrator._matching_agent, "run", new=AsyncMock(return_value=matches),
+    ), patch.object(
+        orchestrator._eligibility_agent, "run", new=AsyncMock(return_value=_eligibility(70)),
+    ), patch.object(
+        orchestrator._profile_agent, "_chat_with_history", new=AsyncMock(return_value="Profilin çıkarıldı."),
+    ), patch.object(
+        orchestrator._memory_agent, "save", new=AsyncMock(),
+    ) as save_mock:
+        result = await orchestrator.run("Düzce'de yazılım şirketi kurdum", session_id="sess-1")
+
+    save_mock.assert_awaited_once()
+    called_session_id, called_profile, called_matches = save_mock.call_args.args
+    assert called_session_id == "sess-1"
+    assert called_profile.sector == "Yazılım"
+    assert [m.program.program_id for m in called_matches] == [m.program.program_id for m in result.matches]
+
+
+@pytest.mark.asyncio
+async def test_no_session_id_skips_memory_save(orchestrator):
+    """session_id verilmezse hafızaya hiç yazılmamalı (ör. geriye dönük uyumlu çağrılar)."""
+    with patch.object(
+        orchestrator._intent_agent, "run",
+        new=AsyncMock(return_value=IntentResult(intent=Intent.GREETING, confidence=0.9)),
+    ), patch.object(
+        orchestrator._profile_agent, "_chat_with_history", new=AsyncMock(return_value="Merhaba!"),
+    ), patch.object(
+        orchestrator._memory_agent, "save", new=AsyncMock(),
+    ) as save_mock:
+        await orchestrator.run("selam")
+
+    save_mock.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_memory_save_failure_does_not_break_reply(orchestrator):
+    """Hafıza kaydı hata fırlatsa bile kullanıcı yine de yanıt almalı."""
+    with patch.object(
+        orchestrator._intent_agent, "run",
+        new=AsyncMock(return_value=IntentResult(intent=Intent.GREETING, confidence=0.9)),
+    ), patch.object(
+        orchestrator._profile_agent, "_chat_with_history", new=AsyncMock(return_value="Merhaba!"),
+    ), patch.object(
+        orchestrator._memory_agent, "save", new=AsyncMock(side_effect=RuntimeError("Supabase çöktü")),
+    ):
+        result = await orchestrator.run("selam", session_id="sess-2")
+
+    assert result.reply == "Merhaba!"
 
 
 @pytest.mark.asyncio

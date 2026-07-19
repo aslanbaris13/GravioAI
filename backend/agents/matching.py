@@ -5,9 +5,9 @@ profilden bir arama metni kurar, embed'ler ve pgvector'da en yakın programları
 bulur. Bu yüzden LLM-merkezli `Agent` temelinden türemez; ama aynı `run(...)`
 arayüzünü sunar ki orkestratör tüm ajanları tek tip çağırabilsin.
 """
-from ..core.embedder import get_embedding_client
-from ..data import repo
-from ..models import Category, SupportProgram, UserProfile
+from core.embedder import get_embedding_client
+from data import repo
+from models import Category, SupportProgram, UserProfile
 
 
 class MatchingAgent:
