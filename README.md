@@ -290,9 +290,9 @@ Sprint 2 kapsamında farklı veri kaynaklarından veri toplanmasını standartla
 ### Tamamlanan Story Point'lerin Bireysel Dağılımı
 
 - **Barış:** 42 SP
-- **Ferhat:** 18 SP
+- **Ferhat:** 15 SP
 - **Hatice:** 13 SP
-- **Sena:** 0 SP
+- **Sena:** 3 SP
 
 </details>
 
@@ -332,7 +332,24 @@ https://hatiicenurolgun.atlassian.net/wiki/x/AYCM
 </details>
 
 ---
+<details>
+<summary> <strong> 📌 Frontend Çıktıları</strong></summary>
 
+<br>
+
+
+<img width="1600" height="942" alt="WhatsApp Image 2026-07-19 at 15 57 06 (2)" src="https://github.com/user-attachments/assets/59523e5d-60e0-4c12-8a5f-d8ff3b9f1787" />
+<img width="1352" height="799" alt="Ekran Resmi 2026-07-19 15 55 31" src="https://github.com/user-attachments/assets/e095a86b-80a8-4000-942a-41e36bbc60f1" />
+<img width="1352" height="797" alt="Ekran Resmi 2026-07-19 15 55 26" src="https://github.com/user-attachments/assets/8583c5b0-8bed-44da-8586-2bbc4b312b98" />
+<img width="1352" height="796" alt="Ekran Resmi 2026-07-19 15 55 19" src="https://github.com/user-attachments/assets/d0a7755f-a5b2-4407-9c00-67b3ec5173ab" />
+<img width="1352" height="797" alt="Ekran Resmi 2026-07-19 15 55 05" src="https://github.com/user-attachments/assets/35096221-0a1e-4bb3-8b00-165b33e879dd" />
+<img width="1352" height="798" alt="Ekran Resmi 2026-07-19 15 54 50" src="https://github.com/user-attachments/assets/ee518198-a90d-425b-bdd9-d42ec1dee465" />
+<img width="1352" height="797" alt="Ekran Resmi 2026-07-19 15 55 36" src="https://github.com/user-attachments/assets/f15e5f1d-3259-44f9-8f42-65f92d08a886" />
+
+
+</details>
+
+---
 <details>
 <summary>🖥️ <strong>Sprint Değerlendirmesi</strong></summary>
 
