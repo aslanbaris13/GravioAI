@@ -1,0 +1,27 @@
+[
+    {
+        "title": "AWS Activate Credits",
+        "category": "Özel Sektör Bulut ve Yazılım Kredileri",
+        "source": "AWS",
+        "support_type": "Bulut Kredisi",
+        "amount_min": 1000.0,
+        "amount_max": 200000.0,
+        "currency": "USD",
+        "support_rate": "Destek oranı belirtilmemiş",
+        "application_status": "Açık",
+        "region": "Ulusal",
+        "founded_after": "Son 10 yılda kurulmuş olmalı",
+        "deadline": "Son başvuru tarihi belirtilmemiş",
+        "official_url": "Resmi link belirtilmemiş",
+        "conditions_summary": "Pre-series B aşamasında olmak, son 10 yılda kurulmuş olmak, ücretli bir AWS hesabına sahip olmak ve daha önce bu krediyi almamış veya daha fazlasını talep ediyor olmak gerekmektedir.",
+        "women_entrepreneur": null,
+        "technopark": null,
+        "company_required": true,
+        "student": null,
+        "program_id": "aws-activate-credits",
+        "source_url": "https://aws.amazon.com/startups/credits/",
+        "body_chunk": "AWS Activate Credits – Up to $200K for Eligible Startups\nSkip to main content\nAWS Startups\nHome\nAWS Credits\nAI for Startups\nOffers\nMigrate\nMore\nAWS Activate Credits\nBuilt for startups from pre-seed to scale\nApply now\nHow today’s startups build for tomorrow\nMove from prototype to production faster. Apply for up to $200,000 in AWS Activate Credits, with additional credits available for AI startups ready to scale.\nFind the right tier for you\nAWS offers promotional credits based on your startup's funding stage. Apply for the tier that matches your stage. Eligibility for AWS Activate: Pre-series B, founded in the last 10 years, AWS Account on Paid Tier Plan, and either new to Activate Credits or requesting more credits than previously received\nTier\nCredits\nHow to Access\nActivate Founders\nSelf-funded\nUp to $5,000 USD in Activate Credits\n*Start with $1,000 USD in Activate Credits. Select participants may qualify for additional credits up to $5,000\nApply directly if you’re bootstrapped or self-funded\nApply here\nActivate Portfolio\nPre-Series B\nUp to $200,000 USD in Activate Credits\n*You must have an Organization ID (Org ID) from your Activate Provider, such as an accelerator, angel investor, and venture capital firm\nApply directly with your\nActivate Provider’\ns Org ID\nApply here\nAWS Credits for AI Startups\nInvite only for startups ready to scale post Activate Portfolio\n$200,000+ in AWS Credits\nTalk with your Account Manager\nIf you need additional support,\ncontact us\n*All AWS Activate Credits are in USD and subject to the\nAWS Promotional Credit Terms & Conditions\n.\nYour investors and accelerators are already here\nThousands of venture capital firms, accelerators, and startup-enabling organizations are part of the AWS network of Activate Providers. Andreessen Horowitz, Brex, Carta, Greylock Partners, Sequoia, and Y Combinator are just a few examples.\nHow to apply\nHere's what you need to know to apply for Activate Credits:\n1\n1.\nCreate your AWS Builder ID\nCreate a Builder ID with your professional email or sign in if you already have one. Once verified, you'll complete your profile.\n2\n2.\nChoose your credit tier\nSelf-funded? Apply for Activate Founders. Backed by a VC or accelerator? Check if they're an Activate Provider and use their Org ID to apply for the Activate Portfolio.\n3\n3.\nTell us about your startup\nWe'll ask a few details about your product, funding stage, and company profile to confirm eligibility.\n4\n4.\nLink your AWS account and submit\nCreate or link an AWS account to your Builder ID and submit. You'll hear back within 5–10 business days.\nHelpful resources:\nBuild AI, move your infrastructure, and ship faster with promotional credits\nUse credits to cover the tools you need to go from idea to production.\nAI\nMigrate\nKiro\nFrom foundation models to production infrastructure\nWhether you're building an AI-native product with Amazon Bedrock or using Kiro to accelerate development, promotional credits help you get from idea to launch. Start building on day one.\nMove to AWS with AI-powered tools and expert support\nAI-powered assessments and end-to-end expert guidance make moving to AWS simple. Get AWS investments, in the form AWS credits or partner investments, to help customers offset one-time migration expenses. Focus on building, not logistics.\nBuild faster with Kiro\nTurn prompts into working code, structured designs, and implementation tasks with an agentic development environment built on frontier models. Start with Kiro Startup Credits, then grow into Activate Credits.\nApply for Kiro Startup Credits\n(Available to eligible startups without current Activate Credits)\nSee what founders are building with AWS Activate Credits\nPlay\nDid you find what you were looking for today?\nLet us know so we can improve the quality of the content on our pages\nYes\nNo",
+        "chunk_index": 0,
+        "embedding": null
+    }
+]

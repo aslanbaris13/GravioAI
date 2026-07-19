@@ -8,8 +8,8 @@ Sınıflandırma belirsizse (confidence eşiğin altındaysa) `profile_info`'ya
 düşülür — bu, kodun geri kalanının bugüne kadarki (niyet ayrımı öncesi)
 davranışıyla aynıdır, yani en güvenli varsayılandır.
 """
-from ..models.intent import Intent, IntentResult
-from ..models.orchestration import ConversationTurn
+from models.intent import Intent, IntentResult
+from models.orchestration import ConversationTurn
 from .base import Agent
 
 CONFIDENCE_THRESHOLD = 0.55

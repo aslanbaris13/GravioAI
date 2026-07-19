@@ -267,7 +267,33 @@ Sprint 2 kapsamında farklı veri kaynaklarından veri toplanmasını standartla
 
 > ⚪ **Sprint Tarihi:** 6 – 19 Temmuz 2026
 > **Sprint Hedefi:** Uygunluk ajanı · başvuru taslağı ajanı · orkestratör + hafıza · kaynak gösterimli RAG · son tarih takibi
+# Sprint 2
 
+> ⚪ **Sprint Tarihi:** 6 – 19 Temmuz 2026
+> **Sprint Hedefi:** Uygunluk ajanı · başvuru taslağı ajanı · orkestratör + hafıza · kaynak gösterimli RAG · son tarih takibi
+
+---
+
+### 🌐 Ulusal ve Küresel Girişimcilik Destekleri Veri Pipeline'ı (TÜBİTAK, Google & AWS)
+
+Sprint 2 hedefleri doğrultusunda; ulusal kurumlardan (**TÜBİTAK**) ve küresel teknoloji devlerinden (**Google Cloud & AWS**) hibe, kredi ve hızlandırma programı verilerini otomatik olarak kazıyan (Scrape), LLM (Gemini API) ile analiz eden ve `programs_v2` tablosuna aktaran (Load) uçtan uca bir ETL pipeline sistemi geliştirilmiştir.
+
+#### 🛠️ 1. Veri Toplama ve Kazıma Aşaması (Extract & Transform)
+Konnektörler hedef siteleri dinamik olarak tarar. Sayfa içi çapa (`#`) linklerini ve mükerrer rotaları filtreleyerek sadece girişimcileri ilgilendiren hibe ve program odaklı sayfaları süzgeçten geçirir. Çekilen ham içerikler Gemini API yardımıyla kurumsal Pydantic veri modellerine (`SupportProgram`) dönüştürülür ve yerel taslak JSON olarak güvenliğe alınır.
+
+* **TÜBİTAK Modülü:** Kurumun dinamik yapısına uygun olarak **41 farklı destek programını** geniş bir yelpazede tarar, analiz eder ve kurumsal şemaya sokar.
+* **Google Cloud & AWS Modülleri:** Küresel bulut sağlayıcılarının tek çatı programları (Google for Startups & AWS Activate) altındaki özel destekleri, filtre süzgeçlerini sıkı tutarak nokta atışı yakalar.
+
+**Komut Satırı Kullanımı:**
+```powershell
+# Sadece TÜBİTAK programlarını kazımak için:
+python -m scripts.scrape tubitak
+
+# Sadece küresel bulut sağlayıcılarını (Google ve AWS) kazımak için:
+python -m scripts.scrape google aws
+
+# Tüm pipeline konnektörlerini aynı anda tetiklemek için:
+python -m scripts.scrape
 _(Sprint 2 dokümantasyonu sprint sonunda eklenecek)_
 
 ---

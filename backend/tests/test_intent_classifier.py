@@ -2,9 +2,9 @@ import json
 
 import pytest
 
-from backend.agents.intent_classifier import CONFIDENCE_THRESHOLD, IntentClassifier
-from backend.models.intent import Intent
-from backend.tests.test_llm_provider import MockLLMClient
+from agents.intent_classifier import CONFIDENCE_THRESHOLD, IntentClassifier
+from models.intent import Intent
+from tests.test_llm_provider import MockLLMClient
 
 
 def _response(intent: str, confidence: float) -> str:
@@ -37,7 +37,7 @@ async def test_low_confidence_falls_back_to_profile_info():
 
 @pytest.mark.asyncio
 async def test_history_is_included_in_prompt():
-    from backend.models.orchestration import ConversationTurn
+    from models.orchestration import ConversationTurn
 
     mock_client = MockLLMClient(responses=[_response("profile_info", 0.9)])
     clf = IntentClassifier(llm=mock_client)

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
-import re # Metindeki fazladan boşlukları silmek için
+import re  # Metindeki fazladan boşlukları silmek için
 
 class BaseCleaner(ABC):
     """
@@ -9,7 +9,7 @@ class BaseCleaner(ABC):
     Genel akış (clean metodu) sabittir ve alt sınıflarda override edilmez:
     1. HTML etiketlerini temizle 
     2. Link yoğunluğu yüksek blokları sil  
-    3. Sayfalar arası tekrar eden satırları sil  
+    3. Sayfalar arası tekrar eden satırları sil   
     
     4. Kuruma özel ince ayar - sadece alt sınıflar override eder
     """
@@ -25,19 +25,17 @@ class BaseCleaner(ABC):
     MIN_BLOCK_LENGTH_FOR_DENSITY_CHECK = 20
     
     KNOWN_WIDGET_ID_PATTERNS = [
-    "reading-guide",
-    "reading-mask",
-    "accessibility",
-]
+        "reading-guide",
+        "reading-mask",
+        "accessibility",
+    ]
 
     KNOWN_WIDGET_CLASS_PATTERNS = [
-    "breadcrumb",]
+        "breadcrumb",
+    ]
 
     def clean(self, html_content: str, repeated_noise_lines: set[str] | None = None) -> str:
-        """
-        Ana temizleme metodu. Bu metod override EDİLMEZ.
-
-        """
+        """Ana temizleme metodu. Bu metod override EDİLMEZ."""
         if repeated_noise_lines is None:
             repeated_noise_lines = set()
 
@@ -46,13 +44,10 @@ class BaseCleaner(ABC):
         # 1: gürültü etiketlerini kaldır
         soup = self._strip_html_tags(soup)
 
-        # 2: link yoğunluğu yüksek blokları ve  widget blokları kaldır (menü/navigasyon tespiti)
-        
+        # 2: link yoğunluğu yüksek blokları ve widget blokları kaldır (menü/navigasyon tespiti)
         soup = self._remove_known_widget_blocks(soup)
         soup = self._remove_high_link_density_blocks(soup)
 
-         
-        
         # 3: düz metne çevir ve satır satır işle
         raw_text = soup.get_text(separator="\n").strip()
         lines = [line.strip() for line in raw_text.split("\n")]
@@ -67,7 +62,7 @@ class BaseCleaner(ABC):
         # 5: fazladan boş satırları sadeleştir (3+ boş satır -> 1 boş satır)
         text = re.sub(r"\n{3,}", "\n\n", text)
 
-        # 6:kuruma özel ayar (alt sınıflar burada devreye girer)
+        # 6: kuruma özel ayar (alt sınıflar burada devreye girer)
         text = self._institution_specific_fix(text)
 
         return text.strip()
@@ -105,10 +100,9 @@ class BaseCleaner(ABC):
     def _remove_known_widget_blocks(self, soup: BeautifulSoup) -> BeautifulSoup:
         """
         Bilinen id veya class kalıplarına sahip widget/gürültü bloklarını
-        (erişilebilirlik menüsü, breadcrumb vb.) siler."""
-
-    # 1. id bazlı tarama
-
+        (erişilebilirlik menüsü, breadcrumb vb.) siler.
+        """
+        # 1. id bazlı tarama
         for tag in soup.find_all(id=True):
             if tag.attrs is None:
                 continue
@@ -118,8 +112,7 @@ class BaseCleaner(ABC):
                     tag.decompose()
                     break  # bu etiket zaten silindi, aynı etiket için tekrar kontrol etmeye gerek yok
 
-        #  2. class bazlı tarama 
-    
+        # 2. class bazlı tarama 
         for tag in soup.find_all(class_=True):
             if tag.attrs is None:
                 continue
@@ -140,6 +133,7 @@ class BaseCleaner(ABC):
         """
         raise NotImplementedError
 
+
 ## KURUM ÖZEL CLASSLAR
 
 class KOSGEBCleaner(BaseCleaner):
@@ -158,15 +152,32 @@ class KalkinmaAjansiCleaner(BaseCleaner):
         return text
 
 
+class GoogleCloudCleaner(BaseCleaner):
+    def _institution_specific_fix(self, text: str) -> str:
+        # Google Cloud için genel temizlik şu an gayet yeterli
+        return text
+
+
+class AwsCleaner(BaseCleaner):
+    def _institution_specific_fix(self, text: str) -> str:
+        # AWS Activate için genel temizlik şu an gayet yeterli
+        return text
+
+
 def get_cleaner(source_name: str) -> BaseCleaner:
     """Kurum ismine göre doğru cleaner örneğini döner."""
     
+    # Harita yapısını bozmadan, isimleri upper() güvencesine alarak eşliyoruz kanka
     cleaners = {
         "KOSGEB": KOSGEBCleaner,
         "TUBITAK": TubitakCleaner,
         "KALKINMA_AJANSI": KalkinmaAjansiCleaner,
+        "GOOGLE_CLOUD": GoogleCloudCleaner,  # Resmi olarak eklendi!
+        "AWS": AwsCleaner,                  # Resmi olarak eklendi!
     }
-    cleaner_class = cleaners.get(source_name)
+    
+    # input case-insensitive esneklik kazansın diye upper yapıyoruz
+    cleaner_class = cleaners.get(source_name.upper())
     if cleaner_class is None:
         raise ValueError(f"Bilinmeyen kaynak için cleaner bulunamadı: {source_name}")
     return cleaner_class()

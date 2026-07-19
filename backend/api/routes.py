@@ -7,7 +7,7 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel
 
-from ..agents import (
+from agents import (
     ApplicationAgent,
     EligibilityAgent,
     Orchestrator,
@@ -15,6 +15,11 @@ from ..agents import (
     ProfileExtractor,
     ReportWriterAgent,
 )
+from core.embedder import get_embedding_client
+from core.llm import LLMClient, LLMMessage, get_llm_client
+from core.rate_limit import enforce_llm_rate_limit
+from data import repo
+from models import (
 from ..core import document_parser
 from ..core.docx_export import build_report_docx
 from ..core.embedder import get_embedding_client

@@ -4,9 +4,9 @@ Kullanıcının profilini ve seçilen programı alıp programa özel bir iş pla
 taslağı (bölümler) ve gerekli belgeler kontrol listesi üretir. Çıktı frontend'in
 "Başvuru Hazırlığı" ekranını besler.
 """
-from ..models.application import ApplicationDraft
-from ..models.profile import UserProfile
-from ..models.program import SupportProgram
+from models.application import ApplicationDraft
+from models.profile import UserProfile
+from models.program import SupportProgram
 from .base import Agent
 from .eligibility import _profile_brief, _program_brief
 
