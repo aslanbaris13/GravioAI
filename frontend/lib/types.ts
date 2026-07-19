@@ -55,14 +55,6 @@ export interface Program {
   conditions: Condition[];
 }
 
-export type ViewName =
-  | "chat"
-  | "matches"
-  | "detail"
-  | "eligibility"
-  | "application"
-  | "dashboard";
-
 export interface ProfileChip {
   label: string;
   value: string;

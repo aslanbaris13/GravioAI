@@ -173,3 +173,36 @@ textarea {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Onboarding — split layout                                            */
+/* Masaüstünde solda markalı ilerleme paneli + sağda adım içeriği;      */
+/* dar ekranda sol panel gizlenir, üstte ince bir ilerleme çubuğu       */
+/* gösterilir.                                                          */
+/* ------------------------------------------------------------------ */
+
+.onboarding-mobile-progress {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .onboarding-aside {
+    display: none !important;
+  }
+
+  .onboarding-mobile-progress {
+    display: flex;
+  }
+
+  .onboarding-main {
+    padding: 28px 20px 60px !important;
+  }
+
+  .onboarding-sector-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .onboarding-goals-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

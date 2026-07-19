@@ -1,5 +1,5 @@
 /**
- * Panelim ekranı.
+ * Panelim ekranı — karar destek paneli.
  *
  * Gerçek verilere bağlı: `profile` sohbetten çıkarılan (ve oturumda kalıcı
  * olan) BackendUserProfile'dır, `programs` ise en son bilinen eşleşmelerdir.
@@ -11,14 +11,31 @@ import { profileToChips } from "@/lib/adapter";
 import type { BackendUserProfile } from "@/lib/api";
 import type { Program } from "@/lib/types";
 
+const PROFILE_FIELD_LABELS: { key: keyof BackendUserProfile; label: string }[] = [
+  { key: "sector", label: "Sektör" },
+  { key: "city", label: "Şehir" },
+  { key: "team_size", label: "Ekip büyüklüğü" },
+  { key: "goals", label: "Hedefler" },
+];
+
+function isFieldMissing(profile: BackendUserProfile, key: keyof BackendUserProfile): boolean {
+  const value = profile[key];
+  if (Array.isArray(value)) return value.length === 0;
+  return value === null || value === undefined;
+}
+
 export default function DashboardView({
   profile,
   programs,
   onOpenProgram,
+  onGoToChat,
+  onNewPresentation,
 }: {
   profile: BackendUserProfile | null;
   programs: Program[];
   onOpenProgram: (id: string) => void;
+  onGoToChat?: () => void;
+  onNewPresentation?: () => void;
 }) {
   const chips = profile ? profileToChips(profile) : [];
 
@@ -27,15 +44,30 @@ export default function DashboardView({
     .sort((a, b) => (a.deadlineDays as number) - (b.deadlineDays as number))
     .slice(0, 5);
 
+  const fullyEligibleCount = programs.filter((p) => p.elig.state === "full").length;
+  const urgentCount = programs.filter((p) => p.deadlineDays != null && (p.deadlineDays as number) < 30).length;
+
+  const missingFields = profile
+    ? PROFILE_FIELD_LABELS.filter((f) => isFieldMissing(profile, f.key))
+    : PROFILE_FIELD_LABELS;
+
   return (
     <section data-screen-label="Panelim" style={{ height: "100%", overflowY: "auto" }}>
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "26px 32px 60px" }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: "#14222c", margin: 0, letterSpacing: "-.01em" }}>Panelim</h1>
         <p style={{ fontSize: 14, color: "#5a6b75", marginTop: 6 }}>
-          İşletme profilin ve yaklaşan son tarihler.
+          İşletme profilin, eşleşme özetin ve yaklaşan son tarihler.
         </p>
 
-        <h2 style={{ fontSize: 13, fontWeight: 700, color: "#76858d", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 26 }}>
+        {programs.length > 0 && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginTop: 22 }}>
+            <StatTile icon="auto_awesome" value={programs.length} label="Toplam eşleşme" />
+            <StatTile icon="check_circle" value={fullyEligibleCount} label="Tam uygun" tone="good" />
+            <StatTile icon="schedule" value={urgentCount} label="30 gün içinde son tarih" tone={urgentCount > 0 ? "warn" : "neutral"} />
+          </div>
+        )}
+
+        <h2 style={{ fontSize: 13, fontWeight: 700, color: "#76858d", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 28 }}>
           İşletme profili
         </h2>
         {chips.length > 0 ? (
@@ -53,6 +85,39 @@ export default function DashboardView({
         ) : (
           <div style={{ marginTop: 12, padding: "16px 18px", background: "#fff", border: "1px solid #e7e4dc", borderRadius: 12, fontSize: 13.5, color: "#8a96a0" }}>
             Henüz profil çıkarılmadı — sohbet ekranında işletmeni anlat.
+          </div>
+        )}
+
+        {missingFields.length > 0 && (
+          <div
+            style={{
+              marginTop: 14,
+              padding: "13px 16px",
+              background: "#fdf6e8",
+              border: "1px solid #f0e0b8",
+              borderRadius: 12,
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 10,
+            }}
+          >
+            <Ms name="info" size={18} color="#a86b12" style={{ marginTop: 1, flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#7a5f1e" }}>
+                Profilinde eksik bilgiler var
+              </div>
+              <div style={{ fontSize: 12.5, color: "#8a6a2e", marginTop: 2 }}>
+                {missingFields.map((f) => f.label).join(", ")} bilgisini paylaşırsan eşleşmeler daha isabetli olur.
+              </div>
+              {onGoToChat && (
+                <button
+                  onClick={onGoToChat}
+                  style={{ marginTop: 8, fontSize: 12.5, fontWeight: 700, color: "#a86b12", textDecoration: "underline" }}
+                >
+                  Sohbete dön ve tamamla
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -106,7 +171,54 @@ export default function DashboardView({
             Yaklaşan bir son tarih yok.
           </div>
         )}
+
+        {onNewPresentation && (
+          <button
+            onClick={onNewPresentation}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              width: "100%",
+              marginTop: 28,
+              padding: "14px 16px",
+              borderRadius: 13,
+              background: "#fff",
+              border: "1.5px dashed #d8c9b0",
+              textAlign: "left",
+            }}
+          >
+            <Ms name="slideshow" size={20} color="#ea580c" />
+            <div>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: "#27353e" }}>Şirket sunumu oluştur</div>
+              <div style={{ fontSize: 12, color: "#8a96a0", marginTop: 1 }}>
+                Yatırımcı/müşteri sunumu — düzenlenebilir PPTX olarak indir
+              </div>
+            </div>
+          </button>
+        )}
       </div>
     </section>
+  );
+}
+
+function StatTile({
+  icon,
+  value,
+  label,
+  tone = "neutral",
+}: {
+  icon: string;
+  value: number;
+  label: string;
+  tone?: "neutral" | "good" | "warn";
+}) {
+  const color = tone === "good" ? "#15803d" : tone === "warn" ? "#b45309" : "#27353e";
+  return (
+    <div style={{ background: "#fff", border: "1px solid #e7e4dc", borderRadius: 13, padding: "13px 14px" }}>
+      <Ms name={icon} size={18} color={color} />
+      <div style={{ fontSize: 20, fontWeight: 800, color, marginTop: 6, fontVariantNumeric: "tabular-nums" }}>{value}</div>
+      <div style={{ fontSize: 11.5, color: "#8a96a0", marginTop: 2 }}>{label}</div>
+    </div>
   );
 }

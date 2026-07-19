@@ -42,6 +42,12 @@ class GeminiClient(LLMClient):
         config = types.GenerateContentConfig(
             system_instruction=system,
             max_output_tokens=max_tokens,
+            # gemini-3.5-flash bir "thinking" modeli; kapatılmazsa görünmez
+            # akıl yürütme token'ları max_output_tokens bütçesinin büyük
+            # kısmını tüketip yanıtı birkaç kelimede (finish_reason=MAX_TOKENS)
+            # kesiyor. Bu asistan kısa/sohbet yanıtları ürettiği için thinking
+            # gerekmiyor — kapatınca yanıtlar tam ve doğal şekilde tamamlanıyor.
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
         )
         resp = await self._client.aio.models.generate_content(
             model=self._model,
@@ -49,6 +55,34 @@ class GeminiClient(LLMClient):
             config=config,
         )
         return resp.text
+
+    async def chat_stream(
+        self,
+        messages: list[LLMMessage],
+        *,
+        system: str | None = None,
+        max_tokens: int = 4096,
+    ):
+        contents = [
+            types.Content(
+                role=_ROLE_MAP[m.role],
+                parts=[types.Part.from_text(text=m.content)],
+            )
+            for m in messages
+        ]
+        config = types.GenerateContentConfig(
+            system_instruction=system,
+            max_output_tokens=max_tokens,
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
+        )
+        stream = await self._client.aio.models.generate_content_stream(
+            model=self._model,
+            contents=contents,
+            config=config,
+        )
+        async for chunk in stream:
+            if chunk.text:
+                yield chunk.text
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=4, max=15),reraise=True)
 

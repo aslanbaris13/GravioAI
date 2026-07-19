@@ -1,0 +1,73 @@
+{
+  "key": "tubitak_1501",
+  "program_name": "TÜBİTAK 1501 - Sanayi Ar-Ge Projeleri Destekleme Programı",
+  "institution": "TÜBİTAK",
+  "match_keywords": ["1501", "sanayi ar-ge destek", "sanayi arge destek", "sanayi ar-ge projeleri destekleme"],
+  "summary": "KOBİ sınırı olmaksızın tüm sanayi kuruluşlarına açık Ar-Ge/yenilik destek programı. Proje bazında en fazla 36 ay destek süresi, %75 hibe (geri ödemesiz). Resmi başvuru AGY100/AGY101 formuyla PRODİS üzerinden yapılır — bu şema, TÜBİTAK'ın 'Proje Öneri Bilgileri Formu Hazırlama Kılavuzu' (AGY100-101) Bölüm A-E yapısını izler (1507 ile aynı form, farklı süre/kapsam kuralları).",
+  "sections": [
+    {
+      "id": "kurulus_ve_proje_ozeti",
+      "title": "Kuruluş ve Proje Özeti (Bölüm A)",
+      "description": "Kuruluşun kısa tanıtımı ve projenin başlatılma gerekçesi, projenin amacı, anahtar kelimeler. Resmi formda 'Proje Kısa Tanıtımı' diğer tüm bölümler doldurulduktan sonra hazırlanması önerilen, değiştirilmeden Yürütme Komitesi'ne sunulan kritik bir bölümdür.",
+      "required_fields": [
+        { "key": "kurulus_tanitimi", "label": "Kuruluşun kısa tanıtımı ve ana faaliyet alanı", "long_text": true },
+        { "key": "baslatilma_gerekcesi", "label": "Projenin başlatılma gerekçesi (hangi ihtiyaç/sorun)", "long_text": true },
+        { "key": "proje_amaci", "label": "Projenin amacı", "long_text": true },
+        { "key": "anahtar_kelimeler", "label": "Anahtar kelimeler" }
+      ]
+    },
+    {
+      "id": "arge_icerigi_teknoloji_duzeyi",
+      "title": "Endüstriyel Ar-Ge İçeriği, Teknoloji Düzeyi ve Yenilikçi Yön (Bölüm B)",
+      "description": "Teknolojik yenilik ve Ar-Ge unsuru içermeyen projeler desteklenmez — bu bölüm değerlendirmede belirleyici niteliktedir.",
+      "char_limit": 4000,
+      "required_fields": [
+        { "key": "cagri_hedefler", "label": "Projenin genel amacı ve önerilen çözüm ile ulaşılması planlanan hedefler", "long_text": true },
+        { "key": "teknoloji_duzeyi", "label": "Tekniğin/teknolojinin bilinen güncel durumu (state-of-the-art)", "long_text": true },
+        { "key": "teknik_belirsizlikler", "label": "Aşılması gereken teknik/teknolojik belirsizlik ve zorluklar", "long_text": true },
+        { "key": "yenilikci_yon", "label": "Yenilikçi yönler (ürün/süreç yeniliği, mevcut ürün/sistemlerden farkı)", "long_text": true }
+      ]
+    },
+    {
+      "id": "proje_plani_kurulus_altyapisi",
+      "title": "Proje Planı ve Kuruluş Altyapısı (Bölüm C)",
+      "description": "İş paketleri, proje yönetimi, kuruluşun mevcut altyapısı ve risk yönetimi. 1501'de proje süresi en fazla 36 ay olduğu için iş paketi planlaması genellikle 1507'den daha kapsamlıdır.",
+      "required_fields": [
+        { "key": "is_paketleri", "label": "İş paketleri ve iş-zaman planı (paket adı, süre, çıktı)", "long_text": true },
+        { "key": "proje_yonetimi", "label": "Proje yönetimi ve organizasyonu (ekip görevleri)", "long_text": true },
+        { "key": "kurulus_altyapisi", "label": "Kuruluşun mevcut Ar-Ge altyapısı (laboratuvar, donanım vb.)", "long_text": true },
+        { "key": "risk_yonetimi", "label": "Öngörülen riskler ve alınacak önlemler", "long_text": true }
+      ]
+    },
+    {
+      "id": "ekonomik_yarar_ulusal_kazanim",
+      "title": "Ekonomik Yarara ve Ulusal Kazanıma Dönüşebilirlik (Bölüm D)",
+      "description": "Proje çıktısının ticari başarı potansiyeli, ekonomik getiri tahmini ve ülke ekonomisine katkısı.",
+      "char_limit": 2000,
+      "required_fields": [
+        { "key": "ticari_potansiyel", "label": "Ticari başarı potansiyeli ve hedef pazar/müşteri", "long_text": true },
+        { "key": "ekonomik_getiri", "label": "Beklenen ekonomik getiri (satış hasılatı, pazar payı artışı vb.)", "long_text": true },
+        { "key": "ulusal_kazanim", "label": "Ulusal kazanımlar (ithalat azaltımı, istihdam, rekabet gücü vb.)", "long_text": true }
+      ]
+    },
+    {
+      "id": "proje_butcesi",
+      "title": "Proje Bütçesi (Bölüm E)",
+      "description": "TÜBİTAK'ın resmi gider kalemleri (M011-M016) esas alınır. Katma değer vergisi, kâr payı, pazarlama/reklam, patent/marka tescil, kira, kırtasiye gibi giderler desteklenmez. Not: 1507'den farklı olarak, AGY100/AGY101 proje hazırlama/hazırlatma danışmanlık gideri 1501'de desteklenmez.",
+      "required_fields": [
+        { "key": "personel_gideri", "label": "Personel gideri (M011)", "prefillable_from_profile": "team_size", "long_text": true },
+        { "key": "seyahat_gideri", "label": "Seyahat gideri — yalnızca ulaşım (M012)", "long_text": true },
+        { "key": "techizat_gideri", "label": "Alet/teçhizat/yazılım/yayın alımları (M013)", "long_text": true },
+        { "key": "hizmet_alimi", "label": "Ar-Ge/test kuruluşlarına yaptırılan işler + hizmet/danışmanlık alımı (M014-M015)", "long_text": true },
+        { "key": "malzeme_gideri", "label": "Malzeme ve sarf gideri (M016)", "long_text": true }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Vergi levhası (onaylı)",
+    "Kuruluşa ait en son tarihli noter onaylı imza sirküleri",
+    "Ticaret Sicil Gazetesi (tescile ilişkin, ana sözleşme değişiklikleri dahil)",
+    "Anahtar personel özgeçmişleri (ARBİS'e kayıtlı)",
+    "Son hesap dönemine ait bilanço"
+  ]
+}
