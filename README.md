@@ -341,10 +341,12 @@ https://hatiicenurolgun.atlassian.net/wiki/x/AYCM
 <img width="1352" height="797" alt="Ekran Resmi 2026-07-19 15 55 26" src="https://github.com/user-attachments/assets/7f284572-3ed9-42c1-8451-0a59c658c933" />
 
 <img width="1352" height="799" alt="Ekran Resmi 2026-07-19 15 55 31" src="https://github.com/user-attachments/assets/e016aad8-0cc4-424f-b5af-08a398b4eaf3" />
-<img width="1600" height="942" alt="WhatsApp Image 2026-07-19 at 15 57 18" src="https://github.com/user-attachments/assets/722611e5-88f7-403c-93a5-e89543e4ede2" />
+
 <img width="1352" height="797" alt="Ekran Resmi 2026-07-19 15 55 36" src="https://github.com/user-attachments/assets/8840904b-034a-45b0-a444-01591dd17828" />
 
 <img width="1600" height="942" alt="WhatsApp Image 2026-07-19 at 15 57 06" src="https://github.com/user-attachments/assets/e767a09e-33ae-4934-96e5-e55e9fde457d" />
+
+<img width="1600" height="942" alt="WhatsApp Image 2026-07-19 at 15 57 18" src="https://github.com/user-attachments/assets/722611e5-88f7-403c-93a5-e89543e4ede2" />
 
 <img width="1600" height="944" alt="WhatsApp Image 2026-07-19 at 15 57 57" src="https://github.com/user-attachments/assets/d053fdd1-b1b5-4701-9c9c-e6473bc985af" />
 
