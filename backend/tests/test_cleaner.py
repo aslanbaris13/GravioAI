@@ -63,3 +63,49 @@ def test_get_cleaner_returns_correct_class_per_source():
 def test_get_cleaner_raises_for_unknown_source():
     with pytest.raises(ValueError):
         get_cleaner("BILINMEYEN_KURUM")
+
+import pytest
+
+
+from core.cleaner import ( # bu kısımda projeye yeni testler ilave edilmiştir -Ferhat
+    KalkinmaAjansiCleaner,
+    KOSGEBCleaner,
+    TubitakCleaner,
+    GoogleCloudCleaner,
+    AwsCleaner,
+    get_cleaner,
+)
+
+@pytest.mark.parametrize(
+    "provider, expected_class",
+    [
+        ("GOOGLE_CLOUD", GoogleCloudCleaner),
+        ("google_cloud", GoogleCloudCleaner),
+        ("AWS", AwsCleaner),
+        ("aws", AwsCleaner),
+    ],
+)
+def test_get_cleaner_case_insensitive(provider, expected_class):
+    cleaner = get_cleaner(provider)
+    assert isinstance(cleaner, expected_class)
+
+@pytest.mark.parametrize(
+    "cleaner_cls",
+    [
+        GoogleCloudCleaner,
+        AwsCleaner,
+    ],
+)
+@pytest.mark.parametrize(
+    "text",
+    [
+        "",
+        "Some sample text",
+        "123-ABC",
+        "İçerik with UTF-8 chars",
+    ],
+)
+def test_cloud_cleaners_institution_specific_fix_noop(cleaner_cls, text):
+    cleaner = cleaner_cls()
+    fixed = cleaner._institution_specific_fix(text)
+    assert fixed == text
