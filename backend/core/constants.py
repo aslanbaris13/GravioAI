@@ -67,3 +67,18 @@ TURKCE_KARAKTER_DEGISIMLERI = {
     "Ö": "o", "ö": "o",
     "Ç": "c", "ç": "c",
 }
+
+
+exclusion_keywords = [
+    # Tarım / hayvancılık / balıkçılık
+    "tarım", "tarımsal", "hayvancılık", "balıkçılık", "su ürünleri", "çiftçi",
+
+    # Turizm / otelcilik
+    "turizm", "turistik", "otelcilik", "otel işletmeciliği",
+
+    # İnşaat / gayrimenkul
+    "inşaat", "gayrimenkul", "konut projesi", "altyapı inşaatı",
+
+    # Maden / enerji / doğal kaynaklar
+    "maden", "madencilik", "petrol", "doğalgaz", "enerji santrali",
+]

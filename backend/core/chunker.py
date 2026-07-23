@@ -18,11 +18,33 @@ program_chunks
 └── created_at (timestamptz, default now())
 
 """
-
+import re
 import uuid
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 # from core.embedding import EmbeddingClient (Projenin yapısına göre importu sağla)
+_SECTION_MARKER_PATTERN = re.compile(r"^---\s*(.+?)\s*---$")
+
+
+def _extract_section_title(parent_text: str, fallback_length: int = 60) -> str:
+    """Bir parent metninin section_title'ını çıkarır.
+
+    Önce ilk satırın "--- başlık ---" işaretleyici desenine uyup uymadığına
+    bakar (ör. TÜBİTAK PDF'lerinin eklendiği "--- Çağrı Belgesi: ... ---").
+    Uyuyorsa işaretleyicinin içindeki gerçek başlığı döner. Uymuyorsa (normal
+    HTML metni), eski davranışa döner: metnin ilk fallback_length karakteri.
+    """
+    ilk_satir = parent_text.strip().splitlines()[0] if parent_text.strip() else ""
+
+    eslesme = _SECTION_MARKER_PATTERN.match(ilk_satir)
+    if eslesme:
+        return eslesme.group(1)
+
+    return parent_text.strip()[:fallback_length]
+
+
+
+
 
 class HierarchicalChunker:
     """
@@ -35,7 +57,7 @@ class HierarchicalChunker:
         self,
         embedding_client, # EmbeddingClient tipinde
         breakpoint_threshold_amount: float = 85.0,
-        child_chunk_size: int = 400,
+        child_chunk_size: int = 450,
         child_chunk_overlap: int = 60,
     ) -> None:
         
