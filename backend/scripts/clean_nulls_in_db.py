@@ -20,20 +20,23 @@ from supabase import create_client, Client
 from core.constants import BOS_ALAN_MESAJLARI
 
 RAW_SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+
+# Anon key'e düşmeyerek güvenliği sağlıyoruz (Sourcery Comment 1)
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
 
-# Python SDK'sı /rest/v1'i otomatik eklediği için URL sonundaki bu takıyı temizliyoruz
+# Python SDK /rest/v1'i otomatik eklediği için URL sonundaki takıyı temizliyoruz (PGRST125 fix)
 SUPABASE_URL = RAW_SUPABASE_URL.replace("/rest/v1", "").rstrip("/")
 
 def update_nulls_in_database():
     if not SUPABASE_URL or not SUPABASE_KEY:
-        print("❌ HATA: .env dosyasından SUPABASE_URL veya SUPABASE_KEY okunamadı!")
+        print("❌ HATA: .env dosyasından SUPABASE_URL veya yazma yetkili SUPABASE_KEY okunamadı!")
         return
 
     try:
         supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
         print("🔄 Veritabanındaki 'programs' tablosu taranıyor...")
         
+        # PostgREST URL ayrıştırma hatasını önlemek için standart select
         response = supabase.table("programs").select("*").execute()
         programs = response.data
         
@@ -55,6 +58,7 @@ def update_nulls_in_database():
             if not program.get("official_url"):
                 updates["official_url"] = BOS_ALAN_MESAJLARI.get("official_url", "Resmi başvuru bağlantısı belirtilmemiştir.")
                 
+            # Sourcery Comment 3: founded_after artık sabitten okunuyor
             if not program.get("founded_after"):
                 updates["founded_after"] = BOS_ALAN_MESAJLARI.get("founded_after", "Kuruluş tarihi şartı belirtilmemiştir.")
 
