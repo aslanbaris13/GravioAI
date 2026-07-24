@@ -2,17 +2,19 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Ms from "@/components/Ms";
+import ProgramLoading from "@/components/ProgramLoading";
 import ProgramNotFound from "@/components/ProgramNotFound";
 import { resolveReportSchema } from "@/lib/api";
 import type { BackendReportSchema } from "@/lib/api";
 import { useAppState } from "@/lib/AppStateContext";
+import { useProgram } from "@/lib/useProgram";
 
 type LoadState = "loading" | "found" | "not-found" | "error";
 
 export default function ProgramReportPage() {
   const { id } = useParams<{ id: string }>();
-  const { resolveProgram, goToMatches, goToProgram, goToReportGenerate, currentProfile } = useAppState();
-  const program = resolveProgram(id);
+  const { goToMatches, goToProgram, goToReportGenerate, currentProfile } = useAppState();
+  const { program, state: programState } = useProgram(id);
 
   const [schema, setSchema] = useState<BackendReportSchema | null>(null);
   const [state, setState] = useState<LoadState>("loading");
@@ -34,8 +36,9 @@ export default function ProgramReportPage() {
       cancelled = true;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, program]);
 
+  if (programState === "loading") return <ProgramLoading />;
   if (!program) return <ProgramNotFound onBack={goToMatches} />;
 
   return (

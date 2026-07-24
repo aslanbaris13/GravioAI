@@ -1,4 +1,6 @@
 """Sunum Ajanı'nın ürettiği çıktı — sabit slayt iskeleti, özelleştirilmiş içerik."""
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -12,6 +14,23 @@ class GeneratedPresentation(BaseModel):
     title: str
     subtitle: str = ""
     slides: list[PresentationSlide] = Field(default_factory=list)
+
+
+class PresentationRecord(BaseModel):
+    """`presentations` tablosunda kalıcı olan, arşivlenmiş bir sunum kaydı.
+
+    `GeneratedPresentation`'dan farkı: bu bir DB satırıdır (id + created_at
+    taşır), "Geçmiş Sunumlarım" listesinde gösterilir ve LLM'i tekrar
+    çağırmadan doğrudan export-pptx'e verilebilir.
+    """
+
+    id: str
+    session_id: str
+    title: str
+    subtitle: str = ""
+    company_name: str = ""
+    slides: list[PresentationSlide] = Field(default_factory=list)
+    created_at: datetime
 
 
 class PresentationSlideSpec(BaseModel):

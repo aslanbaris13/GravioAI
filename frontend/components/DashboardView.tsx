@@ -8,8 +8,14 @@
 "use client";
 import Ms from "./Ms";
 import { profileToChips } from "@/lib/adapter";
-import type { BackendUserProfile } from "@/lib/api";
+import type { ApplicationTrackingStatus, BackendApplicationRecord, BackendUserProfile } from "@/lib/api";
 import type { Program } from "@/lib/types";
+
+const APPLICATION_STATUS_META: Record<ApplicationTrackingStatus, { label: string; color: string; bg: string }> = {
+  taslak: { label: "Taslak", color: "#76858d", bg: "#f4f3ee" },
+  hazirlaniyor: { label: "Hazırlanıyor", color: "#0f6ea8", bg: "#eef6fb" },
+  gonderildi: { label: "Gönderildi", color: "#15803d", bg: "#eaf7ee" },
+};
 
 const PROFILE_FIELD_LABELS: { key: keyof BackendUserProfile; label: string }[] = [
   { key: "sector", label: "Sektör" },
@@ -27,17 +33,22 @@ function isFieldMissing(profile: BackendUserProfile, key: keyof BackendUserProfi
 export default function DashboardView({
   profile,
   programs,
+  applications,
   onOpenProgram,
   onGoToChat,
+  onGoToApplications,
   onNewPresentation,
 }: {
   profile: BackendUserProfile | null;
   programs: Program[];
+  applications: BackendApplicationRecord[];
   onOpenProgram: (id: string) => void;
   onGoToChat?: () => void;
+  onGoToApplications?: () => void;
   onNewPresentation?: () => void;
 }) {
-  const chips = profile ? profileToChips(profile) : [];
+  // Web sitesi zaten başlığın altında gösteriliyor — chip listesinde tekrarlamıyoruz.
+  const chips = profile ? profileToChips(profile).filter((c) => c.label !== "Web sitesi") : [];
 
   const upcoming = programs
     .filter((p) => p.deadlineDays != null)
@@ -51,13 +62,72 @@ export default function DashboardView({
     ? PROFILE_FIELD_LABELS.filter((f) => isFieldMissing(profile, f.key))
     : PROFILE_FIELD_LABELS;
 
+  const companyName = profile?.company_name ?? null;
+  const website = profile?.website ?? null;
+  const websiteHref = website ? (website.startsWith("http") ? website : `https://${website}`) : null;
+  const initials = (companyName ?? profile?.sector ?? "İşletmem").slice(0, 2).toUpperCase();
+
+  // Kategori dağılımı — yeni veri toplamadan, mevcut eşleşmelerden türetilir.
+  const categoryCounts = new Map<string, number>();
+  for (const p of programs) {
+    categoryCounts.set(p.categoryLabel, (categoryCounts.get(p.categoryLabel) ?? 0) + 1);
+  }
+  const categoryDistribution = [...categoryCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
+  const maxCategoryCount = categoryDistribution[0]?.[1] ?? 1;
+
+  const applicationStatusCounts: Record<ApplicationTrackingStatus, number> = {
+    taslak: 0,
+    hazirlaniyor: 0,
+    gonderildi: 0,
+  };
+  for (const a of applications) applicationStatusCounts[a.status] += 1;
+
   return (
     <section data-screen-label="Panelim" style={{ height: "100%", overflowY: "auto" }}>
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "26px 32px 60px" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: "#14222c", margin: 0, letterSpacing: "-.01em" }}>Panelim</h1>
-        <p style={{ fontSize: 14, color: "#5a6b75", marginTop: 6 }}>
-          İşletme profilin, eşleşme özetin ve yaklaşan son tarihler.
-        </p>
+        <div style={{ fontSize: 12, fontWeight: 700, color: "#97a2aa", textTransform: "uppercase", letterSpacing: ".05em" }}>
+          Panelim
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 8 }}>
+          <div
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 13,
+              flexShrink: 0,
+              background: "linear-gradient(140deg,#f97316,#ea580c)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 15,
+              fontWeight: 700,
+              color: "#fff",
+            }}
+          >
+            {initials}
+          </div>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#14222c", margin: 0, letterSpacing: "-.01em" }}>
+              {companyName ?? "İşletmem"}
+            </h1>
+            {websiteHref ? (
+              <a
+                href={websiteHref}
+                target="_blank"
+                rel="noreferrer"
+                style={{ fontSize: 12.5, fontWeight: 600, color: "#0f6ea8" }}
+              >
+                {website}
+              </a>
+            ) : (
+              <p style={{ fontSize: 13, color: "#8a96a0", margin: "2px 0 0" }}>
+                İşletme profilin, eşleşme özetin ve yaklaşan son tarihler.
+              </p>
+            )}
+          </div>
+        </div>
 
         {programs.length > 0 && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginTop: 22 }}>
@@ -65,6 +135,73 @@ export default function DashboardView({
             <StatTile icon="check_circle" value={fullyEligibleCount} label="Tam uygun" tone="good" />
             <StatTile icon="schedule" value={urgentCount} label="30 gün içinde son tarih" tone={urgentCount > 0 ? "warn" : "neutral"} />
           </div>
+        )}
+
+        {applications.length > 0 && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28 }}>
+              <h2 style={{ fontSize: 13, fontWeight: 700, color: "#76858d", textTransform: "uppercase", letterSpacing: ".05em", margin: 0 }}>
+                Başvuru durumu
+              </h2>
+              {onGoToApplications && (
+                <button onClick={onGoToApplications} style={{ fontSize: 12, fontWeight: 700, color: "#ea580c" }}>
+                  Tümünü gör
+                </button>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+              {(Object.keys(APPLICATION_STATUS_META) as ApplicationTrackingStatus[]).map((status) => {
+                const meta = APPLICATION_STATUS_META[status];
+                const count = applicationStatusCounts[status];
+                return (
+                  <div
+                    key={status}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "9px 14px",
+                      borderRadius: 11,
+                      background: "#fff",
+                      border: "1px solid #e7e4dc",
+                    }}
+                  >
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: 13.5, fontWeight: 700, color: "#27353e" }}>{count}</span>
+                    <span style={{ fontSize: 12, color: "#8a96a0" }}>{meta.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {categoryDistribution.length > 1 && (
+          <>
+            <h2 style={{ fontSize: 13, fontWeight: 700, color: "#76858d", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 28 }}>
+              Kategori dağılımı
+            </h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
+              {categoryDistribution.map(([label, count]) => (
+                <div key={label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 12.5, color: "#5a6b75", width: 150, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {label}
+                  </span>
+                  <div style={{ flex: 1, height: 8, borderRadius: 999, background: "#efece3", overflow: "hidden" }}>
+                    <div
+                      style={{
+                        width: `${(count / maxCategoryCount) * 100}%`,
+                        height: "100%",
+                        borderRadius: 999,
+                        background: "linear-gradient(90deg,#f97316,#ea580c)",
+                      }}
+                    />
+                  </div>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: "#27353e", width: 18, textAlign: "right" }}>{count}</span>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         <h2 style={{ fontSize: 13, fontWeight: 700, color: "#76858d", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 28 }}>

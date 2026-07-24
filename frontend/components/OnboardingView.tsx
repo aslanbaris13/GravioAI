@@ -51,6 +51,8 @@ const STEP_LABELS: { key: StepKey; label: string; icon: string }[] = [
 ];
 
 interface FormState {
+  companyName: string;
+  website: string;
   sector: string | null;
   city: string;
   companyExists: boolean | null;
@@ -65,6 +67,8 @@ interface FormState {
 }
 
 const EMPTY_FORM: FormState = {
+  companyName: "",
+  website: "",
   sector: null,
   city: "",
   companyExists: null,
@@ -90,6 +94,8 @@ function buildProfile(f: FormState): BackendUserProfile {
   const summary = f.about.trim() || composed;
 
   return {
+    company_name: f.companyName.trim() || null,
+    website: f.website.trim() || null,
     sector: f.sector || null,
     city: f.city.trim() || null,
     team_size: f.teamSize ? Number(f.teamSize) : null,
@@ -109,6 +115,8 @@ function buildProfile(f: FormState): BackendUserProfile {
 function applyParsedProfile(f: FormState, p: BackendUserProfile): FormState {
   return {
     ...f,
+    companyName: f.companyName || p.company_name || "",
+    website: f.website || p.website || "",
     sector: f.sector ?? p.sector ?? null,
     city: f.city || p.city || "",
     companyExists: f.companyExists ?? p.company_exists ?? null,
@@ -340,11 +348,16 @@ export default function OnboardingView({
       </aside>
 
       {/* ---------------- Sağ panel — adım içeriği ---------------- */}
+      {/* `display:flex` + çocukta `margin:auto`: içerik geniş ekranlarda
+          hem yatayda hem dikeyde ortalanır (üstte kalıp altında/sağında
+          büyük boşluk bırakmaz), içerik viewport'tan uzun olduğunda ise
+          (ör. Hedeflerin adımı) `justify-content:center` gibi kırpma
+          yapmadan tam kaydırılabilir kalır. */}
       <main
         className="onboarding-main"
-        style={{ flex: 1, minWidth: 0, overflowY: "auto", padding: "48px 56px 80px" }}
+        style={{ flex: 1, minWidth: 0, overflowY: "auto", display: "flex", padding: "48px 56px 80px" }}
       >
-        <div style={{ maxWidth: 620, margin: "0 auto" }}>
+        <div style={{ maxWidth: 620, width: "100%", margin: "auto" }}>
           {/* Mobil ilerleme çubuğu (masaüstünde gizli) */}
           {!isFirst && (
             <div className="onboarding-mobile-progress" style={{ gap: 6, marginBottom: 26 }}>
@@ -458,6 +471,14 @@ export default function OnboardingView({
               <div>
                 <StepHeading title="Nerede ve ne zamandır?" sub="Bölgesel destekler ve kuruluş şartları için" />
 
+                <label style={labelStyle}>Şirket adı (opsiyonel)</label>
+                <input
+                  value={form.companyName}
+                  onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))}
+                  placeholder="ör. Nova AI Yazılım"
+                  style={{ ...inputStyle, marginBottom: 24 }}
+                />
+
                 <label style={labelStyle}>Şehir</label>
                 <input
                   value={form.city}
@@ -505,13 +526,21 @@ export default function OnboardingView({
                       value={form.companyAgeYears}
                       onChange={(e) => setForm((f) => ({ ...f, companyAgeYears: e.target.value }))}
                       placeholder="ör. 2"
-                      style={inputStyle}
+                      style={{ ...inputStyle, marginBottom: 24 }}
                     />
-                    <p style={{ fontSize: 12.5, color: "#97a2aa", marginTop: 8 }}>
+                    <p style={{ fontSize: 12.5, color: "#97a2aa", marginTop: -16, marginBottom: 24 }}>
                       Bazı programlar yalnızca belirli yaştan genç şirketlere açık — bu yüzden soruyoruz.
                     </p>
                   </>
                 )}
+
+                <label style={labelStyle}>Web sitesi (opsiyonel)</label>
+                <input
+                  value={form.website}
+                  onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
+                  placeholder="ör. nova-ai.com"
+                  style={inputStyle}
+                />
               </div>
             )}
 

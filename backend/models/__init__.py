@@ -1,4 +1,4 @@
-from .application import ApplicationDraft, PlanSection, RequiredDocument
+from .application import ApplicationDraft, ApplicationRecord, ApplicationTrackingStatus, PlanSection, RequiredDocument
 from .eligibility import (
     ConditionState,
     EligibilityCondition,
@@ -7,7 +7,13 @@ from .eligibility import (
 )
 from .intent import Intent, IntentResult
 from .orchestration import AssistResult, ConversationTurn, ProgramMatch
-from .presentation import PRESENTATION_SKELETON, GeneratedPresentation, PresentationSlide, PresentationSlideSpec
+from .presentation import (
+    PRESENTATION_SKELETON,
+    GeneratedPresentation,
+    PresentationRecord,
+    PresentationSlide,
+    PresentationSlideSpec,
+)
 from .profile import UserProfile
 from .program import ApplicationStatus, Currency, ExtractedSupportInfo, SupportProgram, SupportType
 from .report import GeneratedReport, GeneratedReportSection
@@ -33,6 +39,8 @@ __all__ = [
     "ProgramMatch",
     "ConversationTurn",
     "ApplicationDraft",
+    "ApplicationRecord",
+    "ApplicationTrackingStatus",
     "PlanSection",
     "RequiredDocument",
     "SessionState",
@@ -42,6 +50,7 @@ __all__ = [
     "GeneratedReport",
     "GeneratedReportSection",
     "GeneratedPresentation",
+    "PresentationRecord",
     "PresentationSlide",
     "PresentationSlideSpec",
     "PRESENTATION_SKELETON",

@@ -24,7 +24,8 @@ jobs:
         run: pip install -r backend/requirements.txt
 
       - name: Run backend tests
-        run: python -m pytest backend/tests/ -q
+        working-directory: backend
+        run: python -m pytest tests/ -q
 
       - name: Verify backend boots (import + health check)
         run: |

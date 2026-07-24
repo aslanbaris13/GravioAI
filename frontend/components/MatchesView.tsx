@@ -33,19 +33,23 @@ export default function MatchesView({
   onFilterChange: (cat: "all" | ProgramCategory) => void;
   onOpenProgram: (id: string) => void;
 }) {
+  // Süresi geçmiş programlar başvurulamaz durumda — eşleşme listesinde
+  // aktif fırsatların arasına karışıp yanıltmaması için gösterilmiyor.
+  const openPrograms = programs.filter((p) => !p.deadlineExpired);
+
   const filtered =
-    filterCat === "all" ? programs : programs.filter((p) => p.category === filterCat);
+    filterCat === "all" ? openPrograms : openPrograms.filter((p) => p.category === filterCat);
 
   // Dinamik istatistikler
-  const fullCount = programs.filter((p) => p.elig.state === "full").length;
-  const nearestDeadlineDays = programs
+  const fullCount = openPrograms.filter((p) => p.elig.state === "full").length;
+  const nearestDeadlineDays = openPrograms
     .map((p) => p.deadlineDays)
     .filter((d): d is number => d !== null)
     .sort((a, b) => a - b)[0];
 
   const stats = [
-    { icon: "auto_awesome", label: "Toplam eşleşme", value: String(programs.length || "—") },
-    { icon: "check_circle", label: "Tam uygun", value: programs.length ? String(fullCount) : "—" },
+    { icon: "auto_awesome", label: "Toplam eşleşme", value: String(openPrograms.length || "—") },
+    { icon: "check_circle", label: "Tam uygun", value: openPrograms.length ? String(fullCount) : "—" },
     {
       icon: "schedule",
       label: "Yaklaşan son tarih",
@@ -53,7 +57,7 @@ export default function MatchesView({
     },
   ];
 
-  const isEmpty = programs.length === 0;
+  const isEmpty = openPrograms.length === 0;
 
   return (
     <section data-screen-label="Eşleşmelerim" style={{ height: "100%", overflowY: "auto" }}>
@@ -64,7 +68,7 @@ export default function MatchesView({
         <p style={{ fontSize: 14, color: "#5a6b75", marginTop: 6 }}>
           {isEmpty
             ? "Henüz eşleşme yok — chat ekranında işletmeni anlat."
-            : `Profiline göre bulunan ${programs.length} fırsat, uygunluk durumuna göre sıralandı.`}
+            : `Profiline göre bulunan ${openPrograms.length} fırsat, uygunluk durumuna göre sıralandı.`}
         </p>
 
         {/* İstatistik kartları */}
@@ -139,7 +143,9 @@ export default function MatchesView({
                 const active = f.key === filterCat;
                 // Filtrede o kategoriden program yoksa soluklaştır
                 const count =
-                  f.key === "all" ? programs.length : programs.filter((p) => p.category === f.key).length;
+                  f.key === "all"
+                    ? openPrograms.length
+                    : openPrograms.filter((p) => p.category === f.key).length;
                 if (count === 0 && f.key !== "all") return null;
                 return (
                   <button

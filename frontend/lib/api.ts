@@ -73,6 +73,8 @@ export interface BackendSupportProgram {
   founded_after?: string | null;
   deadline?: string | null;
   official_url?: string | null;
+  /** Verinin çekildiği kaynak sayfa — `official_url` boş/placeholder geldiğinde yedek link olarak kullanılır. */
+  source_url?: string | null;
   conditions_summary?: string | null;
   women_entrepreneur?: boolean | null;
   technopark?: boolean | null;
@@ -81,6 +83,8 @@ export interface BackendSupportProgram {
 }
 
 export interface BackendUserProfile {
+  company_name?: string | null;
+  website?: string | null;
   sector?: string | null;
   city?: string | null;
   team_size?: number | null;
@@ -126,6 +130,23 @@ export interface BackendApplicationDraft {
   plan_title: string;
   plan_sections: BackendPlanSection[];
   documents: BackendRequiredDocument[];
+}
+
+/** `/application`'ın (LLM ile plan/belge taslağı) ürettiği `BackendApplicationDraft`
+ * ile karıştırılmamalı — bu, `applications` tablosundaki kalıcı durum takibi
+ * kaydı ("Başvurularım" sayfası). */
+export type ApplicationTrackingStatus = "taslak" | "hazirlaniyor" | "gonderildi";
+
+export interface BackendApplicationRecord {
+  id: string;
+  session_id: string;
+  program_id: string;
+  program_name: string;
+  status: ApplicationTrackingStatus;
+  note: string | null;
+  reminder_date: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface BackendRequiredField {
@@ -293,6 +314,35 @@ export async function fetchApplicationDraft(
   });
 }
 
+/** Bir programa başvuru sürecini başlatır (Başvurularım — durum takibi).
+ * Aynı program için tekrar çağrılırsa mevcut kaydı döner. */
+export async function startApplicationTracking(
+  sessionId: string,
+  programId: string,
+  programName: string,
+): Promise<BackendApplicationRecord> {
+  return apiFetch<BackendApplicationRecord>("/applications", {
+    method: "POST",
+    body: JSON.stringify({ session_id: sessionId, program_id: programId, program_name: programName }),
+  });
+}
+
+/** Bir oturumun tüm başvuru takibi kayıtlarını getirir. */
+export async function listApplicationTracking(sessionId: string): Promise<BackendApplicationRecord[]> {
+  return apiFetch<BackendApplicationRecord[]>(`/applications?session_id=${encodeURIComponent(sessionId)}`);
+}
+
+/** Bir başvuru kaydının durum/not/hatırlatma alanlarını günceller. */
+export async function updateApplicationTracking(
+  id: string,
+  fields: { status?: ApplicationTrackingStatus; note?: string; reminder_date?: string },
+): Promise<BackendApplicationRecord> {
+  return apiFetch<BackendApplicationRecord>(`/applications/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(fields),
+  });
+}
+
 /**
  * Tüm programları listeler (opsiyonel kategori filtresi).
  */
@@ -301,6 +351,27 @@ export async function getPrograms(
 ): Promise<BackendSupportProgram[]> {
   const qs = category ? `?category=${encodeURIComponent(category)}` : "";
   return apiFetch<BackendSupportProgram[]>(`/programs${qs}`);
+}
+
+/**
+ * Tek bir programı id'siyle getirir. `apiPrograms` önbelleğinde yoksa
+ * (ör. doğrudan bir program linkiyle gelindiğinde) yedek olarak kullanılır.
+ */
+export async function getProgram(id: string): Promise<BackendSupportProgram> {
+  return apiFetch<BackendSupportProgram>(`/programs/${encodeURIComponent(id)}`);
+}
+
+/**
+ * Bir profili belirli bir programa karşı değerlendirir (Uygunluk Ajanı).
+ */
+export async function evaluateEligibility(
+  profile: BackendUserProfile,
+  programId: string,
+): Promise<BackendEligibilityResult> {
+  return apiFetch<BackendEligibilityResult>("/eligibility", {
+    method: "POST",
+    body: JSON.stringify({ profile, program_id: programId }),
+  });
 }
 
 /**
@@ -384,18 +455,41 @@ export interface BackendGeneratedPresentation {
   slides: BackendPresentationSlide[];
 }
 
+/** `presentations` tablosunda arşivlenmiş, kalıcı bir sunum kaydı ("Geçmiş Sunumlarım"). */
+export interface BackendPresentationRecord {
+  id: string;
+  session_id: string;
+  title: string;
+  subtitle: string;
+  company_name: string;
+  slides: BackendPresentationSlide[];
+  created_at: string;
+}
+
 /**
  * Sabit slayt iskeletinden, profile özel bir yatırımcı/müşteri sunumu üretir.
+ * `sessionId` verilirse üretilen sunum "Geçmiş Sunumlarım" arşivine de kaydedilir.
  */
 export async function generatePresentation(
   profile: BackendUserProfile,
   companyName: string,
   extraContext: string,
+  sessionId?: string,
 ): Promise<BackendGeneratedPresentation> {
   return apiFetch<BackendGeneratedPresentation>("/presentations/generate", {
     method: "POST",
-    body: JSON.stringify({ profile, company_name: companyName, extra_context: extraContext }),
+    body: JSON.stringify({
+      profile,
+      company_name: companyName,
+      extra_context: extraContext,
+      session_id: sessionId ?? null,
+    }),
   });
+}
+
+/** Bir oturumun daha önce ürettiği tüm sunumları getirir. */
+export async function listPresentations(sessionId: string): Promise<BackendPresentationRecord[]> {
+  return apiFetch<BackendPresentationRecord[]>(`/presentations?session_id=${encodeURIComponent(sessionId)}`);
 }
 
 /**

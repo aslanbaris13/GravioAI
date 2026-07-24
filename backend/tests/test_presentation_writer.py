@@ -2,11 +2,11 @@ import json
 
 import pytest
 
-from backend.agents.presentation_writer import PresentationWriterAgent
-from backend.core.pptx_export import build_presentation_pptx
-from backend.models.presentation import PRESENTATION_SKELETON, GeneratedPresentation, PresentationSlide
-from backend.models.profile import UserProfile
-from backend.tests.test_llm_provider import MockLLMClient
+from agents.presentation_writer import PresentationWriterAgent
+from core.pptx_export import build_presentation_pptx
+from models.presentation import PRESENTATION_SKELETON, GeneratedPresentation, PresentationSlide
+from models.profile import UserProfile
+from tests.test_llm_provider import MockLLMClient
 
 
 @pytest.fixture

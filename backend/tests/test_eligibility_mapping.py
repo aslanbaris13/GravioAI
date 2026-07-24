@@ -94,3 +94,23 @@ async def test_eligibility_mapping_consistency(mock_profile, mock_program):
     assert "DESTEK PROGRAMI:" in prompt_text
     assert "Sektör: yazılım" in prompt_text
     assert "Program: Test Programı" in prompt_text
+
+
+@pytest.mark.asyncio
+async def test_eligibility_top_level_state_coerces_condition_value(mock_profile, mock_program):
+    """LLM, genel `state` alanına yanlışlıkla bir ConditionState değeri
+    (met/action/unmet) yazarsa — iki alan da aynı isimde ("state") farklı
+    enum'lar taşıdığı için bu karışıklık olur — Pydantic doğrulaması ham bir
+    hatayla çökmemeli, en yakın EligibilityState değerine eşlenmeli."""
+    mock_response = {
+        "score": 40,
+        "state": "unmet",
+        "label": "Koşul karşılanmıyor",
+        "conditions": [],
+    }
+    mock_client = MockLLMClient(responses=[json.dumps(mock_response)])
+    agent = EligibilityAgent(llm=mock_client)
+
+    result = await agent.run(mock_profile, mock_program)
+
+    assert result.state == "locked"
