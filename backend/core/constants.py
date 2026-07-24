@@ -26,6 +26,7 @@ BOS_ALAN_MESAJLARI = {
     "student": "Öğrenci şartı belirtilmemiştir.",
     "company_required": "Şirket şartı belirtilmemiştir.",
     "amount_max": "Maksimum destek tutarı belirtilmemiştir.",
+    "deadline": "Son başvuru tarihi belirtilmemiştir.",
 }
 # Kalkınma Ajansı'nın API'sinden gelen agency_code'ları okunaklı tam isme çeviren sözlük 
 #sadece kalkinma_ajansi.py kullanıyor.
