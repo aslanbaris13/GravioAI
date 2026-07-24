@@ -2,7 +2,7 @@
 from bs4 import BeautifulSoup
 from connectors.base import BaseConnector
 from models.raw_program import RawProgram
-from core.cleaner import BaseCleaner,get_cleaner
+from core.cleaner import BaseCleaner, get_cleaner
 from core.fetcher import BaseFetcher
 
 from core.llm.factory import get_llm_client
