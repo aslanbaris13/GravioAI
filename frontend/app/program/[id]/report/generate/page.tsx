@@ -2,18 +2,20 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Ms from "@/components/Ms";
+import ProgramLoading from "@/components/ProgramLoading";
 import ProgramNotFound from "@/components/ProgramNotFound";
 import { resolveReportSchema, generateReport, exportReportDocx, ApiError } from "@/lib/api";
 import type { BackendReportSchema, BackendGeneratedReport, ReportFieldValues } from "@/lib/api";
 import { useAppState } from "@/lib/AppStateContext";
+import { useProgram } from "@/lib/useProgram";
 
 type LoadState = "loading" | "found" | "not-found" | "error";
 type SubmitState = "idle" | "submitting" | "done" | "error";
 
 export default function ProgramReportGeneratePage() {
   const { id } = useParams<{ id: string }>();
-  const { resolveProgram, goToMatches, goToReport, currentProfile } = useAppState();
-  const program = resolveProgram(id);
+  const { goToMatches, goToReport, currentProfile } = useAppState();
+  const { program, state: programState } = useProgram(id);
 
   const [schema, setSchema] = useState<BackendReportSchema | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
@@ -39,8 +41,9 @@ export default function ProgramReportGeneratePage() {
       cancelled = true;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, program]);
 
+  if (programState === "loading") return <ProgramLoading />;
   if (!program) return <ProgramNotFound onBack={goToMatches} />;
 
   function setFieldValue(sectionId: string, fieldKey: string, value: string) {

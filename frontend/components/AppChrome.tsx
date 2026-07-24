@@ -9,7 +9,16 @@ import { useAppState } from "@/lib/AppStateContext";
 export default function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { sidebarOpen, setSidebarOpen, matchCount, onNewChat, toastShow, toastText } = useAppState();
+  const {
+    sidebarOpen,
+    setSidebarOpen,
+    matchCount,
+    onNewChat,
+    toastShow,
+    toastText,
+    currentProfile,
+    trackedApplications,
+  } = useAppState();
 
   if (pathname === "/onboarding") {
     return <>{children}</>;
@@ -43,7 +52,9 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
       />
       <Sidebar
         matchCount={matchCount}
+        applicationCount={trackedApplications.length}
         open={sidebarOpen}
+        profile={currentProfile}
         onNewChat={() => {
           onNewChat();
           router.push("/chat");
@@ -55,6 +66,10 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
         }}
         onNavMatches={() => {
           router.push("/matches");
+          setSidebarOpen(false);
+        }}
+        onNavApplications={() => {
+          router.push("/applications");
           setSidebarOpen(false);
         }}
         onNavProfile={() => {

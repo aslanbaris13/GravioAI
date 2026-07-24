@@ -25,7 +25,7 @@ from typing import AsyncIterator
 from ..core.llm import LLMMessage
 from ..models.intent import Intent, IntentResult
 from ..models.orchestration import AssistResult, ConversationTurn, ProgramMatch
-from ..models.profile import UserProfile
+from ..models.profile import UserProfile, merge_profile
 from .eligibility import EligibilityAgent
 from .intent_classifier import IntentClassifier
 from .matching import MatchingAgent
@@ -40,7 +40,11 @@ _REPLY_SYSTEM = (
     "sektör destek programları konusunda yardım edersin. Kısa, samimi ve "
     "Türkçe yanıt ver. Kullanıcıya bulunan programlar hakkında kısa bir özet "
     "sun; programa başvurabilir ya da uygunluğunu kontrol edebilir. "
-    "Teknik jargon kullanma."
+    "Teknik jargon kullanma.\n\n"
+    "Biçimlendirme: Birden fazla programdan bahsediyorsan her birini ayrı "
+    "bir markdown liste öğesi olarak yaz (\"- \" ile başlat, her öğe kendi "
+    "satırında) — hepsini tek bir paragrafa sıkıştırma. Program adını "
+    "**kalın** yaz, geri kalan metinde kalın kullanma. Kısa cümleler kur."
 )
 
 _SMALL_TALK_INSTRUCTIONS = {
@@ -65,7 +69,10 @@ _APPLY_REPLY_SYSTEM = (
     "başvuracağını soruyor. Bulunan en uygun programı kısaca tanıt, başvuru "
     "için genel adımları özetle (uygunluk koşullarını kontrol et, gerekli "
     "belgeleri hazırla) ve arayüzdeki 'Başvuru hazırla' seçeneğini işaret et. "
-    "Kısa, samimi ve Türkçe yaz. Teknik jargon kullanma."
+    "Kısa, samimi ve Türkçe yaz. Teknik jargon kullanma.\n\n"
+    "Biçimlendirme: Adımları anlatırken her adımı ayrı bir markdown liste "
+    "öğesi olarak yaz (\"- \" ile başlat, her öğe kendi satırında). Program "
+    "adını **kalın** yaz, geri kalan metinde kalın kullanma."
 )
 
 _APPLY_NO_MATCH_REPLY = (
@@ -122,9 +129,24 @@ class Orchestrator:
         return result
 
     async def _save_memory(self, session_id: str, result: AssistResult) -> None:
-        """Turu hafızaya kaydeder — başarısız olsa bile kullanıcı yanıtsız kalmamalı."""
+        """Turu hafızaya kaydeder — başarısız olsa bile kullanıcı yanıtsız kalmamalı.
+
+        `result.profile` bu turun çıkardığı profildir; bazı intent'lerde
+        (PROGRAM_QUESTION, APPLY_REQUEST'te aday bulunamazsa) neredeyse boştur.
+        Kayıtlı profille birleştirmeden doğrudan üzerine yazmak, önceki
+        turlarda çıkarılan gerçek profili (sektör/şehir/ekip vb.) siler —
+        bu yüzden önce mevcut kaydı yükleyip alan bazında birleştiriyoruz.
+        """
+        profile = result.profile
         try:
-            await self._memory_agent.save(session_id, result.profile, result.matches)
+            existing = await self._memory_agent.load(session_id)
+            if existing:
+                profile = merge_profile(existing.profile, result.profile)
+        except Exception:  # noqa: BLE001 — mevcut profil okunamazsa bu turun profiliyle devam
+            logger.exception("memory_load_failed session_id=%s", session_id)
+
+        try:
+            await self._memory_agent.save(session_id, profile, result.matches)
         except Exception:  # noqa: BLE001 — kayıt hatası sohbeti kesmemeli
             logger.exception("memory_save_failed session_id=%s", session_id)
 

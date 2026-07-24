@@ -224,3 +224,26 @@ create trigger applications_set_updated_at
     for each row execute function public.set_updated_at();
 
 alter table public.applications enable row level security;
+
+-- ============================================================
+-- presentations — üretilen şirket sunumlarının kalıcı arşivi.
+-- "Sunumu oluştur" her çağrıldığında burada bir kayıt açılır; kullanıcı
+-- sayfadan ayrılsa/geri dönse bile daha önce ürettiği sunumları görüp
+-- tekrar .pptx olarak indirebilir (LLM'i tekrar çağırmadan — `slides`
+-- tam JSON içerir, export-pptx bunu doğrudan kullanır).
+-- ============================================================
+
+-- 15) Sunum arşivi tablosu
+create table if not exists public.presentations (
+    id            uuid primary key default gen_random_uuid(),
+    session_id    text not null references public.user_sessions(session_id) on delete cascade,
+    title         text not null,
+    subtitle      text,
+    company_name  text,
+    slides        jsonb not null default '[]'::jsonb,
+    created_at    timestamptz not null default now()
+);
+
+create index if not exists presentations_session_id_idx on public.presentations(session_id);
+
+alter table public.presentations enable row level security;
