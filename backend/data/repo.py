@@ -12,11 +12,11 @@ from functools import lru_cache
 from pydantic import ValidationError
 from supabase import Client, create_client
 
-from ..core.config import get_settings
-from ..models import Category, ProgramMatch, SupportProgram
-from ..models.application import ApplicationRecord
-from ..models.presentation import GeneratedPresentation, PresentationRecord
-from ..models.session import SessionState
+from core.config import get_settings
+from models import Category, ProgramMatch, SupportProgram
+from models.application import ApplicationRecord
+from models.presentation import GeneratedPresentation, PresentationRecord
+from models.session import SessionState
 
 logger = logging.getLogger(__name__)
 

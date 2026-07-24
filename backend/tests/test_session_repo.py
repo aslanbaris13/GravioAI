@@ -1,11 +1,11 @@
 from unittest.mock import MagicMock, patch
 
-from backend.data import repo
-from backend.models.eligibility import EligibilityResult, EligibilityState
-from backend.models.orchestration import ProgramMatch
-from backend.models.profile import UserProfile
-from backend.models.program import SupportProgram
-from backend.models.session import SessionState
+from data import repo
+from models.eligibility import EligibilityResult, EligibilityState
+from models.orchestration import ProgramMatch
+from models.profile import UserProfile
+from models.program import SupportProgram
+from models.session import SessionState
 
 
 def _program(pid: str) -> SupportProgram:

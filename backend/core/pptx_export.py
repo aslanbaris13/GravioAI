@@ -14,7 +14,7 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
-from ..models.presentation import GeneratedPresentation
+from models.presentation import GeneratedPresentation
 
 NAVY_DARK = RGBColor(0x0A, 0x1F, 0x2D)
 ORANGE = RGBColor(0xF9, 0x73, 0x16)

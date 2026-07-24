@@ -2,10 +2,10 @@ import pytest
 import json
 from unittest.mock import patch
 
-from backend.agents.eligibility import EligibilityAgent, _profile_brief, _program_brief
-from backend.models.profile import UserProfile
-from backend.models.program import SupportProgram
-from backend.tests.test_llm_provider import MockLLMClient
+from agents.eligibility import EligibilityAgent, _profile_brief, _program_brief
+from models.profile import UserProfile
+from models.program import SupportProgram
+from tests.test_llm_provider import MockLLMClient
 
 @pytest.fixture
 def mock_profile():

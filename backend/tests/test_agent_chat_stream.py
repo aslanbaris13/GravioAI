@@ -2,8 +2,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from backend.agents.base import Agent
-from backend.core.llm.base import LLMClient, LLMMessage
+from agents.base import Agent
+from core.llm.base import LLMClient, LLMMessage
 
 
 class DummyAgent(Agent):
@@ -40,7 +40,7 @@ async def test_stream_retries_before_first_chunk_on_transient_error():
     client = _FlakyStreamClient(["Merhaba", " dünya"], fail_times=2)
     agent = DummyAgent(llm=client)
 
-    with patch("backend.agents.base.asyncio.sleep", new_callable=AsyncMock):
+    with patch("agents.base.asyncio.sleep", new_callable=AsyncMock):
         chunks = [
             c
             async for c in agent._chat_stream_with_history(

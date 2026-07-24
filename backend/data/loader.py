@@ -7,7 +7,7 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-from ..models import SupportProgram
+from models import SupportProgram
 
 _PROGRAMS_DIR = Path(__file__).parent / "programs"
 

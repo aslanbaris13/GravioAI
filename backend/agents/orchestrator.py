@@ -22,10 +22,10 @@ import logging
 import time
 from typing import AsyncIterator
 
-from ..core.llm import LLMMessage
-from ..models.intent import Intent, IntentResult
-from ..models.orchestration import AssistResult, ConversationTurn, ProgramMatch
-from ..models.profile import UserProfile, merge_profile
+from core.llm import LLMMessage
+from models.intent import Intent, IntentResult
+from models.orchestration import AssistResult, ConversationTurn, ProgramMatch
+from models.profile import UserProfile, merge_profile
 from .eligibility import EligibilityAgent
 from .intent_classifier import IntentClassifier
 from .matching import MatchingAgent

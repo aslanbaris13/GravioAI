@@ -7,9 +7,9 @@ bu sayede kullanıcı bilgilerini birden fazla turda paylaşabilir.
 Yeni ajanlar bu deseni izler: `Agent`'tan türet, `name` + `system_prompt` ver,
 `run()` içinde `self._extract(...)` çağır.
 """
-from ..core.llm import LLMMessage
-from ..models.orchestration import ConversationTurn
-from ..models.profile import UserProfile
+from core.llm import LLMMessage
+from models.orchestration import ConversationTurn
+from models.profile import UserProfile
 from .base import Agent
 
 

@@ -9,11 +9,11 @@ Akış:
 """
 import asyncio
 
-from ..data.loader import load_programs
-from ..data.repo import program_embedding_text, _to_row, upsert_programs
-from ..core.embedder import get_embedding_client
-from ..core.chunker import HierarchicalChunker
-from ..data.repo import upsert_program_parents, upsert_program_chunks
+from data.loader import load_programs
+from data.repo import program_embedding_text, _to_row, upsert_programs
+from core.embedder import get_embedding_client
+from core.chunker import HierarchicalChunker
+from data.repo import upsert_program_parents, upsert_program_chunks
 
 async def main():
     print("Ingestion başlatılıyor...\n")

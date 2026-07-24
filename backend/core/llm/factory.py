@@ -5,7 +5,7 @@ değişmez.
 """
 from functools import lru_cache
 
-from ..config import Settings, get_settings
+from core.config import Settings, get_settings
 from .base import LLMClient
 
 

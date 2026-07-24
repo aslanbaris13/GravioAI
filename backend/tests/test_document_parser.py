@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from docx import Document
 
-from backend.core import document_parser
+from core import document_parser
 
 
 def test_extract_txt():
@@ -34,7 +34,7 @@ def test_extract_pdf_uses_pypdf_reader():
     fake_reader = MagicMock()
     fake_reader.pages = [fake_page]
 
-    with patch("backend.core.document_parser.PdfReader", return_value=fake_reader):
+    with patch("core.document_parser.PdfReader", return_value=fake_reader):
         text = document_parser.extract_text(b"%PDF-fake-bytes", "cv.pdf")
 
     assert text == "Şirket hakkında bilgiler."
@@ -52,7 +52,7 @@ def test_empty_extracted_text_raises():
     fake_reader = MagicMock()
     fake_reader.pages = [fake_page]
 
-    with patch("backend.core.document_parser.PdfReader", return_value=fake_reader):
+    with patch("core.document_parser.PdfReader", return_value=fake_reader):
         with pytest.raises(ValueError, match="çıkarılamadı"):
             document_parser.extract_text(b"%PDF", "taranmis.pdf")
 
