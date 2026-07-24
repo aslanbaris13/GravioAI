@@ -14,9 +14,9 @@ from core.config import get_settings
 from models import Category, ProgramMatch, SupportProgram
 from models.session import SessionState
 
-_TABLE = "programs_v3"  # yeni tablo
-_CHİLD = "program_chunks_v3" #child
-_PARENT = "program_parents_v3" #parent
+_TABLE = "programs"
+_CHİLD = "program_chunks" #child
+_PARENT = "program_parents" #parent
 _SESSIONS = "user_sessions"
 
 @lru_cache

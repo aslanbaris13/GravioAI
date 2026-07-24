@@ -18,21 +18,31 @@ program_chunks
 └── created_at (timestamptz, default now())
 
 """
+
 import re
 import uuid
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 # from core.embedding import EmbeddingClient (Projenin yapısına göre importu sağla)
+
+# Deterministik UUID üretimi için sabit isim uzayı 
+# uuid.uuid5(namespace, name) kullanılır: aynı program_id + parent_index her zaman aynı ID üretir, böylece ingest
+# tekrarlarında mükerrer satır birikmez. Bu sabit asla değiştirilmemeli.
+_GRAVIOAI_NAMESPACE = uuid.UUID("7c9e6a8f-1b3d-4f2a-9c5e-8d4b2a1f6e3c")
+
+# Connector'ların (TÜBİTAK, KOSGEB, Kalkınma Ajansı vb.) body_chunk metnine
+# eklediği bölüm/ek işaretleyicilerini tanıyan genel desen: "--- başlık ---"
+# şeklindeki her satır bir bölüm başlığı sayılır. Kurumun kelimeleri önemli
+# değil, sadece sarma deseni — yeni kurum eklense de kod değişmeden çalışır.
 _SECTION_MARKER_PATTERN = re.compile(r"^---\s*(.+?)\s*---$")
 
 
 def _extract_section_title(parent_text: str, fallback_length: int = 60) -> str:
     """Bir parent metninin section_title'ını çıkarır.
 
-    Önce ilk satırın "--- başlık ---" işaretleyici desenine uyup uymadığına
-    bakar (ör. TÜBİTAK PDF'lerinin eklendiği "--- Çağrı Belgesi: ... ---").
-    Uyuyorsa işaretleyicinin içindeki gerçek başlığı döner. Uymuyorsa (normal
-    HTML metni), eski davranışa döner: metnin ilk fallback_length karakteri.
+    "--- başlık ---" işaretleyicisi varsa (ör. TÜBİTAK PDF ekleri) içindeki
+    başlığı döner. Yoksa ilk fallback_length karakteri alır, ama kelimeyi
+    yarım bırakmamak için son tam kelimeye kadar geri gider.
     """
     ilk_satir = parent_text.strip().splitlines()[0] if parent_text.strip() else ""
 
@@ -40,10 +50,14 @@ def _extract_section_title(parent_text: str, fallback_length: int = 60) -> str:
     if eslesme:
         return eslesme.group(1)
 
-    return parent_text.strip()[:fallback_length]
+    temiz_metin = parent_text.strip()
+    kesilmis = temiz_metin[:fallback_length]
 
+    # Kelime ortasında kesilmesin diye son tam kelimeye geri dön
+    if len(temiz_metin) > fallback_length and " " in kesilmis:
+        kesilmis = kesilmis.rsplit(" ", 1)[0]
 
-
+    return kesilmis
 
 
 class HierarchicalChunker:
@@ -57,7 +71,7 @@ class HierarchicalChunker:
         self,
         embedding_client, # EmbeddingClient tipinde
         breakpoint_threshold_amount: float = 90.0,
-        child_chunk_size: int = 450,
+        child_chunk_size: int = 400,
         child_chunk_overlap: int = 60,
     ) -> None:
         
@@ -91,9 +105,9 @@ class HierarchicalChunker:
 
         # Parent_docs üzerinde döngü
         for parent_index, parent_doc in enumerate(parent_docs):
-            # Parent için benzersiz UUID
-            parent_id = str(uuid.uuid4())
-            section_title = parent_doc.page_content.strip()[:60]
+            # Deterministik ID: aynı program_id + parent_index -> aynı UUID(veriler güncellendiğinde eski verilerin id'si ile aynı olup üzerine yazabilmesi için)
+            parent_id = str(uuid.uuid5(_GRAVIOAI_NAMESPACE, f"{program_id}:parent:{parent_index}"))
+            section_title = _extract_section_title(parent_doc.page_content)
             
             #Parent dict'ini listeye ekleme
             parent_rows.append({
@@ -120,7 +134,10 @@ class HierarchicalChunker:
             # Child dict'lerini listeye ekle
             # Kendi parent'ı içindeki sırayı takip ediyoruz
             for chunk_index, (c_text, c_vector) in enumerate(zip(child_texts, child_vectors)):
-                child_id = str(uuid.uuid4())
+                # program_id + parent_index + chunk_index -> aynı UUID
+                child_id = str(uuid.uuid5(
+                    _GRAVIOAI_NAMESPACE, f"{program_id}:parent:{parent_index}:chunk:{chunk_index}"
+                ))
                 child_rows.append({
                     "id": child_id,
                     "program_id": program_id,
