@@ -27,7 +27,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # Deterministik UUID üretimi için sabit isim uzayı 
 # uuid.uuid5(namespace, name) kullanılır: aynı program_id + parent_index her zaman aynı ID üretir, böylece ingest
-# tekrarlarında mükerrer satır birikmez. Bu sabit asla değiştirilmemeli.
+# tekrarlarında duplicate satır birikmez. Bu sabit asla değiştirilmemeli.
 _GRAVIOAI_NAMESPACE = uuid.UUID("7c9e6a8f-1b3d-4f2a-9c5e-8d4b2a1f6e3c")
 
 # Connector'ların (TÜBİTAK, KOSGEB, Kalkınma Ajansı vb.) body_chunk metnine
