@@ -16,7 +16,6 @@ from supabase import create_client, Client
 from core.constants import BOS_ALAN_MESAJLARI
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-# Sourcery uyarısı: Yazma yetkisi için anon_key kaldırıldı, sadece yetkili key'ler kullanılıyor.
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
 
 def update_nulls_in_database():
@@ -28,7 +27,6 @@ def update_nulls_in_database():
         supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
         print("🔄 Veritabanındaki 'programs' tablosu taranıyor...")
         
-        # Sourcery uyarısı: Tüm kolonlar yerine sadece gerekli kolonlar çekilerek performans optimize edildi.
         columns_to_select = [
             "id",
             "program_id",
@@ -54,7 +52,6 @@ def update_nulls_in_database():
         for program in programs:
             updates = {}
             
-            # Metinsel Kolon Kontrolleri
             if not program.get("support_rate"):
                 updates["support_rate"] = BOS_ALAN_MESAJLARI.get("support_rate", "Destek oranı belirtilmemiştir.")
                 
@@ -64,11 +61,9 @@ def update_nulls_in_database():
             if not program.get("official_url"):
                 updates["official_url"] = BOS_ALAN_MESAJLARI.get("official_url", "Resmi başvuru bağlantısı belirtilmemiştir.")
                 
-            # Sourcery uyarısı: Hardcoded metin kaldırıldı, sabitten çekiliyor.
             if not program.get("founded_after"):
                 updates["founded_after"] = BOS_ALAN_MESAJLARI.get("founded_after", "Kuruluş tarihi şartı belirtilmemiştir.")
 
-            # Boolean Kolon Kontrolleri
             if program.get("women_entrepreneur") is None:
                 updates["women_entrepreneur"] = False
                 

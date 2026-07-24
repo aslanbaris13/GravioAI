@@ -17,10 +17,15 @@ AY_KISALTMALARI = {
 # None olan text/opsiyonel alanları doldurmak için kullanılan Türkçe mesajlar — 
 # format_to_db() içinde kullanılıyor.
 BOS_ALAN_MESAJLARI = {
-    "founded_after": "Kuruluş tarihi şartı belirtilmemiş",
-    "deadline": "Son başvuru tarihi belirtilmemiş",
-    "support_rate": "Destek oranı belirtilmemiş",
-    "official_url": "Resmi link belirtilmemiş",
+    "support_rate": "Destek oranı belirtilmemiştir.",
+    "application_status": "Başvuru durumu bilgisi bulunmuyor.",
+    "official_url": "Resmi başvuru bağlantısı belirtilmemiştir.",
+    "founded_after": "Kuruluş tarihi şartı belirtilmemiştir.",
+    "women_entrepreneur": "Kadın girişimci şartı belirtilmemiştir.",
+    "technopark": "Teknopark şartı belirtilmemiştir.",
+    "student": "Öğrenci şartı belirtilmemiştir.",
+    "company_required": "Şirket şartı belirtilmemiştir.",
+    "amount_max": "Maksimum destek tutarı belirtilmemiştir.",
 }
 
 # Kalkınma Ajansı'nın API'sinden gelen agency_code'ları okunaklı tam isme çeviren sözlük 
