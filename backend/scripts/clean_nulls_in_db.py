@@ -10,33 +10,32 @@ BACKEND_DIR = CURRENT_DIR.parent
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-# .env dosyasını yüklüyoruz
+# .env dosyasını yüklüyoruz (varsa)
 env_path = BACKEND_DIR / ".env"
-if not env_path.exists():
-    env_path = BACKEND_DIR.parent / ".env"
-load_dotenv(dotenv_path=env_path)
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    # Üst dizini de kontrol et
+    load_dotenv(dotenv_path=BACKEND_DIR.parent / ".env")
 
-from supabase import create_client, Client
 from core.constants import BOS_ALAN_MESAJLARI
 
-RAW_SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-
-# Anon key'e düşmeyerek güvenliği sağlıyoruz (Sourcery Comment 1)
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
-
-# Python SDK /rest/v1'i otomatik eklediği için URL sonundaki takıyı temizliyoruz (PGRST125 fix)
-SUPABASE_URL = RAW_SUPABASE_URL.replace("/rest/v1", "").rstrip("/")
-
 def update_nulls_in_database():
-    if not SUPABASE_URL or not SUPABASE_KEY:
-        print("❌ HATA: .env dosyasından SUPABASE_URL veya yazma yetkili SUPABASE_KEY okunamadı!")
+    raw_url = os.getenv("SUPABASE_URL", "")
+    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
+
+    if not raw_url or not key:
+        print("⚠️ UYARI: .env veya ortam değişkenlerinde SUPABASE_URL / SUPABASE_KEY bulunamadı. İşlem atlanıyor.")
         return
 
+    # Python SDK /rest/v1'i otomatik eklediği için URL sonundaki takıyı temizliyoruz
+    supabase_url = raw_url.replace("/rest/v1", "").rstrip("/")
+
     try:
-        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        from supabase import create_client, Client
+        supabase: Client = create_client(supabase_url, key)
         print("🔄 Veritabanındaki 'programs' tablosu taranıyor...")
         
-        # PostgREST URL ayrıştırma hatasını önlemek için standart select
         response = supabase.table("programs").select("*").execute()
         programs = response.data
         
@@ -58,7 +57,6 @@ def update_nulls_in_database():
             if not program.get("official_url"):
                 updates["official_url"] = BOS_ALAN_MESAJLARI.get("official_url", "Resmi başvuru bağlantısı belirtilmemiştir.")
                 
-            # Sourcery Comment 3: founded_after artık sabitten okunuyor
             if not program.get("founded_after"):
                 updates["founded_after"] = BOS_ALAN_MESAJLARI.get("founded_after", "Kuruluş tarihi şartı belirtilmemiştir.")
 
