@@ -97,7 +97,7 @@ class KalkinmaAjansiConnector(BaseConnector):
                         print(f" Detay sayfası okunamadı ({redirect_url}): {e}")
 
                 
-                 # İkinci filtreleme: Detay sayfası indirildikten sonra, tam
+                # İkinci filtreleme: Detay sayfası indirildikten sonra, tam
                 # metin üzerinden tekrar kontrol. 
                 if not self.is_relevant(detail_text, title):
                     print(f" -> ELENDİ (tam metin kontrolünde alakasız çıktı): {title}")

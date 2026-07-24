@@ -56,7 +56,7 @@ class HierarchicalChunker:
     def __init__(
         self,
         embedding_client, # EmbeddingClient tipinde
-        breakpoint_threshold_amount: float = 85.0,
+        breakpoint_threshold_amount: float = 90.0,
         child_chunk_size: int = 450,
         child_chunk_overlap: int = 60,
     ) -> None:
