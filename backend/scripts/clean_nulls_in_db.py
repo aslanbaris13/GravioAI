@@ -4,43 +4,37 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Backend dizinini sys.path'e ekliyoruz
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+CURRENT_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = CURRENT_DIR.parent
+
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
 # .env dosyasını yüklüyoruz
-env_path = Path(__file__).resolve().parent.parent / ".env"
+env_path = BACKEND_DIR / ".env"
 if not env_path.exists():
-    env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+    env_path = BACKEND_DIR.parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
 from supabase import create_client, Client
 from core.constants import BOS_ALAN_MESAJLARI
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
+RAW_SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY")
+
+# Python SDK'sı /rest/v1'i otomatik eklediği için URL sonundaki bu takıyı temizliyoruz
+SUPABASE_URL = RAW_SUPABASE_URL.replace("/rest/v1", "").rstrip("/")
 
 def update_nulls_in_database():
     if not SUPABASE_URL or not SUPABASE_KEY:
-        print("❌ HATA: .env dosyasından SUPABASE_URL veya yazma yetkili SUPABASE_KEY okunamadı!")
+        print("❌ HATA: .env dosyasından SUPABASE_URL veya SUPABASE_KEY okunamadı!")
         return
 
     try:
         supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
         print("🔄 Veritabanındaki 'programs' tablosu taranıyor...")
         
-        columns_to_select = [
-            "id",
-            "program_id",
-            "support_rate",
-            "application_status",
-            "official_url",
-            "founded_after",
-            "women_entrepreneur",
-            "technopark",
-            "student",
-            "company_required"
-        ]
-        
-        response = supabase.table("programs").select(",".join(columns_to_select)).execute()
+        response = supabase.table("programs").select("*").execute()
         programs = response.data
         
         if not programs:
