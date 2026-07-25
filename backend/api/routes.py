@@ -37,8 +37,7 @@ from models import (
     ReportSchema,
     SessionState,
     SupportProgram,
-    UserProfile,
-)
+    UserProfile)
 
 router = APIRouter()
 
