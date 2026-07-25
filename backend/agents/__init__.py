@@ -9,16 +9,16 @@ Ortak desen `base.Agent`'ta (LLM-merkezli ajanlar için). Mevcut ajanlar:
 * MemoryAgent — oturumun profil + eşleşmelerini kalıcılaştırır (SCRUM-97)
 * Orchestrator — mesaj -> AssistResult (niyete göre ajanları zincirler, SCRUM-96)
 """
-from .application import ApplicationAgent
-from .base import Agent
-from .eligibility import EligibilityAgent
-from .intent_classifier import IntentClassifier
-from .matching import MatchingAgent
-from .memory import MemoryAgent
-from .orchestrator import Orchestrator
-from .presentation_writer import PresentationWriterAgent
-from .profile_extractor import ProfileExtractor
-from .report_writer import ReportWriterAgent
+from application import ApplicationAgent
+from base import Agent
+from eligibility import EligibilityAgent
+from intent_classifier import IntentClassifier
+from matching import MatchingAgent
+from memory import MemoryAgent
+from orchestrator import Orchestrator
+from presentation_writer import PresentationWriterAgent
+from profile_extractor import ProfileExtractor
+from report_writer import ReportWriterAgent
 
 __all__ = [
     "Agent",

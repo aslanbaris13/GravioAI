@@ -10,10 +10,10 @@ değil, çünkü ajan katmanı API framework'üne bağımlı olmamalı.
 """
 import asyncio
 
-from ..data import repo
-from ..models.orchestration import ProgramMatch
-from ..models.profile import UserProfile
-from ..models.session import SessionState
+from data import repo
+from models.orchestration import ProgramMatch
+from models.profile import UserProfile
+from models.session import SessionState
 
 
 class MemoryAgent:
