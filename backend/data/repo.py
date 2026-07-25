@@ -21,7 +21,6 @@ from models.session import SessionState
 _TABLE = "programs"
 logger = logging.getLogger(__name__)
 
-_TABLE = "programs_v2"  # yeni tablo
 _CHİLD = "program_chunks" #child
 _PARENT = "program_parents" #parent
 _SESSIONS = "user_sessions"
