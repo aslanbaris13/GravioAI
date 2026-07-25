@@ -60,6 +60,28 @@ class UserProfile(BaseModel):
             parts.append("Hedefler: " + ", ".join(self.goals))
         return " — ".join(parts) if parts else ""
 
+    def has_content(self) -> bool:
+        """Kullanıcıdan en az bir anlamlı bilgi çıkarılıp çıkarılmadığını söyler.
+
+        Eşleştirme (matching) hiç aday bulamadığında doğru fallback mesajını
+        seçmek için kullanılır: profil doluysa "anlayamadım" demek yanlış
+        olur, çünkü profil zaten doğru çıkarılmıştır — sorun eşleşen program
+        bulunamamasıdır.
+        """
+        return bool(
+            self.company_name
+            or self.website
+            or self.sector
+            or self.city
+            or self.team_size is not None
+            or self.company_exists is not None
+            or self.women_entrepreneur
+            or self.student
+            or self.in_technopark
+            or self.goals
+            or self.summary
+        )
+
 
 def merge_profile(prev: "UserProfile", next_: "UserProfile") -> "UserProfile":
     """`prev` (daha önce bilinen/kayıtlı) ile `next_` (bu turda çıkarılan) profili
