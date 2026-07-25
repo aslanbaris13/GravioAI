@@ -6,7 +6,7 @@ import io
 from docx import Document
 from docx.shared import Pt
 
-from ..models.report import GeneratedReport
+from models.report import GeneratedReport
 
 
 def build_report_docx(report: GeneratedReport) -> bytes:

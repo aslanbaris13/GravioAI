@@ -1,4 +1,4 @@
-from backend.data.report_schema_loader import (
+from data.report_schema_loader import (
     get_report_schema,
     load_report_schemas,
     resolve_report_schema_for_program,

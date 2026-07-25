@@ -1,11 +1,11 @@
 import pytest
 
-from backend.agents.report_writer import ReportWriterAgent
-from backend.core.docx_export import build_report_docx
-from backend.data.report_schema_loader import get_report_schema
-from backend.models.profile import UserProfile
-from backend.models.report import GeneratedReport, GeneratedReportSection
-from backend.tests.test_llm_provider import MockLLMClient
+from agents.report_writer import ReportWriterAgent
+from core.docx_export import build_report_docx
+from data.report_schema_loader import get_report_schema
+from models.profile import UserProfile
+from models.report import GeneratedReport, GeneratedReportSection
+from tests.test_llm_provider import MockLLMClient
 
 
 @pytest.fixture

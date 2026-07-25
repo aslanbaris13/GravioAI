@@ -3,9 +3,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from backend.agents import ProfileExtractor
-from backend.api.routes import router
-from backend.models.profile import UserProfile
+from agents import ProfileExtractor
+from api.routes import router
+from models.profile import UserProfile
 
 app = FastAPI()
 app.include_router(router, prefix="/api")
@@ -43,7 +43,7 @@ def test_parse_document_rejects_empty_pdf_text():
     fake_reader = MagicMock()
     fake_reader.pages = [fake_page]
 
-    with patch("backend.core.document_parser.PdfReader", return_value=fake_reader):
+    with patch("core.document_parser.PdfReader", return_value=fake_reader):
         response = client.post(
             "/api/profile/parse-document",
             files={"file": ("taranmis.pdf", b"%PDF-fake", "application/pdf")},

@@ -6,18 +6,27 @@ RPC fonksiyonu üzerinden yapılır.
 
 Fonksiyonlar senkron; async route'lar bunları `run_in_threadpool` ile çağırır.
 """
+import logging
 from functools import lru_cache
 
+from pydantic import ValidationError
 from supabase import Client, create_client
 
 from core.config import get_settings
 from models import Category, ProgramMatch, SupportProgram
+from models.application import ApplicationRecord
+from models.presentation import GeneratedPresentation, PresentationRecord
 from models.session import SessionState
 
 _TABLE = "programs"
+logger = logging.getLogger(__name__)
+
+_TABLE = "programs_v2"  # yeni tablo
 _CHİLD = "program_chunks" #child
 _PARENT = "program_parents" #parent
 _SESSIONS = "user_sessions"
+_PRESENTATIONS = "presentations"
+_APPLICATIONS = "applications"
 
 @lru_cache
 def _client() -> Client:
@@ -70,6 +79,18 @@ def _from_row(row: dict) -> SupportProgram:
     return SupportProgram.model_validate(row)
 
 
+def _from_row_safe(row: dict) -> SupportProgram | None:
+    """`_from_row` ile aynı, ama eksik/bozuk zorunlu alanı olan (ör.
+    `source_url` NULL — henüz connector'ı yazılmamış bazı ileriye dönük
+    stub kayıtlarda görülüyor) bir satır tüm listeyi 500'e düşürmesin diye
+    hatayı yutup None döner; çağıran taraf bu satırı atlar."""
+    try:
+        return _from_row(row)
+    except ValidationError:
+        logger.warning("program_row_invalid program_id=%s", row.get("program_id"), exc_info=True)
+        return None
+
+
 def upsert_programs(rows: list[dict]) -> int:
     """Hazır satırları (embedding dahil) toplu upsert eder, yazılan kayıt sayısını döner."""
     if not rows:
@@ -95,18 +116,18 @@ def upsert_program_chunks(rows: list[dict]) -> int:
 
 def get_programs(category: Category | None = None) -> list[SupportProgram]:
     """Kategoriye göre (isteğe bağlı) tüm programları getirir."""
-    query = _client().table(_TABLE).select("*").order("id")
+    query = _client().table(_TABLE).select("*").order("program_id")
     if category is not None:
         query = query.eq("category", category.value)
     resp = query.execute()
-    return [_from_row(r) for r in (resp.data or [])]
+    return [p for r in (resp.data or []) if (p := _from_row_safe(r)) is not None]
 
 
 def get_program(program_id: str) -> SupportProgram | None:
     """Tek bir programı program_id'sine göre getirir."""
     resp = _client().table(_TABLE).select("*").eq("program_id", program_id).limit(1).execute()
     data = resp.data or []
-    return _from_row(data[0]) if data else None
+    return _from_row_safe(data[0]) if data else None
 
 
 def match_programs(
@@ -124,7 +145,7 @@ def match_programs(
             "filter_category": category.value if category else None,
         },
     ).execute()
-    return [_from_row(r) for r in (resp.data or [])]
+    return [p for r in (resp.data or []) if (p := _from_row_safe(r)) is not None]
 
 
 def save_session(session_id: str, state: SessionState) -> None:
@@ -156,3 +177,88 @@ def get_session(session_id: str) -> SessionState | None:
         for m in (row.get("matches") or [])
     ]
     return SessionState(profile=row.get("profile") or {}, matches=matches)
+
+
+def create_application(session_id: str, program_id: str, program_name: str) -> ApplicationRecord:
+    """Bir oturumun bir programa başvuru sürecini başlatır ('taslak' durumunda).
+
+    `applications` tablosunda `(session_id, program_id)` üzerinde unique kısıt
+    var — aynı programa tekrar "başvuru hazırla" denirse (ör. sayfa yenileme
+    sonrası tekrar tıklama) hata vermek yerine mevcut kaydı döner (upsert).
+    """
+    row = {"session_id": session_id, "program_id": program_id, "program_name": program_name}
+    resp = (
+        _client()
+        .table(_APPLICATIONS)
+        .upsert(row, on_conflict="session_id,program_id", ignore_duplicates=True)
+        .execute()
+    )
+    data = resp.data or []
+    if data:
+        return ApplicationRecord.model_validate(data[0])
+    # `ignore_duplicates=True` çakışan satır için veri döndürmez — mevcut kaydı ayrıca çekiyoruz.
+    existing = (
+        _client()
+        .table(_APPLICATIONS)
+        .select("*")
+        .eq("session_id", session_id)
+        .eq("program_id", program_id)
+        .limit(1)
+        .execute()
+    )
+    return ApplicationRecord.model_validate(existing.data[0])
+
+
+def list_applications(session_id: str) -> list[ApplicationRecord]:
+    """Bir oturumun tüm başvuru kayıtlarını (en yeni önce) getirir."""
+    resp = (
+        _client()
+        .table(_APPLICATIONS)
+        .select("*")
+        .eq("session_id", session_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return [ApplicationRecord.model_validate(r) for r in (resp.data or [])]
+
+
+def update_application(application_id: str, fields: dict) -> ApplicationRecord | None:
+    """Bir başvuru kaydının durum/not/hatırlatma alanlarını günceller.
+
+    `fields` yalnızca istemcinin gönderdiği (JSON'da açıkça belirtilmiş)
+    alanları içermeli — çağıran taraf (routes.py) bunu `exclude_unset` ile
+    üretir, yoksa `None` bir alanı yanlışlıkla temizleyebilir.
+    """
+    if not fields:
+        return None
+    resp = _client().table(_APPLICATIONS).update(fields).eq("id", application_id).execute()
+    data = resp.data or []
+    return ApplicationRecord.model_validate(data[0]) if data else None
+
+
+def save_presentation(
+    session_id: str, company_name: str, presentation: GeneratedPresentation
+) -> PresentationRecord:
+    """Üretilen bir sunumu arşive kaydeder ('Geçmiş Sunumlarım')."""
+    row = {
+        "session_id": session_id,
+        "title": presentation.title,
+        "subtitle": presentation.subtitle,
+        "company_name": company_name,
+        "slides": [s.model_dump(mode="json") for s in presentation.slides],
+    }
+    resp = _client().table(_PRESENTATIONS).insert(row).execute()
+    return PresentationRecord.model_validate(resp.data[0])
+
+
+def list_presentations(session_id: str) -> list[PresentationRecord]:
+    """Bir oturumun daha önce ürettiği tüm sunumları (en yeni önce) getirir."""
+    resp = (
+        _client()
+        .table(_PRESENTATIONS)
+        .select("*")
+        .eq("session_id", session_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return [PresentationRecord.model_validate(r) for r in (resp.data or [])]

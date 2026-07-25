@@ -3,7 +3,7 @@ from unittest.mock import patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from backend.api.routes import router
+from api.routes import router
 
 app = FastAPI()
 app.include_router(router, prefix="/api")
@@ -18,7 +18,7 @@ async def _fake_run_stream(self, message, *, history=None, session_id=None, matc
 
 
 def test_assist_stream_returns_sse_formatted_events():
-    with patch("backend.agents.orchestrator.Orchestrator.run_stream", new=_fake_run_stream):
+    with patch("agents.orchestrator.Orchestrator.run_stream", new=_fake_run_stream):
         response = client.post(
             "/api/assist/stream",
             json={"message": "selam", "history": [], "session_id": None},
@@ -38,7 +38,7 @@ async def _fake_run_stream_error(self, message, *, history=None, session_id=None
 
 
 def test_assist_stream_propagates_error_event():
-    with patch("backend.agents.orchestrator.Orchestrator.run_stream", new=_fake_run_stream_error):
+    with patch("agents.orchestrator.Orchestrator.run_stream", new=_fake_run_stream_error):
         response = client.post(
             "/api/assist/stream",
             json={"message": "selam"},

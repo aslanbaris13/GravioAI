@@ -1,17 +1,16 @@
 """GravioAI backend — FastAPI giriş noktası.
 
-`backend.main:app` (repo kökünden) ve `main:app` (backend/ dizininden,
-venv aktifken) olmak üzere iki şekilde de çalıştırılabilir. İkincisinde
-`main` paket bağlamı olmadan (üst düzey modül olarak) yüklendiği için
-`backend` paketinin her zaman import edilebilir olması adına üst dizin
-sys.path'e ekleniyor; alt modüllerin (`api.routes`, `agents` vb.) kendi
-relative importları bundan etkilenmez, çünkü onlar `backend.` önekiyle
-düzgün paket bağlamında yükleniyor."""
+Alt modüller (`api.routes`, `core`, `models`, `agents`, `data`) bare import
+kullanıyor (`from core.config import ...`) — yani `backend/` dizininin
+kendisi sys.path'te olmalı. `main:app` (backend/ dizininden, cwd zaten
+`backend/`) bunu otomatik sağlar; `backend.main:app` (repo kökünden)
+çalıştırıldığında ise cwd repo kökü olduğundan bunu burada elle ekliyoruz.
+"""
 import logging
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
