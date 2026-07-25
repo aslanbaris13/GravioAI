@@ -18,6 +18,7 @@ from models.application import ApplicationRecord
 from models.presentation import GeneratedPresentation, PresentationRecord
 from models.session import SessionState
 
+_TABLE = "programs"
 logger = logging.getLogger(__name__)
 
 _TABLE = "programs_v2"  # yeni tablo

@@ -4,22 +4,16 @@ from connectors.base import BaseConnector
 from models.raw_program import RawProgram
 from core.cleaner import BaseCleaner, get_cleaner
 from core.fetcher import BaseFetcher
-
 from core.llm.factory import get_llm_client
 from models.program import SupportProgram
 import traceback
+
+
 class KOSGEBConnector(BaseConnector):
 # KOSGEB Erişilebilirlik ve site başlığı çöp metinleri
 
     SOURCE_NAME = "KOSGEB"
     
-    forbidden_terms = [
-        "Erişilebilirlik Menüsü", "x", "Ekran Okuyucu", "Seçili Alan Okuyucu", 
-        "Bağlantı Vurgula", "Büyük Metin", "Metni Sola Hizala", "İmleç", 
-        "Okuma", "Disleksi Dostu", "Kontrast", "Solgunlaştırma", 
-        "Düşük Doygunluk", "Yüksek Doygunluk", "Erişilebilirlik Ayarlarını Temizle",
-        "Tüm Liste", "Site içi arama", "e-hizmetler"
-    ]
 
     def __init__(self,fetcher:BaseFetcher, cleaner: BaseCleaner | None = None):
         super().__init__(cleaner=cleaner)
@@ -59,17 +53,10 @@ class KOSGEBConnector(BaseConnector):
                 soup = BeautifulSoup(detail_html, "html.parser")
                 title = soup.title.string.replace("KOSGEB - ", "").strip() if soup.title else "Başlıksız"
 
-                # Ön filtreleme: Girişimclere uygun mu değil mi diye
-                # KARAR BEKLİYOR: Bu filtre kapalı, yani her KOSGEB ilanı (alakasız
-                # olsa bile) LLM'e gidiyor. Gemini ücretsiz katmanda günlük kota 20
-                # istek ile sınırlı (bkz. Sprint2Documents/Aslan_Sprint2.md), bu
-                # yüzden filtreyi açmak kota tasarrufu sağlar; ama relevance_keywords
-                # listesi (base.py) dar kalırsa gerçekten uygun bazı programları da
-                # eleyebilir. Açıp açmama kararı ürün tarafının onayını gerektiriyor.
-                # if not self.is_relevant(clean_txt, title):
-                #     print(f" -> ELENDİ (Girişimci odaklı değil): {title}")
-                #     continue
-
+                # Ön filtreleme: Hedef kitleye kesinlikle uymayan bir sektöre mi ait?
+                if not self.is_relevant(clean_txt, title):
+                    print(f" -> ELENDİ (hedef kitleye uymayan sektör): {title}")
+                    continue
                 #LLM ile analiz
                     
                 print(f"Yapay zeka analiz ediyor: {title}")
