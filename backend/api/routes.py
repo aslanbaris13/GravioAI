@@ -16,7 +16,7 @@ from agents import (
     ReportWriterAgent,
 )
 
-from data import repo
+
 from core import document_parser
 from core.docx_export import build_report_docx
 from core.embedder import get_embedding_client
