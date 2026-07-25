@@ -10,7 +10,7 @@ import io
 from docx import Document
 from pypdf import PdfReader
 
-_MAX_FILE_SIZE = 10 * 1024 * 1024  # 5MB
+_MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 
 def extract_text(file_bytes: bytes, filename: str) -> str:
