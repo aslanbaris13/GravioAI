@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Literal, Optional
 from models.program import ExtractedSupportInfo
 from typing import AsyncIterator, Literal, Optional
-from ...models.program import ExtractedSupportInfo
+from models.program import ExtractedSupportInfo
 
 Role = Literal["user", "assistant"]
 

@@ -34,10 +34,34 @@ class BaseCleaner(ABC):
         "breadcrumb",
     ]
 
-    def clean(self, html_content: str, repeated_noise_lines: set[str] | None = None) -> str:
+    # Tüm kurumlarda (KOSGEB, TÜBİTAK, Kalkınma Ajansı, ileride eklenecekler)
+    # ortak görülen, tipik "web sitesi iskeleti" gürültü satırları — erişilebilirlik
+    # linkleri, zoom/büyüteç widget kontrolleri gibi. Kuruma özel olmayan, herhangi
+    # bir modern devlet/kurum sitesinde rastlanabilecek ifadeler burada durur.
+    # Kuruma özel gürültüler için her alt sınıf kendi forbidden_terms'ini tanımlar.
+    COMMON_FORBIDDEN_TERMS = [
+        "Ana içeriğe atla",
+        "Görsel",
+        "+",
+        "-",
+        "0",
+    ]
+
+    # Kuruma özel, sayfalar arası tekrar eden gürültü satırları (ör. KOSGEB'in
+    # erişilebilirlik menüsü ifadeleri). Her alt sınıf kendi listesini tanımlar;
+    # varsayılan boş liste, henüz bilinen bir gürültü kalıbı olmayan kurumlar
+    # için. clean() bu listeyi COMMON_FORBIDDEN_TERMS ile birleştirip TAM EŞLEŞME
+    # mantığıyla kullanır: bir satır, listedeki bir ifadeye BİREBİR eşitse
+    # silinir (satır içinde geçiyor olması yetmez) — kısa terimlerin (ör. "x")
+    # alakasız satırları yanlışlıkla silmesini önlemek için.
+    forbidden_terms: list[str] = []
+
+    def clean(self, html_content: str) -> str:
         """Ana temizleme metodu. Bu metod override EDİLMEZ."""
-        if repeated_noise_lines is None:
-            repeated_noise_lines = set()
+        # Ortak (tüm kurumlar) + kuruma özel gürültü listelerini birleştirip
+        # set'e çeviriyoruz: "line in ..." kontrolü set'te list'ten çok daha
+        # hızlı çalışır (özellikle uzun sayfalarda fark yaratır).
+        forbidden_terms_set = set(self.COMMON_FORBIDDEN_TERMS) | set(self.forbidden_terms)
 
         soup = BeautifulSoup(html_content, "html.parser")
 
@@ -52,10 +76,11 @@ class BaseCleaner(ABC):
         raw_text = soup.get_text(separator="\n").strip()
         lines = [line.strip() for line in raw_text.split("\n")]
 
-        # 4: boş satırları ve sayfalar-arası tekrar eden gürültü satırlarını at
+        # 4: boş satırları ve kuruma özel bilinen gürültü satırlarını at
+        # (tam eşleşme: satır birebir forbidden_terms'teki bir ifadeye eşitse silinir)
         filtered_lines = [
             line for line in lines
-            if line and line not in repeated_noise_lines
+            if line and line not in forbidden_terms_set
         ]
         text = "\n".join(filtered_lines)
 
@@ -137,12 +162,27 @@ class BaseCleaner(ABC):
 ## KURUM ÖZEL CLASSLAR
 
 class KOSGEBCleaner(BaseCleaner):
+    # KOSGEB'in erişilebilirlik menüsü ve site başlığı çöp metinleri —
+    # bu ifadeler sayfalar arasında tekrar eden gürültü satırları
+    forbidden_terms = [
+        "Erişilebilirlik Menüsü", "x", "Ekran Okuyucu", "Seçili Alan Okuyucu",
+        "Bağlantı Vurgula", "Büyük Metin", "Metni Sola Hizala", "İmleç",
+        "Okuma", "Disleksi Dostu", "Kontrast", "Solgunlaştırma",
+        "Düşük Doygunluk", "Yüksek Doygunluk", "Erişilebilirlik Ayarlarını Temizle",
+        "Tüm Liste", "Site içi arama", "e-hizmetler"
+    ]
+
     def _institution_specific_fix(self, text: str) -> str:
-        # Şu an için genel temizlik yeterli, ekstra bir düzeltmeye gerek yok.
+        
         return text
 
 
 class TubitakCleaner(BaseCleaner):
+    # TÜBİTAK sayfalarında gözlemlenen, sabit ve tekrar eden gürültü satırları.
+    # Not: "Ana içeriğe atla", "+", "-", "0", "Görsel" zaten COMMON_FORBIDDEN_TERMS
+    # içinde (tüm kurumlarda ortak), burada tekrar yazmaya gerek yok.
+    forbidden_terms: list[str] = []
+
     def _institution_specific_fix(self, text: str) -> str:
         return text
 
@@ -154,20 +194,20 @@ class KalkinmaAjansiCleaner(BaseCleaner):
 
 class GoogleCloudCleaner(BaseCleaner):
     def _institution_specific_fix(self, text: str) -> str:
-        # Google Cloud için genel temizlik şu an gayet yeterli
+        
         return text
 
 
 class AwsCleaner(BaseCleaner):
     def _institution_specific_fix(self, text: str) -> str:
-        # AWS Activate için genel temizlik şu an gayet yeterli
+        
         return text
 
 
 def get_cleaner(source_name: str) -> BaseCleaner:
     """Kurum ismine göre doğru cleaner örneğini döner."""
     
-    # Harita yapısını bozmadan, isimleri upper() güvencesine alarak eşliyoruz kanka
+    # Harita yapısını bozmadan, isimleri upper() güvencesine alarak eşliyoruz 
     cleaners = {
         "KOSGEB": KOSGEBCleaner,
         "TUBITAK": TubitakCleaner,

@@ -2,6 +2,7 @@
 import type { CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import Ms from "./Ms";
+import type { BackendUserProfile } from "@/lib/api";
 
 function navStyle(active: boolean): CSSProperties {
   const base: CSSProperties = {
@@ -24,23 +25,49 @@ function navStyle(active: boolean): CSSProperties {
 
 export default function Sidebar({
   matchCount,
+  applicationCount,
   open,
   onNewChat,
   onNavChat,
   onNavMatches,
+  onNavApplications,
   onNavProfile,
+  profile,
 }: {
   matchCount: number;
+  applicationCount: number;
   open: boolean;
   onNewChat: () => void;
   onNavChat: () => void;
   onNavMatches: () => void;
+  onNavApplications: () => void;
   onNavProfile: () => void;
+  profile: BackendUserProfile | null;
 }) {
   const pathname = usePathname();
   const chatActive = pathname === "/chat";
   const matchActive = pathname.startsWith("/matches") || pathname.startsWith("/program");
+  const applicationsActive = pathname.startsWith("/applications");
   const profileActive = pathname === "/panel";
+
+  const companyName = profile?.company_name ?? null;
+  const sector = profile?.sector ?? null;
+  const city = profile?.city ?? null;
+  const teamSize = profile?.team_size ?? null;
+  const initials = companyName
+    ? companyName.slice(0, 2).toUpperCase()
+    : sector
+      ? sector.slice(0, 2).toUpperCase()
+      : "İŞ";
+  const title = companyName ?? sector ?? "İşletmem";
+  // Şirket adı zaten başlıkta gösterildiği için sektörü tekrar etmiyoruz;
+  // yalnızca companyName yokken sektör bir alt bilgi olarak anlamlı kalır.
+  const metaParts = [
+    companyName ? null : sector,
+    city,
+    teamSize ? `${teamSize} kişi` : null,
+  ].filter(Boolean);
+  const meta = metaParts.length > 0 ? metaParts.join(" · ") : "Profil bilgisi eksik";
 
   return (
     <aside
@@ -132,6 +159,25 @@ export default function Sidebar({
           {matchCount}
         </span>
       </button>
+      <button onClick={onNavApplications} style={navStyle(applicationsActive)}>
+        <Ms name="assignment" size={20} />
+        <span>Başvurularım</span>
+        {applicationCount > 0 && (
+          <span
+            style={{
+              marginLeft: "auto",
+              fontSize: 11,
+              fontWeight: 700,
+              background: "rgba(249,115,22,.2)",
+              color: "#ffb27a",
+              padding: "1px 8px",
+              borderRadius: 999,
+            }}
+          >
+            {applicationCount}
+          </span>
+        )}
+      </button>
       <button onClick={onNavProfile} style={navStyle(profileActive)}>
         <Ms name="dashboard" size={20} />
         <span>Panelim</span>
@@ -175,7 +221,7 @@ export default function Sidebar({
             flexShrink: 0,
           }}
         >
-          NA
+          {initials}
         </div>
         <div style={{ textAlign: "left", lineHeight: 1.2, overflow: "hidden" }}>
           <div
@@ -188,9 +234,9 @@ export default function Sidebar({
               textOverflow: "ellipsis",
             }}
           >
-            Nova AI Yazılım
+            {title}
           </div>
-          <div style={{ fontSize: 10.5, color: "#7d93a1" }}>Düzce · 3 kişi</div>
+          <div style={{ fontSize: 10.5, color: "#7d93a1" }}>{meta}</div>
         </div>
       </button>
     </aside>

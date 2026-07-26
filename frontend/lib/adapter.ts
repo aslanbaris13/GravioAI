@@ -92,15 +92,16 @@ function formatAmount(
 function formatDeadline(isoDate: string | null | undefined): {
   deadlineText: string;
   deadlineDays: number | null;
+  deadlineExpired: boolean;
 } {
-  if (!isoDate) return { deadlineText: "Belirtilmemiş", deadlineDays: null };
+  if (!isoDate) return { deadlineText: "Belirtilmemiş", deadlineDays: null, deadlineExpired: false };
 
   const deadline = new Date(isoDate);
   if (Number.isNaN(deadline.getTime())) {
     // Backend, tarih bulunamadığında ISO tarih yerine açıklayıcı bir
     // Türkçe mesaj gönderebilir (bkz. BOS_ALAN_MESAJLARI) — o durumda
     // mesajı olduğu gibi göster.
-    return { deadlineText: isoDate, deadlineDays: null };
+    return { deadlineText: isoDate, deadlineDays: null, deadlineExpired: false };
   }
   // "YYYY-MM-DD" biçimindeki tarihler JS'te UTC gece yarısı olarak parse
   // edilir — bu yüzden karşılaştırılacak "bugün" de UTC gece yarısına göre
@@ -117,8 +118,10 @@ function formatDeadline(isoDate: string | null | undefined): {
     year: "numeric",
   });
 
-  if (diffDays < 0) return { deadlineText: `${formatted} (Sona erdi)`, deadlineDays: null };
-  return { deadlineText: formatted, deadlineDays: diffDays };
+  if (diffDays < 0) {
+    return { deadlineText: `${formatted} (Sona erdi)`, deadlineDays: null, deadlineExpired: true };
+  }
+  return { deadlineText: formatted, deadlineDays: diffDays, deadlineExpired: false };
 }
 
 /* ------------------------------------------------------------------ */
@@ -139,19 +142,25 @@ function adaptStatus(
 
 /** Backend, bilgi bulunamadığında null yerine bu açıklayıcı mesajları
  * gönderir (bkz. backend/core/constants.py::BOS_ALAN_MESAJLARI) — kriter
- * listesinde anlamsız bir chip olarak görünmesinler diye eleniyor. */
+ * listesinde anlamsız bir chip olarak görünmesinler diye eleniyor.
+ * "Bölge şartı belirtilmemiş" güncel connector pipeline'ının (bkz.
+ * backend/connectors/base.py) ürettiği bir mesaj değil — region hiç
+ * bulunamazsa doğrudan "Ulusal" varsayılanına düşer; bu yalnızca eski bir
+ * statik taslak dosyasından (tubitak_taslak.json) kalan artık veri, yine de
+ * aynı şekilde eleniyor. */
 const EMPTY_FIELD_MESSAGES = new Set([
   "Kuruluş tarihi şartı belirtilmemiş",
   "Son başvuru tarihi belirtilmemiş",
   "Destek oranı belirtilmemiş",
   "Resmi link belirtilmemiş",
+  "Bölge şartı belirtilmemiş",
 ]);
 
 /** SupportProgram'ın gerçek alanlarından "Temel kriterler" chip'lerini üretir. */
 function buildCriteria(sp: BackendSupportProgram): Criterion[] {
   const criteria: Criterion[] = [];
 
-  if (sp.region) {
+  if (sp.region && !EMPTY_FIELD_MESSAGES.has(sp.region)) {
     criteria.push({ icon: "public", label: "Bölge", value: sp.region });
   }
   if (sp.company_required != null) {
@@ -192,7 +201,7 @@ export function adaptProgram(
     sp.amount_max,
     sp.currency,
   );
-  const { deadlineText, deadlineDays } = formatDeadline(sp.deadline);
+  const { deadlineText, deadlineDays, deadlineExpired } = formatDeadline(sp.deadline);
   const { status, statusLabel } = adaptStatus(sp.application_status);
 
   const conditions: Condition[] = er.conditions.map((c) => ({
@@ -201,6 +210,15 @@ export function adaptProgram(
     value: c.value,
     hint: c.hint ?? undefined,
   }));
+
+  // `official_url` çoğunlukla TÜBİTAK'ın program-özel başvuru portalı (ör.
+  // eteydeb.tubitak.gov.tr) — `source_url`'den kasıtlı olarak farklıdır, o
+  // yüzden birini diğerine eşitlemiyoruz. Ama `official_url` boş/placeholder
+  // geldiğinde link alanını tamamen boş bırakmak yerine, elimizdeki gerçek
+  // kaynak sayfasını (`source_url`) gösteriyoruz — "hiç link yok" demek
+  // yanıltıcı, hâlbuki resmi kurumun sitesine giden gerçek bir link var.
+  const hasOfficialLink = !!sp.official_url && !EMPTY_FIELD_MESSAGES.has(sp.official_url);
+  const link = hasOfficialLink ? sp.official_url! : sp.source_url ?? "";
 
   return {
     id: sp.program_id,
@@ -219,8 +237,9 @@ export function adaptProgram(
     statusLabel,
     deadlineText,
     deadlineDays,
-    sourceLink: sp.official_url ?? "",
-    sourceHref: sp.official_url ?? "#",
+    deadlineExpired,
+    sourceLink: link,
+    sourceHref: link || "#",
     updated: new Date().toLocaleDateString("tr-TR"),
     elig: {
       state: er.state,
@@ -275,8 +294,34 @@ export function profileToChips(
   if (p.goals.length > 0)
     chips.push({ label: "Hedef", value: p.goals.slice(0, 2).join(", ") });
   if (p.in_technopark) chips.push({ label: "Altyapı", value: "Teknopark" });
+  if (p.website) chips.push({ label: "Web sitesi", value: p.website });
 
   return chips;
+}
+
+/** Sohbetin her turu kendi profil çıkarımını döner (bazı intent'lerde neredeyse
+ * boştur, örn. PROGRAM_QUESTION sadece sorguyu `summary`'ye koyar). Alan bazında
+ * birleştirir — yeni turda dolu olmayan alanlarda önceki bilinen değeri korur,
+ * böylece bir önceki turda çıkarılan sektör/şehir/ekip bilgisi kaybolmaz. */
+export function mergeProfile(
+  prev: BackendUserProfile | null,
+  next: BackendUserProfile,
+): BackendUserProfile {
+  if (!prev) return next;
+  return {
+    company_name: next.company_name ?? prev.company_name,
+    website: next.website ?? prev.website,
+    sector: next.sector ?? prev.sector,
+    city: next.city ?? prev.city,
+    team_size: next.team_size ?? prev.team_size,
+    company_exists: next.company_exists ?? prev.company_exists,
+    company_age_years: next.company_age_years ?? prev.company_age_years,
+    women_entrepreneur: next.women_entrepreneur ?? prev.women_entrepreneur,
+    student: next.student ?? prev.student,
+    in_technopark: next.in_technopark ?? prev.in_technopark,
+    goals: next.goals.length > 0 ? next.goals : prev.goals,
+    summary: next.summary ?? prev.summary,
+  };
 }
 
 /** Backend ApplicationDraft → ApplicationView'in beklediği belgeler ve plan */

@@ -17,6 +17,10 @@ class BaseFetcher(ABC):
         Her fetcher kendi fetch metodunu implement etmek zorunda.
         """
         pass
+    
+    @abstractmethod
+    async def fetch_bytes(self, url: str) -> bytes:   # <-- YENİ
+        pass
 
 
 class HttpFetcher(BaseFetcher):
@@ -24,6 +28,20 @@ class HttpFetcher(BaseFetcher):
     Bu sınıf, HTTP üzerinden internete çıkıp sayfaların
     HTML (veya metin) kodunu indiren veri çekmek için kullanılacak.
     """
+    
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=4, max=20),reraise=True)
+    async def _get_response(self, url: str) -> httpx.Response:   
+        kimlik_karti = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+        
+        print(f"istek atılıyor")
+        
+        async with httpx.AsyncClient(timeout=30.0, headers=kimlik_karti, follow_redirects=True) as client:
+            response = await client.get(url)
+            response.raise_for_status()
+            return response
+    
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=2, min=4, max=20),reraise=True)
     async def fetch_text(self, url: str) -> str:
@@ -31,16 +49,15 @@ class HttpFetcher(BaseFetcher):
         Bu metod, verilen URL'den veri çeker ve ham metin (HTML) olarak döndürür.
         Eğer istek başarısız olursa, belirli bir sayıda tekrar dener.
         """
-        kimlik_karti = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        }
+        
+        response = await self._get_response(url)
+        return response.text
+    
+    
+    async def fetch_bytes(self, url: str) -> bytes:  
+        response = await self._get_response(url)
+        return response.content
 
-        print(f"istek atılıyor: {url}")
-     
-        async with httpx.AsyncClient(timeout=30.0, headers=kimlik_karti, follow_redirects=True) as client:
-            response = await client.get(url)
-            response.raise_for_status()  # Eğer HTTP hatası varsa exception fırlatır
-            return response.text
 
     async def fetch_links(self, url: str, filter_pattern: str) -> set:
         html = await self.fetch_text(url)

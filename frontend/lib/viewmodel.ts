@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { EligState, Program, ProgramCategory, ProgramStatus } from "./types";
+import type { Condition, EligState, Program, ProgramCategory, ProgramStatus } from "./types";
 
 const CATEGORY_COLORS: Record<ProgramCategory, [string, string]> = {
   kamu: ["#fff3ea", "#ea580c"],
@@ -175,10 +175,20 @@ export function eligRingStyle(state: EligState, score: number): CSSProperties {
   };
 }
 
-export function eligHeadline(state: EligState): string {
+/** "Karşılandı" dışındaki koşullar — kullanıcının hâlâ tamamlaması/sağlaması gereken koşullar. */
+function remainingConditions(conditions: Condition[]): Condition[] {
+  return conditions.filter((c) => c.state !== "met");
+}
+
+export function eligHeadline(state: EligState, conditions: Condition[]): string {
   if (state === "full") return "Tüm koşulları karşılıyorsun";
-  if (state === "partial") return "Neredeyse hazırsın — 1 koşul kaldı";
-  return "Şu an bir koşul karşılanmıyor";
+  const remaining = remainingConditions(conditions);
+  if (state === "partial") {
+    return remaining.length === 1
+      ? "Neredeyse hazırsın — 1 koşul kaldı"
+      : `Neredeyse hazırsın — ${remaining.length} koşul kaldı`;
+  }
+  return remaining.length === 1 ? "Şu an bir koşul karşılanmıyor" : `Şu an ${remaining.length} koşul karşılanmıyor`;
 }
 
 export const CONDITION_STYLE = {
@@ -187,7 +197,7 @@ export const CONDITION_STYLE = {
   unmet: { icon: "pending", col: "#b45309", bg: "#fffdf6", bd: "#f0e6c8", tag: "Eksik", tagBg: "#fdf6e3", tagFg: "#b45309" },
 } as const;
 
-export function eligCta(state: EligState): { icon: string; text: string; btn: string } {
+export function eligCta(state: EligState, conditions: Condition[]): { icon: string; text: string; btn: string } {
   if (state === "full") {
     return {
       icon: "rocket_launch",
@@ -195,16 +205,17 @@ export function eligCta(state: EligState): { icon: string; text: string; btn: st
       btn: "Başvuru hazırla",
     };
   }
+  const remaining = remainingConditions(conditions);
   if (state === "partial") {
-    return {
-      icon: "lightbulb",
-      text: "Tek koşul kaldı. Onu tamamlamak için bir plan oluşturup yine de başvuruya başlayabilirsin.",
-      btn: "Yine de başla",
-    };
+    const text =
+      remaining.length === 1
+        ? `"${remaining[0].text}" koşulu tamamlanmadı. Yukarıdaki koşul kartında ne yapman gerektiği yazıyor — onu tamamlayıp yine de başvuruya başlayabilirsin.`
+        : `${remaining.length} koşul tamamlanmadı: ${remaining.map((c) => `"${c.text}"`).join(", ")}. Yukarıdaki koşul kartlarında her biri için ne yapman gerektiği yazıyor — tamamlayıp yine de başvuruya başlayabilirsin.`;
+    return { icon: "lightbulb", text, btn: "Yine de başla" };
   }
-  return {
-    icon: "schedule",
-    text: "Şu an bir koşul karşılanmıyor. Uygun olduğunda seni proaktif olarak bilgilendireyim mi?",
-    btn: "Takibe al",
-  };
+  const lockedText =
+    remaining.length === 1
+      ? `"${remaining[0].text}" koşulu şu an karşılanmıyor. Uygun olduğunda seni proaktif olarak bilgilendireyim mi?`
+      : `${remaining.length} koşul şu an karşılanmıyor. Uygun olduğunda seni proaktif olarak bilgilendireyim mi?`;
+  return { icon: "schedule", text: lockedText, btn: "Takibe al" };
 }

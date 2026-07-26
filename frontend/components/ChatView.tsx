@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import Ms from "./Ms";
+import { formatChatText } from "@/lib/formatChatText";
 import { toVM } from "@/lib/viewmodel";
 import type { ChatMessage, FollowUp, Program } from "@/lib/types";
 
@@ -170,39 +171,6 @@ export default function ChatView({
               />
             ))}
 
-            {typing && (
-              <div style={{ display: "flex", gap: 11, marginTop: 14 }}>
-                <div
-                  style={{
-                    width: 30,
-                    height: 30,
-                    borderRadius: 9,
-                    flexShrink: 0,
-                    background: "linear-gradient(140deg,#f97316,#ea580c)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ms name="radar" size={17} color="#fff" />
-                </div>
-                <div
-                  style={{
-                    background: "#fff",
-                    border: "1px solid #ebe8e0",
-                    padding: "15px 17px",
-                    borderRadius: "4px 16px 16px 16px",
-                    display: "flex",
-                    gap: 5,
-                    alignItems: "center",
-                  }}
-                >
-                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f97316", animation: "blink 1.2s infinite 0s" }} />
-                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f97316", animation: "blink 1.2s infinite .2s" }} />
-                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f97316", animation: "blink 1.2s infinite .4s" }} />
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -343,7 +311,7 @@ function MessageRow({
               boxShadow: "0 1px 2px rgba(20,34,44,.04)",
             }}
           >
-            {m.text}
+            {formatChatText(m.text)}
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-from ..models import ReportSchema
+from models import ReportSchema
 
 _SCHEMAS_DIR = Path(__file__).parent / "report_schemas"
 

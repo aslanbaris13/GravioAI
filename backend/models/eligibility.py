@@ -7,7 +7,7 @@ Böylece Uygunluk Ajanı'nın çıktısı arayüze neredeyse birebir geçer.
 """
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ConditionState(str, Enum):
@@ -42,3 +42,19 @@ class EligibilityResult(BaseModel):
     summary: str | None = Field(
         default=None, description="Değerlendirmenin bir cümlelik özeti"
     )
+
+    # LLM'in serbest JSON çıktısında iki `state` alanı da aynı isimde ama
+    # farklı enum'larda olduğu için (bu alan vs. `EligibilityCondition.state`)
+    # model bazen bunları karıştırıp buraya bir ConditionState değeri
+    # (met/action/unmet) yazıyor — bu, tur boyunca ham bir Pydantic hatasıyla
+    # kullanıcıya yansıyıp tüm sohbet turunu çökertiyordu. `UserProfile`'daki
+    # gibi (bkz. backend/models/profile.py) sessizce en yakın anlama eşleyip
+    # kabul ediyoruz; gerçekten tanınmayan bir değerse normal doğrulama hatası
+    # yine de fırlatılır.
+    @field_validator("state", mode="before")
+    @classmethod
+    def _coerce_condition_state(cls, v):
+        if isinstance(v, str):
+            remap = {"met": "full", "action": "partial", "unmet": "locked"}
+            return remap.get(v, v)
+        return v

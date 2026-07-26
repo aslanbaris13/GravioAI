@@ -5,8 +5,8 @@ from datetime import datetime
 from models.raw_program import RawProgram
 from core.cleaner import BaseCleaner, get_cleaner
 from models.program import SupportProgram
-from core.constants import AY_KISALTMALARI, BOS_ALAN_MESAJLARI, TURKCE_KARAKTER_DEGISIMLERI
-
+from core.constants import AY_KISALTMALARI, BOS_ALAN_MESAJLARI, exclusion_keywords
+from core.text_utils import turkce_slugify,turkce_lower
 
 
 def _normalize_deadline(raw: str | None) -> str | None:
@@ -25,7 +25,7 @@ def _normalize_deadline(raw: str | None) -> str | None:
     m = re.search(r"(\d{1,2})\s+([A-Za-zÇĞİÖŞÜçğıöşü]+)\s+(\d{4})", raw)
     if m:
         gun, ay_metni, yil = m.groups()
-        ay = AY_KISALTMALARI.get(ay_metni[:3].lower().replace("ı", "i"))
+        ay = AY_KISALTMALARI.get(turkce_lower(ay_metni[:3]))
         if ay:
             try:
                 return datetime(int(yil), ay, int(gun)).strftime("%Y-%m-%d")
@@ -44,8 +44,8 @@ class BaseConnector(ABC):
     Bütün kurumların connector'ları bu sınıftan türetilecek.
     Böylece hepsinin aynı standartta (fetch metoduna sahip) olmasını garanti altına alıyoruz.
     """
-    forbidden_terms = []
-    relevance_keywords = ["girişimci", "iş kurma", "startup", "kuluçka", "yeni işletme"]
+    
+    exclusion_keywords = exclusion_keywords
     
     def __init__(self,cleaner:BaseCleaner|None=None):
         self.cleaner=cleaner or get_cleaner(self.SOURCE_NAME)
@@ -62,24 +62,21 @@ class BaseConnector(ABC):
     def clean(self, raw_html: str) -> str:
         # core/cleaner.py dosyasındaki fonksiyonunu buraya çağıracağız
         return self.cleaner.clean(raw_html)
-
-    # girişimcilere uygun mu kontrolü?
+    
+    # Hedef kitleye kesinlikle uymayan bir sektöre mi ait? (dışlama mantığı)
     def is_relevant(self, text: str, title: str) -> bool:
-        # Metod artık sınıfın başındaki listeyi kullanır
-        content = (text + " " + title).lower()
-        return any(keyword in content for keyword in self.relevance_keywords)
+        # Varsayılan olarak her program uygun sayılır; sadece exclusion_keywords
+        # listesindeki kelimelerden biri geçiyorsa (tarım, turizm, inşaat,
+        # maden vb.) program elenir. Bkz. core/constants.py exclusive_keyword.
+        content = turkce_lower(text + " " + title)
+        return not any(keyword in content for keyword in self.exclusion_keywords)
+
+
 
     def generate_id(self, text: str) -> str:
-        """Supabase program ID üretir (Türkçe karakterleri güvenli şekilde temizler)."""
-
-        for eski, yeni in TURKCE_KARAKTER_DEGISIMLERI.items():
-            text = text.replace(eski, yeni)
         
-        text = text.lower()
-
-        cln_txt = "".join(harf for harf in text if harf.isalnum() or harf == " ")
-        kelimeler = cln_txt.split()
-        return "-".join(kelimeler)
+        """Supabase program ID üretir (Türkçe karakterleri güvenli şekilde temizler)."""
+        return turkce_slugify(text)
 
     def format_to_db(
     self,

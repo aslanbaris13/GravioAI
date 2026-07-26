@@ -10,6 +10,8 @@ from pydantic import BaseModel, Field, model_validator
 class UserProfile(BaseModel):
     """Kullanıcının destek aramasıyla ilgili yapılandırılmış profili."""
 
+    company_name: str | None = Field(default=None, description="Şirket/girişim adı, örn. 'Nova AI Yazılım'")
+    website: str | None = Field(default=None, description="Şirket web sitesi, örn. 'https://nova-ai.com'")
     sector: str | None = Field(default=None, description="Faaliyet sektörü, örn. 'AI / Yazılım'")
     city: str | None = Field(default=None, description="İl / şehir, örn. 'Düzce'")
     team_size: int | None = Field(default=None, description="Çalışan / ekip sayısı")
@@ -57,3 +59,54 @@ class UserProfile(BaseModel):
         if self.goals:
             parts.append("Hedefler: " + ", ".join(self.goals))
         return " — ".join(parts) if parts else ""
+
+    def has_content(self) -> bool:
+        """Kullanıcıdan en az bir anlamlı bilgi çıkarılıp çıkarılmadığını söyler.
+
+        Eşleştirme (matching) hiç aday bulamadığında doğru fallback mesajını
+        seçmek için kullanılır: profil doluysa "anlayamadım" demek yanlış
+        olur, çünkü profil zaten doğru çıkarılmıştır — sorun eşleşen program
+        bulunamamasıdır.
+        """
+        return bool(
+            self.company_name
+            or self.website
+            or self.sector
+            or self.city
+            or self.team_size is not None
+            or self.company_exists is not None
+            or self.women_entrepreneur
+            or self.student
+            or self.in_technopark
+            or self.goals
+            or self.summary
+        )
+
+
+def merge_profile(prev: "UserProfile", next_: "UserProfile") -> "UserProfile":
+    """`prev` (daha önce bilinen/kayıtlı) ile `next_` (bu turda çıkarılan) profili
+    alan bazında birleştirir. `next_`'te dolu olan alan kazanır; boşsa `prev`
+    korunur. Bazı intent'ler (PROGRAM_QUESTION, APPLY_REQUEST) neredeyse boş bir
+    `UserProfile(summary=message)` üretir — bu olmasaydı hafızaya kaydedilirken
+    önceki turlarda çıkarılan gerçek profili silerdi.
+    """
+    data = prev.model_dump()
+    next_data = next_.model_dump()
+    for field in (
+        "company_name",
+        "website",
+        "sector",
+        "city",
+        "team_size",
+        "company_exists",
+        "company_age_years",
+        "women_entrepreneur",
+        "student",
+        "in_technopark",
+        "summary",
+    ):
+        if next_data[field] is not None:
+            data[field] = next_data[field]
+    if next_data["goals"]:
+        data["goals"] = next_data["goals"]
+    return UserProfile.model_validate(data)

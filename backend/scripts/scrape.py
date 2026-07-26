@@ -28,9 +28,9 @@ load_dotenv()
 # Kurum adı -> (connector sınıfı, taslak dosya adı) eşlemesi.
 # Yeni bir kurum eklerken buraya da eklemek yeterli.
 KURUM_MAP = {
-    "kosgeb": (KOSGEBConnector, "kosgeb_taslak.json"),
-    "kalkinma": (KalkinmaAjansiConnector, "kalkinma_taslak.json"),
-    "tubitak": (TubitakConnector, "tubitak_taslak.json"),
+    "kosgeb": (KOSGEBConnector, "kosgeb_destek.json"),
+    "kalkinma": (KalkinmaAjansiConnector, "kalkinma_destek.json"),
+    "tubitak": (TubitakConnector, "tubitak_destek.json"),
 }
 
 

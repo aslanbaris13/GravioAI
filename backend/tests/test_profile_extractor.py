@@ -2,9 +2,9 @@ import json
 
 import pytest
 
-from backend.agents.profile_extractor import ProfileExtractor
-from backend.models.orchestration import ConversationTurn
-from backend.tests.test_llm_provider import MockLLMClient
+from agents.profile_extractor import ProfileExtractor
+from models.orchestration import ConversationTurn
+from tests.test_llm_provider import MockLLMClient
 
 _BASE_FIELDS = {
     "sector": None,

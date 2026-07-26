@@ -4,6 +4,9 @@
 * plan_sections -> iş planı taslağı (başlık + gövde bölümleri)
 * documents     -> belge kontrol listesi ('auto' = Gravio'nun hazırlayabileceği)
 """
+from datetime import date, datetime
+from enum import Enum
+
 from pydantic import BaseModel, Field
 
 
@@ -30,3 +33,33 @@ class ApplicationDraft(BaseModel):
     documents: list[RequiredDocument] = Field(
         default_factory=list, description="Programa özel gerekli belgeler"
     )
+
+
+class ApplicationTrackingStatus(str, Enum):
+    """Panelim/Başvurularım'daki bir başvurunun ilerleme durumu.
+
+    `models.program.ApplicationStatus` ile KARIŞTIRILMAMALI — o, bir
+    programın kendisinin başvuruya açık olup olmadığını (Açık/Kapalı/Sürekli)
+    belirtir. Bu enum ise `ApplicationDraft`'tan (LLM'in ürettiği plan/belge
+    taslağı) da farklı — `applications` tablosunda kalıcı olan, kullanıcının
+    o programdaki başvuru sürecinin durum takibi kaydıdır (bkz.
+    backend/db/schema.sql).
+    """
+
+    DRAFT = "taslak"
+    IN_PROGRESS = "hazirlaniyor"
+    SUBMITTED = "gonderildi"
+
+
+class ApplicationRecord(BaseModel):
+    """Bir oturumun bir programa dair başvuru sürecini takip eden kayıt."""
+
+    id: str
+    session_id: str
+    program_id: str
+    program_name: str
+    status: ApplicationTrackingStatus = ApplicationTrackingStatus.DRAFT
+    note: str | None = None
+    reminder_date: date | None = None
+    created_at: datetime
+    updated_at: datetime

@@ -15,12 +15,30 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { assistStream, fetchApplicationDraft, fetchSession, saveSession } from "@/lib/api";
-import type { AssistStreamEvent, BackendUserProfile, ConversationTurn } from "@/lib/api";
+import {
+  assistStream,
+  evaluateEligibility,
+  fetchApplicationDraft,
+  fetchSession,
+  getProgram,
+  listApplicationTracking,
+  saveSession,
+  startApplicationTracking,
+  updateApplicationTracking,
+} from "@/lib/api";
+import type {
+  ApplicationTrackingStatus,
+  AssistStreamEvent,
+  BackendApplicationRecord,
+  BackendUserProfile,
+  ConversationTurn,
+} from "@/lib/api";
 import { getSessionId } from "@/lib/session";
 import {
   adaptApplicationDraft,
+  adaptProgram,
   adaptSessionState,
+  mergeProfile,
   profileToChips,
 } from "@/lib/adapter";
 import type {
@@ -36,6 +54,8 @@ import type {
 const TOAST_MS = 2200;
 
 const EMPTY_PROFILE: BackendUserProfile = {
+  company_name: null,
+  website: null,
   sector: null,
   city: null,
   team_size: null,
@@ -66,6 +86,12 @@ interface AppState {
   applicationDraft: ApplicationDraft | null;
   applyLoading: boolean;
   matchCount: number;
+  trackedApplications: BackendApplicationRecord[];
+  refreshApplications: () => Promise<void>;
+  updateApplicationRecord: (
+    id: string,
+    fields: { status?: ApplicationTrackingStatus; note?: string; reminder_date?: string },
+  ) => Promise<void>;
 
   onNewChat: () => void;
   onOnboardingComplete: (profile: BackendUserProfile) => void;
@@ -78,6 +104,7 @@ interface AppState {
   onCopyPlan: () => void;
   onDownloadPlan: () => void;
   resolveProgram: (id: string) => Program | null;
+  ensureProgram: (id: string) => Promise<Program | null>;
   applyProgram: (id: string) => Promise<void>;
 
   goToChat: () => void;
@@ -88,6 +115,7 @@ interface AppState {
   goToReportGenerate: (id: string) => void;
   goToPanel: () => void;
   goToNewPresentation: () => void;
+  goToApplications: () => void;
 }
 
 const AppStateCtx = createContext<AppState | null>(null);
@@ -115,6 +143,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [apiPrograms, setApiPrograms] = useState<Program[]>([]);
   const [applicationDraft, setApplicationDraft] = useState<ApplicationDraft | null>(null);
   const [applyLoading, setApplyLoading] = useState(false);
+  const [trackedApplications, setTrackedApplications] = useState<BackendApplicationRecord[]>([]);
 
   const idRef = useRef(1);
   const nextId = () => String(idRef.current++);
@@ -147,6 +176,35 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /** Başvurularım listesini backend'den yeniden çeker. */
+  const refreshApplications = useCallback(async () => {
+    const sessionId = getSessionId();
+    if (!sessionId) return;
+    try {
+      const records = await listApplicationTracking(sessionId);
+      setTrackedApplications(records);
+    } catch {
+      // Sessizce yoksay — Başvurularım sayfası boş/eski listeyle devam eder
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshApplications();
+  }, [refreshApplications]);
+
+  /** Bir başvuru kaydının durum/not alanlarını günceller ve listeyi tazeler. */
+  async function updateApplicationRecord(
+    id: string,
+    fields: { status?: ApplicationTrackingStatus; note?: string; reminder_date?: string },
+  ) {
+    const updated = await updateApplicationTracking(id, fields);
+    setTrackedApplications((prev) => prev.map((a) => (a.id === id ? updated : a)));
+  }
+
+  function goToApplications() {
+    router.push("/applications");
+  }
 
   /** Yalnızca text mesajları alır; profil/kart/cta gibi UI-özel turlar kapsam dışı. */
   function buildHistory(msgs: ChatMessage[]): ConversationTurn[] {
@@ -193,15 +251,20 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   function onOnboardingComplete(profile: BackendUserProfile) {
     window.localStorage.setItem("gravioai_onboarding_complete", "1");
     setCurrentProfile(profile);
-    push({
-      role: "assistant",
-      kind: "text",
-      text: "Harika, seni tanıdım! Sana uygun destekleri bulmak için bir soru sorabilir ya da \"bana uygun destekleri göster\" diyebilirsin.",
-    });
-    const chips = profileToChips(profile);
-    if (chips.length > 0) push({ role: "assistant", kind: "profile", chips });
-    saveSession(getSessionId(), { profile, matches: [] }).catch(() => {});
     router.push("/chat");
+
+    // Onboarding'in yapılandırılmış (zengin) profilini önce kaydediyoruz ki
+    // aşağıdaki sendMessage turu backend'de bunu temel alıp birleştirsin
+    // (merge_profile) — yoksa serbest metinden yeniden çıkarım, formda
+    // toplanan company_name/website gibi alanları kaybedebilir.
+    saveSession(getSessionId(), { profile, matches: [] }).catch(() => {});
+
+    // Eşleşmelerim'in onboarding sonrası boş kalmaması için gerçek eşleştirme
+    // turu burada tetiklenir — kullanıcının "bana uygun destekleri göster"
+    // yazmasını beklemeden. `profile.summary` onboarding formunun ürettiği
+    // (serbest metin veya yapılandırılmış alanlardan kurulmuş) özet metindir.
+    const openingMessage = profile.summary?.trim() || "İşletmemi tanıttım, bana uygun destekleri göster.";
+    void sendMessage(openingMessage, []);
   }
 
   function onOnboardingSkip() {
@@ -229,7 +292,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       if (event.type === "meta") {
         const { profile, programs } = adaptSessionState({ profile: event.profile, matches: event.matches });
         lastPrograms = programs;
-        setCurrentProfile(profile);
+        setCurrentProfile((prev) => mergeProfile(prev, profile));
         setApiPrograms((prev) => {
           const existingIds = new Set(prev.map((p) => p.id));
           const fresh = programs.filter((p) => !existingIds.has(p.id));
@@ -366,6 +429,17 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   /** Başvuru taslağını backend'den çeker ve başvuru sayfasına geçer. */
   async function applyProgram(id: string) {
+    // Başvuru sürecini Başvurularım'da takip edilebilir hale getirir — plan/belge
+    // taslağı üretiminden bağımsız, sessizce en iyi çaba (best-effort): burası
+    // başarısız olsa da kullanıcı başvuru akışına devam edebilmeli.
+    const sessionId = getSessionId();
+    const program = resolveProgram(id);
+    if (sessionId && program) {
+      startApplicationTracking(sessionId, id, program.name)
+        .then(() => refreshApplications())
+        .catch(() => {});
+    }
+
     if (!currentProfile) {
       router.push(`/program/${id}/application`);
       return;
@@ -449,7 +523,28 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     return apiPrograms.find((p) => p.id === id) ?? null;
   }
 
-  const matchCount = apiPrograms.length;
+  /** `resolveProgram` bu oturumda daha önce görülmüş (sohbetten/session'dan
+   * gelen) programlara bakar — doğrudan bir program linkiyle (paylaşılan
+   * link, sayfa yenileme sonrası) gelindiğinde önbellek boş olabilir ve
+   * program aslında var olsa da "program bulunamadı" gösterilir. Bu durumda
+   * backend'den tek programı + uygunluğunu çekip önbelleğe ekleriz. */
+  async function ensureProgram(id: string): Promise<Program | null> {
+    const cached = resolveProgram(id);
+    if (cached) return cached;
+    try {
+      const sp = await getProgram(id);
+      const er = await evaluateEligibility(currentProfile ?? EMPTY_PROFILE, id);
+      const program = adaptProgram(sp, er);
+      setApiPrograms((prev) => (prev.some((p) => p.id === program.id) ? prev : [...prev, program]));
+      return program;
+    } catch {
+      return null;
+    }
+  }
+
+  // Süresi geçmiş programlar Eşleşmelerim listesinde gösterilmiyor
+  // (bkz. MatchesView) — sidebar rozeti de aynı sayıyı yansıtmalı.
+  const matchCount = apiPrograms.filter((p) => !p.deadlineExpired).length;
 
   const value: AppState = {
     sidebarOpen,
@@ -469,6 +564,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     applicationDraft,
     applyLoading,
     matchCount,
+    trackedApplications,
+    refreshApplications,
+    updateApplicationRecord,
     onNewChat,
     onOnboardingComplete,
     onOnboardingSkip,
@@ -480,6 +578,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     onCopyPlan,
     onDownloadPlan,
     resolveProgram,
+    ensureProgram,
     applyProgram,
     goToChat,
     goToMatches,
@@ -489,6 +588,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     goToReportGenerate,
     goToPanel,
     goToNewPresentation,
+    goToApplications,
   };
 
   return <AppStateCtx.Provider value={value}>{children}</AppStateCtx.Provider>;

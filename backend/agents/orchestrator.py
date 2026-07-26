@@ -25,7 +25,7 @@ from typing import AsyncIterator
 from core.llm import LLMMessage
 from models.intent import Intent, IntentResult
 from models.orchestration import AssistResult, ConversationTurn, ProgramMatch
-from models.profile import UserProfile
+from models.profile import UserProfile, merge_profile
 from .eligibility import EligibilityAgent
 from .intent_classifier import IntentClassifier
 from .matching import MatchingAgent
@@ -40,7 +40,11 @@ _REPLY_SYSTEM = (
     "sektör destek programları konusunda yardım edersin. Kısa, samimi ve "
     "Türkçe yanıt ver. Kullanıcıya bulunan programlar hakkında kısa bir özet "
     "sun; programa başvurabilir ya da uygunluğunu kontrol edebilir. "
-    "Teknik jargon kullanma."
+    "Teknik jargon kullanma.\n\n"
+    "Biçimlendirme: Birden fazla programdan bahsediyorsan her birini ayrı "
+    "bir markdown liste öğesi olarak yaz (\"- \" ile başlat, her öğe kendi "
+    "satırında) — hepsini tek bir paragrafa sıkıştırma. Program adını "
+    "**kalın** yaz, geri kalan metinde kalın kullanma. Kısa cümleler kur."
 )
 
 _SMALL_TALK_INSTRUCTIONS = {
@@ -65,13 +69,47 @@ _APPLY_REPLY_SYSTEM = (
     "başvuracağını soruyor. Bulunan en uygun programı kısaca tanıt, başvuru "
     "için genel adımları özetle (uygunluk koşullarını kontrol et, gerekli "
     "belgeleri hazırla) ve arayüzdeki 'Başvuru hazırla' seçeneğini işaret et. "
-    "Kısa, samimi ve Türkçe yaz. Teknik jargon kullanma."
+    "Kısa, samimi ve Türkçe yaz. Teknik jargon kullanma.\n\n"
+    "Biçimlendirme: Adımları anlatırken her adımı ayrı bir markdown liste "
+    "öğesi olarak yaz (\"- \" ile başlat, her öğe kendi satırında). Program "
+    "adını **kalın** yaz, geri kalan metinde kalın kullanma."
 )
 
-_APPLY_NO_MATCH_REPLY = (
+_APPLY_PROFILE_UNCLEAR_REPLY = (
     "Hangi programa başvurmak istediğini tam anlayamadım. Program adını "
     "veya işletmenle ilgili birkaç detay (sektör, şehir, hedef) paylaşır mısın?"
 )
+
+_APPLY_NO_MATCH_REPLY = (
+    "İşletmeni anladım ama bahsettiğin programı tam eşleştiremedim. Program "
+    "adını daha net yazar mısın, ya da 'Eşleşmelerim' bölümünden ilgilendiğin "
+    "programı seçebilirsin."
+)
+
+_PROFILE_UNCLEAR_REPLY = (
+    "Profilini tam çıkaramadım. İşletmen hakkında biraz daha bilgi "
+    "verir misin? (sektör, şehir, ekip büyüklüğü, hedefin)"
+)
+
+_NO_MATCH_REPLY = (
+    "İşletmeni anladım ama sana uygun bir program bulamadım. Sektör/şehir/"
+    "hedefini biraz daha netleştirir misin, ya da bir program adı yazabilirsin."
+)
+
+
+def _apply_reply_for_no_matches(profile: UserProfile) -> str:
+    """Aday program bulunamadığında profilin durumuna göre doğru mesajı seçer.
+
+    Önceden profil başarıyla çıkarılmış olsa bile (sektör/şehir/hedef dolu)
+    her zaman aynı "anlayamadım" metni gösteriliyordu — bu, kullanıcıya
+    hemen üstünde gösterilen dolu profil kartıyla çelişiyordu.
+    """
+    return _APPLY_NO_MATCH_REPLY if profile.has_content() else _APPLY_PROFILE_UNCLEAR_REPLY
+
+
+def _reply_for_no_matches(profile: UserProfile) -> str:
+    """`_compose_reply_llm` / `_stream_reply_llm` için aynı ayrımı yapar."""
+    return _NO_MATCH_REPLY if profile.has_content() else _PROFILE_UNCLEAR_REPLY
 
 
 class Orchestrator:
@@ -122,9 +160,24 @@ class Orchestrator:
         return result
 
     async def _save_memory(self, session_id: str, result: AssistResult) -> None:
-        """Turu hafızaya kaydeder — başarısız olsa bile kullanıcı yanıtsız kalmamalı."""
+        """Turu hafızaya kaydeder — başarısız olsa bile kullanıcı yanıtsız kalmamalı.
+
+        `result.profile` bu turun çıkardığı profildir; bazı intent'lerde
+        (PROGRAM_QUESTION, APPLY_REQUEST'te aday bulunamazsa) neredeyse boştur.
+        Kayıtlı profille birleştirmeden doğrudan üzerine yazmak, önceki
+        turlarda çıkarılan gerçek profili (sektör/şehir/ekip vb.) siler —
+        bu yüzden önce mevcut kaydı yükleyip alan bazında birleştiriyoruz.
+        """
+        profile = result.profile
         try:
-            await self._memory_agent.save(session_id, result.profile, result.matches)
+            existing = await self._memory_agent.load(session_id)
+            if existing:
+                profile = merge_profile(existing.profile, result.profile)
+        except Exception:  # noqa: BLE001 — mevcut profil okunamazsa bu turun profiliyle devam
+            logger.exception("memory_load_failed session_id=%s", session_id)
+
+        try:
+            await self._memory_agent.save(session_id, profile, result.matches)
         except Exception:  # noqa: BLE001 — kayıt hatası sohbeti kesmemeli
             logger.exception("memory_save_failed session_id=%s", session_id)
 
@@ -202,7 +255,7 @@ class Orchestrator:
         query_profile, matches = await self._prepare_program_question(
             message, match_limit, eligibility_limit
         )
-        reply = await self._compose_reply_llm(message, matches, None)
+        reply = await self._compose_reply_llm(message, matches, None, query_profile)
         return AssistResult(profile=query_profile, matches=matches, reply=reply)
 
     async def _prepare_apply_request(
@@ -245,7 +298,9 @@ class Orchestrator:
     ) -> AssistResult:
         profile, matches = await self._prepare_apply_request(message, history)
         if not matches:
-            return AssistResult(profile=profile, matches=[], reply=_APPLY_NO_MATCH_REPLY)
+            return AssistResult(
+                profile=profile, matches=[], reply=_apply_reply_for_no_matches(profile)
+            )
 
         reply = await self._compose_apply_reply(message, matches[0])
         return AssistResult(profile=profile, matches=matches, reply=reply)
@@ -286,7 +341,7 @@ class Orchestrator:
         profile, matches = await self._prepare_full_chain(
             message, history, match_limit, eligibility_limit
         )
-        reply = await self._compose_reply_llm(message, matches, history)
+        reply = await self._compose_reply_llm(message, matches, history, profile)
         return AssistResult(profile=profile, matches=matches, reply=reply)
 
     def _build_llm_history(
@@ -304,6 +359,7 @@ class Orchestrator:
         last_message: str,
         matches: list[ProgramMatch],
         history: list[ConversationTurn] | None,
+        profile: UserProfile,
     ) -> str:
         """LLM ile bağlamsal sohbet yanıtı üretir.
 
@@ -311,10 +367,7 @@ class Orchestrator:
         kullanıcıya yönelik doğal dilde bir yanıt oluşturulur.
         """
         if not matches:
-            return (
-                "Profilini tam çıkaramadım. İşletmen hakkında biraz daha bilgi "
-                "verir misin? (sektör, şehir, ekip büyüklüğü, hedefin)"
-            )
+            return _reply_for_no_matches(profile)
 
         # Eşleşen programların kısa özetini hazırla
         program_lines = []
@@ -406,11 +459,11 @@ class Orchestrator:
                 profile, matches = await self._prepare_program_question(
                     message, match_limit, eligibility_limit
                 )
-                reply_stream = self._stream_reply_llm(message, matches, None)
+                reply_stream = self._stream_reply_llm(message, matches, None, profile)
             elif intent_result.intent == Intent.APPLY_REQUEST:
                 profile, matches = await self._prepare_apply_request(message, history)
                 reply_stream = (
-                    self._single_chunk_stream(_APPLY_NO_MATCH_REPLY)
+                    self._single_chunk_stream(_apply_reply_for_no_matches(profile))
                     if not matches
                     else self._stream_apply_reply(message, matches[0])
                 )
@@ -418,7 +471,7 @@ class Orchestrator:
                 profile, matches = await self._prepare_full_chain(
                     message, history, match_limit, eligibility_limit
                 )
-                reply_stream = self._stream_reply_llm(message, matches, history)
+                reply_stream = self._stream_reply_llm(message, matches, history, profile)
 
             yield {
                 "type": "meta",
@@ -465,13 +518,11 @@ class Orchestrator:
         last_message: str,
         matches: list[ProgramMatch],
         history: list[ConversationTurn] | None,
+        profile: UserProfile,
     ) -> AsyncIterator[str]:
         """`_compose_reply_llm`'in streaming karşılığı."""
         if not matches:
-            yield (
-                "Profilini tam çıkaramadım. İşletmen hakkında biraz daha bilgi "
-                "verir misin? (sektör, şehir, ekip büyüklüğü, hedefin)"
-            )
+            yield _reply_for_no_matches(profile)
             return
 
         program_lines = []

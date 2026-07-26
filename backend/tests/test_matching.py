@@ -4,10 +4,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from backend.agents.matching import MatchingAgent
-from backend.models.profile import UserProfile
-from backend.models.program import SupportProgram
-from backend.models.taxonomy import Category
+from agents.matching import MatchingAgent
+from models.profile import UserProfile
+from models.program import SupportProgram
+from models.taxonomy import Category
 
 
 def _program(pid: str) -> SupportProgram:
@@ -36,10 +36,10 @@ async def test_query_text_is_embedded_and_passed_to_repo(agent):
     """Profilden kurulan sorgu metni embed'lenmeli, embedding de match_programs'a gitmeli."""
     profile = UserProfile(summary="Düzce'de yazılım girişimi")
     with patch(
-        "backend.agents.matching.get_embedding_client",
+        "agents.matching.get_embedding_client",
         return_value=_mock_embedding_client([0.1, 0.2, 0.3]),
     ) as get_client, patch(
-        "backend.data.repo.match_programs", return_value=[_program("p1")]
+        "data.repo.match_programs", return_value=[_program("p1")]
     ) as match_programs:
         result = await agent.run(profile, limit=3)
 
@@ -52,7 +52,7 @@ async def test_query_text_is_embedded_and_passed_to_repo(agent):
 async def test_empty_profile_returns_empty_without_embedding_call(agent):
     """Boş profilde to_query_text() '' döner — hiç embedding çağrısı yapılmamalı."""
     profile = UserProfile()
-    with patch("backend.agents.matching.get_embedding_client") as get_client:
+    with patch("agents.matching.get_embedding_client") as get_client:
         result = await agent.run(profile)
 
     get_client.assert_not_called()
@@ -64,9 +64,9 @@ async def test_category_filter_is_forwarded(agent):
     """category parametresi değişmeden match_programs'a iletilmeli."""
     profile = UserProfile(summary="Ar-Ge hibesi arıyorum")
     with patch(
-        "backend.agents.matching.get_embedding_client",
+        "agents.matching.get_embedding_client",
         return_value=_mock_embedding_client([0.5]),
-    ), patch("backend.data.repo.match_programs", return_value=[]) as match_programs:
+    ), patch("data.repo.match_programs", return_value=[]) as match_programs:
         await agent.run(profile, limit=5, category=Category.KAMU)
 
     match_programs.assert_called_once_with([0.5], match_count=5, category=Category.KAMU)
@@ -78,9 +78,9 @@ async def test_source_url_preserved_in_results(agent):
     profile = UserProfile(summary="test sorgusu")
     program = _program("bigg")
     with patch(
-        "backend.agents.matching.get_embedding_client",
+        "agents.matching.get_embedding_client",
         return_value=_mock_embedding_client([0.1]),
-    ), patch("backend.data.repo.match_programs", return_value=[program]):
+    ), patch("data.repo.match_programs", return_value=[program]):
         result = await agent.run(profile)
 
     assert result[0].source_url == "https://example.com/bigg"
@@ -101,8 +101,8 @@ async def test_concurrent_matching_calls_do_not_block_each_other(agent):
     slow_client = AsyncMock()
     slow_client.embed_text = slow_embed
 
-    with patch("backend.agents.matching.get_embedding_client", return_value=slow_client), patch(
-        "backend.data.repo.match_programs", return_value=[_program("p1")]
+    with patch("agents.matching.get_embedding_client", return_value=slow_client), patch(
+        "data.repo.match_programs", return_value=[_program("p1")]
     ):
         profiles = [UserProfile(summary=f"profil {i}") for i in range(10)]
         t0 = time.monotonic()

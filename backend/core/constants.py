@@ -14,15 +14,22 @@ AY_KISALTMALARI = {
     "kas": 11, "nov": 11, "ara": 12, "dec": 12,
 }
 
-# None olan text/opsiyonel alanları doldurmak için kullanılan Türkçe mesajlar — 
-# format_to_db() içinde kullanılıyor.
+# None olan text/opsiyonel alanları doldurmak için kullanılan Türkçe mesajlar —
+# format_to_db() içinde kullanılıyor. Sadece serbest metin (str) alanlar burada
+# yer alabilir: application_status/amount_max/women_entrepreneur/technopark/
+# student/company_required kasıtlı olarak yok — bunlar ExtractedSupportInfo'da
+# enum/float/bool tipli, placeholder metin yazılırsa pydantic validasyonu
+# patlar (SupportProgram de aynı tipleri miras alır). Boş kaldıklarında None
+# bırakılır; frontend (frontend/lib/adapter.ts) zaten null/undefined'ı
+# bekliyor. Buradaki metinler frontend/lib/adapter.ts::EMPTY_FIELD_MESSAGES
+# ile birebir aynı olmalı, aksi halde frontend bunları gerçek veri sanıp
+# chip olarak gösterir.
 BOS_ALAN_MESAJLARI = {
-    "founded_after": "Kuruluş tarihi şartı belirtilmemiş",
-    "deadline": "Son başvuru tarihi belirtilmemiş",
     "support_rate": "Destek oranı belirtilmemiş",
     "official_url": "Resmi link belirtilmemiş",
+    "founded_after": "Kuruluş tarihi şartı belirtilmemiş",
+    "deadline": "Son başvuru tarihi belirtilmemiş",
 }
-
 # Kalkınma Ajansı'nın API'sinden gelen agency_code'ları okunaklı tam isme çeviren sözlük 
 #sadece kalkinma_ajansi.py kullanıyor.
 
@@ -67,3 +74,18 @@ TURKCE_KARAKTER_DEGISIMLERI = {
     "Ö": "o", "ö": "o",
     "Ç": "c", "ç": "c",
 }
+
+
+exclusion_keywords = [
+    # Tarım / hayvancılık / balıkçılık
+    "tarım", "tarımsal", "hayvancılık", "balıkçılık", "su ürünleri", "çiftçi",
+
+    # Turizm / otelcilik
+    "turizm", "turistik", "otelcilik", "otel işletmeciliği",
+
+    # İnşaat / gayrimenkul
+    "inşaat", "gayrimenkul", "konut projesi", "altyapı inşaatı",
+
+    # Maden / enerji / doğal kaynaklar
+    "maden", "madencilik", "petrol", "doğalgaz", "enerji santrali",
+]

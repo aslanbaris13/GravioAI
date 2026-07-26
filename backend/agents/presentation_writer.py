@@ -6,8 +6,8 @@ odaklı bir promptla — tek dev bir "tüm sunumu yaz" çağrısı yerine.
 """
 import json
 
-from ..models.presentation import PRESENTATION_SKELETON, GeneratedPresentation, PresentationSlide
-from ..models.profile import UserProfile
+from models.presentation import PRESENTATION_SKELETON, GeneratedPresentation, PresentationSlide
+from models.profile import UserProfile
 from .base import Agent
 from .eligibility import _profile_brief
 

@@ -11,16 +11,8 @@ from core.constants import KALKINMA_AJANSI_ISIMLERI
 
 class KalkinmaAjansiConnector(BaseConnector):
 
-    SOURCE_NAME = "KALKİNMA"
+    SOURCE_NAME = "KALKINMA_AJANSI"
     
-    forbidden_terms = []
-    ambiguous_keywords = [
-        "kobi", "işletme", "yenilik", "inovasyon", "teknik destek",
-        "ar-ge", "dijital dönüşüm", "kapasite","finansman","yatırım","akademik",
-    ]
-
-    # Rate limiting'e karşı önlem: her istek arası küçük bekleme,
-    # her 15 istekte bir daha uzun bir mola
     REQUEST_DELAY = 1.0
     BATCH_SIZE = 15
     BATCH_PAUSE = 1.0
@@ -77,14 +69,14 @@ class KalkinmaAjansiConnector(BaseConnector):
                     if agency_code else None
                 )
                 
-                #Girişimcilere uygun olmayanlar için ön eleme
+                  # Ön filtreleme: Hedef kitleye kesinlikle uymayan bir sektöre mi ait?
                 
-                title_clearly_relevant = self.is_relevant(text="", title=title)
-                title_ambiguous = any(kw in title.lower() for kw in self.ambiguous_keywords)
-
-                if not title_clearly_relevant and not title_ambiguous:
-                    print(f" -> ELENDİ (başlıkta ipucu yok, indirilmedi): {title}")
+    
+                if not self.is_relevant(text="", title=title):
+                    print(f" ELENDİ (hedef kitleye uymayan sektör): {title}")
                     continue
+                
+            
 
                 redirect_url = item.get("redirect_url")
                 detail_text = title
@@ -102,18 +94,15 @@ class KalkinmaAjansiConnector(BaseConnector):
                         if html:
                             detail_text = self.clean(html)
                     except Exception as e:
-                        print(f" -> Detay sayfası okunamadı ({redirect_url}): {e}")
+                        print(f" Detay sayfası okunamadı ({redirect_url}): {e}")
 
-                # KARAR BEKLİYOR: Başlık bazlı ön filtre (yukarıda) aktif ama bu
-                # tam-metin ikinci filtre kapalı — yani başlığı belirsiz/uygun
-                # görünen her ilan (gerçekten alakasız olsa bile) LLM'e gidiyor.
-                # Gemini günlük kotası (20 istek/gün, ücretsiz katman) düşünülünce
-                # bu filtreyi açmak kota tasarrufu sağlar; ama relevance_keywords
-                # (base.py) dar kalırsa gerçek programları da eleyebilir. Açıp
-                # açmama kararı ürün tarafının onayını gerektiriyor.
-                # if not self.is_relevant(detail_text, title):
-                #     print(f" -> ELENDİ (tam metin kontrolünde alakasız çıktı): {title}")
-                #     continue
+                
+                # İkinci filtreleme: Detay sayfası indirildikten sonra, tam
+                # metin üzerinden tekrar kontrol. 
+                if not self.is_relevant(detail_text, title):
+                    print(f" -> ELENDİ (tam metin kontrolünde alakasız çıktı): {title}")
+                    continue
+
 
                 print(f"Yapay zeka analiz ediyor: {title}")
                 extracted_info = await llm_client.extract_program_details(

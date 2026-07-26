@@ -1,5 +1,9 @@
 """HTTP uç noktaları."""
 import json
+import logging
+from core import document_parser
+from core.docx_export import build_report_docx
+from datetime import date
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -15,33 +19,30 @@ from agents import (
     ProfileExtractor,
     ReportWriterAgent,
 )
+
 from core.embedder import get_embedding_client
 from core.llm import LLMClient, LLMMessage, get_llm_client
+from core.pptx_export import build_presentation_pptx
 from core.rate_limit import enforce_llm_rate_limit
-from data import repo
+from data import repo, report_schema_loader
 from models import (
-from ..core import document_parser
-from ..core.docx_export import build_report_docx
-from ..core.embedder import get_embedding_client
-from ..core.llm import LLMClient, LLMMessage, get_llm_client
-from ..core.pptx_export import build_presentation_pptx
-from ..core.rate_limit import enforce_llm_rate_limit
-from ..data import repo, report_schema_loader
-from ..models import (
     ApplicationDraft,
+    ApplicationRecord,
+    ApplicationTrackingStatus,
     AssistResult,
     Category,
     ConversationTurn,
     EligibilityResult,
     GeneratedPresentation,
     GeneratedReport,
+    PresentationRecord,
     ReportSchema,
     SessionState,
     SupportProgram,
-    UserProfile,
-)
+    UserProfile)
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def _content_disposition(name_stem: str, suffix: str, extension: str) -> str:
@@ -165,6 +166,49 @@ async def draft_application(body: ApplicationRequest) -> ApplicationDraft:
         raise HTTPException(status_code=404, detail="Program bulunamadı")
     agent = ApplicationAgent()
     return await agent.run(body.profile, program)
+
+
+class ApplicationCreateRequest(BaseModel):
+    session_id: str
+    program_id: str
+    program_name: str
+
+
+@router.post("/applications", response_model=ApplicationRecord, response_model_by_alias=False)
+async def start_application(body: ApplicationCreateRequest) -> ApplicationRecord:
+    """Bir programa başvuru sürecini başlatır — Panelim/Başvurularım'daki durum
+    takibi kaydı (`/application` ile karıştırılmamalı; o LLM ile plan/belge
+    taslağı üretir, bu ise `applications` tablosunda kalıcı bir kayıt açar).
+    Aynı program için tekrar çağrılırsa mevcut kaydı döner (upsert)."""
+    return await run_in_threadpool(
+        repo.create_application, body.session_id, body.program_id, body.program_name
+    )
+
+
+@router.get("/applications", response_model=list[ApplicationRecord], response_model_by_alias=False)
+async def get_applications(session_id: str) -> list[ApplicationRecord]:
+    """Bir oturumun tüm başvuru takibi kayıtlarını getirir."""
+    return await run_in_threadpool(repo.list_applications, session_id)
+
+
+class ApplicationUpdateRequest(BaseModel):
+    status: ApplicationTrackingStatus | None = None
+    note: str | None = None
+    reminder_date: date | None = None
+
+
+@router.patch("/applications/{application_id}", response_model=ApplicationRecord, response_model_by_alias=False)
+async def patch_application(application_id: str, body: ApplicationUpdateRequest) -> ApplicationRecord:
+    """Bir başvuru kaydının durumunu/notunu/hatırlatmasını günceller.
+
+    Yalnızca istekte açıkça gönderilen alanlar güncellenir (`exclude_unset`) —
+    yoksa gönderilmeyen bir alan `None` sanılıp yanlışlıkla temizlenebilir.
+    """
+    fields = body.model_dump(exclude_unset=True, exclude_none=True, mode="json")
+    updated = await run_in_threadpool(repo.update_application, application_id, fields)
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Başvuru kaydı bulunamadı")
+    return updated
 
 
 class AssistRequest(BaseModel):
@@ -309,6 +353,7 @@ class GeneratePresentationRequest(BaseModel):
     profile: UserProfile
     company_name: str = ""
     extra_context: str = ""
+    session_id: str | None = None
 
 
 @router.post(
@@ -317,9 +362,30 @@ class GeneratePresentationRequest(BaseModel):
     dependencies=[Depends(enforce_llm_rate_limit)],
 )
 async def generate_presentation(body: GeneratePresentationRequest) -> GeneratedPresentation:
-    """Sabit slayt iskeletinden, profile özel bir sunum üretir (Sunum Ajanı)."""
+    """Sabit slayt iskeletinden, profile özel bir sunum üretir (Sunum Ajanı).
+
+    `session_id` verilirse, üretilen sunum "Geçmiş Sunumlarım" arşivine de
+    kaydedilir — bu en iyi çaba (best-effort): arşivleme başarısız olsa bile
+    kullanıcı üretilen sunumu görüp indirebilmeli.
+    """
     agent = PresentationWriterAgent()
-    return await agent.write_presentation(body.profile, body.company_name, body.extra_context)
+    result = await agent.write_presentation(body.profile, body.company_name, body.extra_context)
+    if body.session_id:
+        try:
+            await run_in_threadpool(repo.save_presentation, body.session_id, body.company_name, result)
+        except Exception:  # noqa: BLE001 — arşivleme hatası kullanıcıyı etkilememeli
+            logger.exception("presentation_save_failed session_id=%s", body.session_id)
+    return result
+
+
+@router.get(
+    "/presentations",
+    response_model=list[PresentationRecord],
+    response_model_by_alias=False,
+)
+async def get_presentations(session_id: str) -> list[PresentationRecord]:
+    """Bir oturumun daha önce ürettiği tüm sunumları getirir (Geçmiş Sunumlarım)."""
+    return await run_in_threadpool(repo.list_presentations, session_id)
 
 
 @router.post("/presentations/export-pptx")

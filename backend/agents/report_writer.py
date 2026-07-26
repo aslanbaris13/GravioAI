@@ -7,9 +7,9 @@ girdiği alan değerleri var. Bu hem kaliteyi (odaklı, kısa promptlar daha
 tutarlı çıktı üretir) hem düzenlenebilirliği (kullanıcı tek bir bölümü
 "yeniden yaz" diyebilir, tüm raporu değil) artırır.
 """
-from ..models.profile import UserProfile
-from ..models.report import GeneratedReport, GeneratedReportSection
-from ..models.report_schema import ReportSchema, ReportSection
+from models.profile import UserProfile
+from models.report import GeneratedReport, GeneratedReportSection
+from models.report_schema import ReportSchema, ReportSection
 from .base import Agent
 from .eligibility import _profile_brief
 

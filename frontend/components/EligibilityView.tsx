@@ -13,7 +13,7 @@ export default function EligibilityView({
   onPrimaryAction: () => void;
 }) {
   const { state, score } = program.elig;
-  const cta = eligCta(state);
+  const cta = eligCta(state, program.conditions);
 
   return (
     <section data-screen-label="Uygunluk kontrolü" style={{ height: "100%", overflowY: "auto" }}>
@@ -44,7 +44,7 @@ export default function EligibilityView({
             </div>
           </div>
           <div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, color: "#14222c", margin: 0 }}>{eligHeadline(state)}</h1>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: "#14222c", margin: 0 }}>{eligHeadline(state, program.conditions)}</h1>
             <div style={{ fontSize: 13, color: "#8a96a0", marginTop: 4 }}>{program.name}</div>
           </div>
         </div>

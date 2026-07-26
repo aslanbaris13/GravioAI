@@ -46,6 +46,7 @@ export interface Program {
   statusLabel: string;
   deadlineText: string;
   deadlineDays: number | null;
+  deadlineExpired: boolean;
   sourceLink: string;
   sourceHref: string;
   updated: string;
