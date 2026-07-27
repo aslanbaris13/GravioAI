@@ -47,14 +47,14 @@ create extension if not exists pgcrypto;
 --     updated_at           timestamptz not null default now()
 -- );
 
--- ============================================================
+
 -- programs — güncel veri şeması (backend-updates branch'i, RAG veri
 -- kalitesi çalışması). Önceki adı `programs_v2` idi; TÜBİTAK açık
 -- çağrılar akışı + is_relevant/cleaner düzeltmeleriyle üretilen veri
--- doğrulandıktan sonra bu isme (versiyon eki olmadan) RENAME edildi.
+-- doğrulandıktan sonra RENAME edildi.
 -- backend/data/repo.py ve backend/models/program.py buradaki alan
 -- adlarıyla birebir eşleşir.
--- ============================================================
+
 
 -- 2) Ana program tablosu
 create table if not exists public.programs (
@@ -81,7 +81,7 @@ create table if not exists public.programs (
     body_chunk           text not null,
     chunk_index          integer not null default 0,
     embedding            vector(768),
-    last_updated         timestamptz not null default timezone('utc'::text, now()) ;
+    last_updated         timestamptz not null default timezone('utc'::text, now()));
 
 create index if not exists programs_category_idx on public.programs (category);
 
@@ -137,8 +137,7 @@ alter table public.program_chunks enable row level security;
 --    parçayla cevapla" prensibine uygun olarak program_chunks
 --    üzerinde arar ve DISTINCT ON ile her programı SADECE 1 KEZ
 --    döndürür (aynı programın birden fazla chunk'ı eşleşse bile).
---    Dönüş tipi aynı kaldığı için (setof public.programs) burada
---    CREATE OR REPLACE yeterli
+i
 drop function if exists public.match_programs(vector, integer, text);
 
 create function public.match_programs(
@@ -172,8 +171,7 @@ $$;
 
 -- user_sessions — sohbetin çıkardığı profil + eşleşmelerin kalıcılığı.
 -- session_id'yi frontend (localStorage) üretir; burada auth yok,
--- session_id fiilen tahmin edilemeyen bir bearer-token gibi davranır.
--- (Bu bölümde değişiklik yok.)
+
 
 -- 6) Oturum tablosu
 create table if not exists public.user_sessions (
