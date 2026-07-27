@@ -8,14 +8,33 @@ Akış:
 5. Toplu olarak Supabase'e yaz (upsert).
 """
 import asyncio
+from datetime import datetime, timezone
 
 from data.loader import load_programs
 from data.repo import program_embedding_text, _to_row, upsert_programs
 from core.embedder import get_embedding_client
 from core.chunker import HierarchicalChunker
-from data.repo import upsert_program_parents, upsert_program_chunks
+from data.repo import upsert_program_parents, upsert_program_chunks, log_ingestion_run
 
 async def main():
+    started_at = datetime.now(timezone.utc)
+    try:
+        written, written_chunks = await _run_ingestion()
+    except Exception as e:
+        print(f" HATA: ingestion başarısız: {e}")
+        log_ingestion_run(source="ingest_batch", status="failed", started_at=started_at, error_msg=str(e))
+        raise
+    else:
+        log_ingestion_run(
+            source="ingest_batch",
+            status="success",
+            started_at=started_at,
+            docs_found=written,
+            chunks_upserted=written_chunks,
+        )
+
+
+async def _run_ingestion() -> tuple[int, int]:
     print("Ingestion başlatılıyor...\n")
 
     programs = load_programs()
@@ -23,7 +42,7 @@ async def main():
 
     if not programs:
         print("Yüklenecek program bulunamadı, çıkılıyor.")
-        return
+        return 0, 0
 
     embedding_client = get_embedding_client()
     chunker = HierarchicalChunker(embedding_client=embedding_client)
@@ -57,7 +76,7 @@ async def main():
 
     if not rows:
         print("Hiçbir satır hazırlanamadı, Supabase'e yazılmayacak.")
-        return
+        return 0, 0
 
     # Aynı program_id'ye sahip birden fazla satır varsa (filtreler kapalıyken
     # aynı slug'ı üreten farklı linkler gibi durumlarda olabiliyor), Postgres
@@ -84,6 +103,8 @@ async def main():
     print(f"\n{len(all_child_rows)} child (chunk) satırı yazılıyor...")
     written_chunks = upsert_program_chunks(all_child_rows)
     print(f"Tamamlandı: {written_chunks} chunk kaydı yazıldı.")
-    
+
+    return written, written_chunks
+
 if __name__ == "__main__":
     asyncio.run(main())

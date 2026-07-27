@@ -17,11 +17,13 @@ import json
 import asyncio
 import os
 import sys
+from datetime import datetime, timezone
 from core.fetcher import HttpFetcher
 from connectors.kosgeb import KOSGEBConnector
 from connectors.kalkinma_ajansi import KalkinmaAjansiConnector
 from connectors.tubitak import TubitakConnector
 from connectors.manager import ConnectorManager
+from data.repo import log_ingestion_run
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -58,6 +60,10 @@ async def main():
         manager = ConnectorManager()
         manager.register(connector_class(fetcher=http_fetcher))
 
+        # ConnectorManager.run_all() kendi içinde hata yakalar (bir kurum
+        # çökerse diğerini etkilemez), bu yüzden exception fırlatmaz —
+        # sonuç her zaman bir liste (başarısızlıkta boş).
+        started_at = datetime.now(timezone.utc)
         collected_programs = await manager.run_all()
 
         if collected_programs:
@@ -65,6 +71,13 @@ async def main():
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(collected_programs, f, ensure_ascii=False, indent=4)
             print(f"{dosya_adi}: {len(collected_programs)} program yazıldı.\n")
+
+        log_ingestion_run(
+            source=kurum_adi,
+            status="success",
+            started_at=started_at,
+            docs_found=len(collected_programs),
+        )
 
 
 if __name__ == "__main__":
