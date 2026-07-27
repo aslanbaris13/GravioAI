@@ -7,6 +7,7 @@ RPC fonksiyonu üzerinden yapılır.
 Fonksiyonlar senkron; async route'lar bunları `run_in_threadpool` ile çağırır.
 """
 import logging
+from datetime import datetime, timezone
 from functools import lru_cache
 
 from pydantic import ValidationError
@@ -26,6 +27,7 @@ _PARENT = "program_parents" #parent
 _SESSIONS = "user_sessions"
 _PRESENTATIONS = "presentations"
 _APPLICATIONS = "applications"
+_INGESTION_RUNS = "ingestion_runs"
 
 @lru_cache
 def _client() -> Client:
@@ -112,6 +114,32 @@ def upsert_program_chunks(rows: list[dict]) -> int:
         return 0
     ch_resp= _client().table(_CHİLD).upsert(rows,on_conflict="id").execute()
     return len(ch_resp.data or [])
+
+
+def log_ingestion_run(
+    source: str,
+    status: str,
+    *,
+    started_at: datetime,
+    docs_found: int = 0,
+    chunks_upserted: int = 0,
+    error_msg: str | None = None,
+) -> None:
+    """Bir scrape/ingest çalıştırmasının sonucunu `ingestion_runs`'a yazar.
+
+    Otomatik veri çekme işinin ne yaptığını (kaç program bulundu, hata var
+    mı) sonradan görebilmek için — cron devreye alınmadan önce her
+    çalıştırmayı burada gözlemleyeceğiz."""
+    row = {
+        "source": source,
+        "status": status,
+        "docs_found": docs_found,
+        "chunks_upserted": chunks_upserted,
+        "error_msg": error_msg,
+        "started_at": started_at.isoformat(),
+        "finished_at": datetime.now(timezone.utc).isoformat(),
+    }
+    _client().table(_INGESTION_RUNS).insert(row).execute()
 
 def get_programs(category: Category | None = None) -> list[SupportProgram]:
     """Kategoriye göre (isteğe bağlı) tüm programları getirir."""
