@@ -7,6 +7,7 @@ export default function PanelPage() {
     currentProfile,
     apiPrograms,
     trackedApplications,
+    ingestionRuns,
     goToProgram,
     goToChat,
     goToOnboarding,
@@ -18,6 +19,7 @@ export default function PanelPage() {
       profile={currentProfile}
       programs={apiPrograms}
       applications={trackedApplications}
+      ingestionRuns={ingestionRuns}
       onOpenProgram={goToProgram}
       onGoToChat={goToChat}
       onGoToOnboarding={goToOnboarding}

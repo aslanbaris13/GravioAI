@@ -4,14 +4,31 @@ import {
   adaptAssistResult,
   adaptProgram,
   adaptSessionState,
+  formatRelativeTime,
+  latestIngestionRunBySource,
   profileToChips,
 } from "./adapter";
 import type {
   BackendApplicationDraft,
   BackendEligibilityResult,
+  BackendIngestionRun,
   BackendSupportProgram,
   BackendUserProfile,
 } from "./api";
+
+function ingestionRun(overrides: Partial<BackendIngestionRun> = {}): BackendIngestionRun {
+  return {
+    id: "r1",
+    source: "kosgeb",
+    status: "success",
+    docs_found: 5,
+    chunks_upserted: 12,
+    error_msg: null,
+    started_at: "2026-07-27T10:00:00Z",
+    finished_at: "2026-07-27T10:02:00Z",
+    ...overrides,
+  };
+}
 
 function program(overrides: Partial<BackendSupportProgram> = {}): BackendSupportProgram {
   return {
@@ -192,5 +209,38 @@ describe("adaptApplicationDraft", () => {
     expect(draft.docs[0].done).toBe(true);
     expect(draft.docs[1].done).toBe(false);
     expect(draft.programName).toBe("BİGG");
+  });
+});
+
+describe("latestIngestionRunBySource", () => {
+  it("her kaynağın yalnızca en yeni (listede ilk gelen) çalıştırmasını döner", () => {
+    const runs = [
+      ingestionRun({ source: "kosgeb", id: "yeni", finished_at: "2026-07-27T10:00:00Z" }),
+      ingestionRun({ source: "kosgeb", id: "eski", finished_at: "2026-07-20T10:00:00Z" }),
+      ingestionRun({ source: "tubitak", id: "tubitak-1" }),
+    ];
+    const latest = latestIngestionRunBySource(runs);
+    expect(latest).toHaveLength(2);
+    expect(latest.find((r) => r.source === "kosgeb")?.id).toBe("yeni");
+  });
+
+  it("boş listede boş liste döner", () => {
+    expect(latestIngestionRunBySource([])).toEqual([]);
+  });
+});
+
+describe("formatRelativeTime", () => {
+  it("az önce geçen bir zamanı 'az önce' olarak gösterir", () => {
+    expect(formatRelativeTime(new Date().toISOString())).toBe("az önce");
+  });
+
+  it("30 günden eski bir tarihi takvim tarihi olarak gösterir", () => {
+    const old = new Date();
+    old.setDate(old.getDate() - 40);
+    expect(formatRelativeTime(old.toISOString())).toMatch(/\d{4}/);
+  });
+
+  it("geçersiz bir tarihi olduğu gibi döner", () => {
+    expect(formatRelativeTime("gecersiz-tarih")).toBe("gecersiz-tarih");
   });
 });

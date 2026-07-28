@@ -17,6 +17,7 @@ from core.config import get_settings
 from data.loader import load_programs
 from models import Category, ProgramMatch, SupportProgram
 from models.application import ApplicationRecord
+from models.ingestion import IngestionRun
 from models.presentation import GeneratedPresentation, PresentationRecord
 from models.session import SessionState
 
@@ -141,6 +142,20 @@ def log_ingestion_run(
         "finished_at": datetime.now(timezone.utc).isoformat(),
     }
     _client().table(_INGESTION_RUNS).insert(row).execute()
+
+
+def list_ingestion_runs(limit: int = 20) -> list[IngestionRun]:
+    """Son veri senkronizasyonu çalıştırmalarını (en yeni önce) getirir —
+    panelde "veri ne zaman güncellendi" göstermek için kullanılır."""
+    resp = (
+        _client()
+        .table(_INGESTION_RUNS)
+        .select("*")
+        .order("started_at", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    return [IngestionRun.model_validate(r) for r in (resp.data or [])]
 
 
 def _local_programs(category: Category | None = None) -> list[SupportProgram]:

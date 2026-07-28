@@ -35,6 +35,7 @@ from models import (
     EligibilityResult,
     GeneratedPresentation,
     GeneratedReport,
+    IngestionRun,
     PresentationRecord,
     ReportSchema,
     SessionState,
@@ -65,6 +66,13 @@ async def health() -> dict:
 async def list_programs(category: Category | None = None) -> list[SupportProgram]:
     """Destek programlarını listeler; opsiyonel kategori filtresi."""
     return await run_in_threadpool(repo.get_programs, category)
+
+
+@router.get("/ingestion-runs", response_model=list[IngestionRun], response_model_by_alias=False)
+async def list_ingestion_runs(limit: int = 20) -> list[IngestionRun]:
+    """Son veri senkronizasyonu (scrape + ingest) çalıştırmalarını getirir —
+    "veri ne zaman güncellendi" bilgisini panelde göstermek için."""
+    return await run_in_threadpool(repo.list_ingestion_runs, limit)
 
 
 @router.get("/programs/{program_id}", response_model=SupportProgram, response_model_by_alias=False)

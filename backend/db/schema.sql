@@ -253,3 +253,27 @@ create table if not exists public.presentations (
 create index if not exists presentations_session_id_idx on public.presentations(session_id);
 
 alter table public.presentations enable row level security;
+
+-- ============================================================
+-- ingestion_runs — veri senkronizasyonu (scrape + ingest) geçmişi.
+-- `data-sync` GitHub Actions workflow'u her çalıştırmada kaynak başına
+-- (kosgeb/kalkinma/tubitak/ingest_batch) bir satır yazar (bkz.
+-- backend/data/repo.py:log_ingestion_run) — panelde "veri ne zaman
+-- güncellendi" göstermek için okunur.
+-- ============================================================
+
+create table if not exists public.ingestion_runs (
+    id               uuid primary key default gen_random_uuid(),
+    source           text not null,
+    status           text not null,
+    docs_found       integer not null default 0,
+    chunks_upserted  integer not null default 0,
+    error_msg        text,
+    started_at       timestamptz not null,
+    finished_at      timestamptz not null,
+    created_at       timestamptz not null default now()
+);
+
+create index if not exists ingestion_runs_started_at_idx on public.ingestion_runs (started_at desc);
+
+alter table public.ingestion_runs enable row level security;

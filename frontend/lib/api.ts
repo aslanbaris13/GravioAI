@@ -343,6 +343,23 @@ export async function updateApplicationTracking(
   });
 }
 
+/** `ingestion_runs` tablosundaki bir çalıştırma kaydı — bkz. backend `data/repo.py:log_ingestion_run`. */
+export interface BackendIngestionRun {
+  id: string;
+  source: string;
+  status: string;
+  docs_found: number;
+  chunks_upserted: number;
+  error_msg: string | null;
+  started_at: string;
+  finished_at: string;
+}
+
+/** Son veri senkronizasyonu (scrape + ingest) çalıştırmalarını getirir. */
+export async function listIngestionRuns(limit = 20): Promise<BackendIngestionRun[]> {
+  return apiFetch<BackendIngestionRun[]>(`/ingestion-runs?limit=${limit}`);
+}
+
 /**
  * Tüm programları listeler (opsiyonel kategori filtresi).
  */

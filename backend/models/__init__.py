@@ -5,6 +5,7 @@ from .eligibility import (
     EligibilityResult,
     EligibilityState,
 )
+from .ingestion import IngestionRun
 from .intent import Intent, IntentResult
 from .orchestration import AssistResult, ConversationTurn, ProgramMatch
 from .presentation import (
@@ -33,6 +34,7 @@ __all__ = [
     "EligibilityCondition",
     "EligibilityState",
     "ConditionState",
+    "IngestionRun",
     "Intent",
     "IntentResult",
     "AssistResult",
