@@ -54,11 +54,21 @@ function toSlug(backendCategory: string): ProgramCategory {
   return CATEGORY_SLUG[backendCategory] ?? "kamu";
 }
 
+/** Avatar baş harfleri — şirket adı, yoksa sektör, o da yoksa "İŞ".
+ *  Sidebar ile daraltılmış ray aynı harfleri göstersin diye ortak. */
+export function profileInitials(profile: BackendUserProfile | null): string {
+  const companyName = profile?.company_name ?? null;
+  const sector = profile?.sector ?? null;
+  if (companyName) return companyName.slice(0, 2).toUpperCase();
+  if (sector) return sector.slice(0, 2).toUpperCase();
+  return "İŞ";
+}
+
 /* ------------------------------------------------------------------ */
 /* Tutar formatlama                                                     */
 /* ------------------------------------------------------------------ */
 
-function formatAmount(
+export function formatAmount(
   min: number | null | undefined,
   max: number | null | undefined,
   currency: string | null | undefined,

@@ -11,9 +11,9 @@ import type { ApplicationTrackingStatus, BackendApplicationRecord } from "@/lib/
 const STATUS_ORDER: ApplicationTrackingStatus[] = ["taslak", "hazirlaniyor", "gonderildi"];
 
 const STATUS_META: Record<ApplicationTrackingStatus, { label: string; color: string; bg: string; border: string }> = {
-  taslak: { label: "Taslak", color: "#76858d", bg: "#f4f3ee", border: "#e3e0d8" },
-  hazirlaniyor: { label: "Hazırlanıyor", color: "#0f6ea8", bg: "#eef6fb", border: "#dde9f2" },
-  gonderildi: { label: "Gönderildi", color: "#15803d", bg: "#eaf7ee", border: "#d3ecd9" },
+  taslak: { label: "Taslak", color: "var(--ink-600)", bg: "var(--paper-100)", border: "var(--border-subtle)" },
+  hazirlaniyor: { label: "Hazırlanıyor", color: "var(--teal-700)", bg: "var(--teal-100)", border: "var(--teal-100)" },
+  gonderildi: { label: "Gönderildi", color: "var(--success-700)", bg: "var(--success-100)", border: "var(--success-200)" },
 };
 
 function formatDate(iso: string): string {
@@ -39,10 +39,10 @@ export default function ApplicationsView({
   return (
     <section data-screen-label="Başvurularım" style={{ height: "100%", overflowY: "auto" }}>
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "26px 32px 60px" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: "#14222c", margin: 0, letterSpacing: "-.01em" }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--ink-900)", margin: 0, letterSpacing: "-.01em" }}>
           Başvurularım
         </h1>
-        <p style={{ fontSize: 14, color: "#5a6b75", marginTop: 6 }}>
+        <p style={{ fontSize: 14, color: "var(--ink-600)", marginTop: 6 }}>
           {isEmpty
             ? "Henüz başvuru başlatmadın."
             : `${sorted.length} program için başvuru sürecin burada — durumunu güncel tut.`}
@@ -53,17 +53,17 @@ export default function ApplicationsView({
             style={{
               marginTop: 22,
               padding: "34px 24px",
-              background: "#fff",
-              border: "1px solid #e7e4dc",
+              background: "var(--surface)",
+              border: "1px solid var(--border-subtle)",
               borderRadius: 14,
               textAlign: "center",
             }}
           >
-            <Ms name="assignment" size={32} color="#d0cdc4" />
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#27353e", marginTop: 12 }}>
+            <Ms name="assignment" size={32} color="var(--border-subtle)" />
+            <div style={{ fontSize: 15, fontWeight: 700, color: "var(--ink-900)", marginTop: 12 }}>
               Henüz başvuru başlatmadın
             </div>
-            <div style={{ fontSize: 13, color: "#8a96a0", marginTop: 6, maxWidth: 380, marginLeft: "auto", marginRight: "auto" }}>
+            <div style={{ fontSize: 13, color: "var(--ink-400)", marginTop: 6, maxWidth: 380, marginLeft: "auto", marginRight: "auto" }}>
               Eşleşmelerim'den bir programı aç ve "Başvuru hazırla" de — süreç burada takip edilebilir hale gelir.
             </div>
             <button
@@ -72,7 +72,7 @@ export default function ApplicationsView({
                 marginTop: 16,
                 padding: "10px 18px",
                 borderRadius: 10,
-                background: "linear-gradient(160deg,#f97316,#ea580c)",
+                background: "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))",
                 color: "#fff",
                 fontSize: 13.5,
                 fontWeight: 600,
@@ -89,8 +89,8 @@ export default function ApplicationsView({
                 <div
                   key={app.id}
                   style={{
-                    background: "#fff",
-                    border: "1px solid #e7e4dc",
+                    background: "var(--surface)",
+                    border: "1px solid var(--border-subtle)",
                     borderRadius: 14,
                     padding: 18,
                   }}
@@ -98,7 +98,7 @@ export default function ApplicationsView({
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
                     <button
                       onClick={() => onOpenProgram(app.program_id)}
-                      style={{ textAlign: "left", fontSize: 15, fontWeight: 700, color: "#14222c", lineHeight: 1.3 }}
+                      style={{ textAlign: "left", fontSize: 15, fontWeight: 700, color: "var(--ink-900)", lineHeight: 1.3 }}
                     >
                       {app.program_name}
                     </button>
@@ -118,12 +118,12 @@ export default function ApplicationsView({
                     </span>
                   </div>
 
-                  <div style={{ fontSize: 12, color: "#97a2aa", marginTop: 4 }}>
+                  <div style={{ fontSize: 12, color: "var(--ink-400)", marginTop: 4 }}>
                     Son güncelleme: {formatDate(app.updated_at)}
                   </div>
 
                   {app.note && (
-                    <div style={{ fontSize: 12.5, color: "#5a6b75", marginTop: 8, lineHeight: 1.5 }}>{app.note}</div>
+                    <div style={{ fontSize: 12.5, color: "var(--ink-600)", marginTop: 8, lineHeight: 1.5 }}>{app.note}</div>
                   )}
 
                   <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
@@ -140,9 +140,9 @@ export default function ApplicationsView({
                             fontWeight: 600,
                             padding: "6px 12px",
                             borderRadius: 999,
-                            border: `1px solid ${active ? m.border : "#e3e0d8"}`,
-                            background: active ? m.bg : "#fff",
-                            color: active ? m.color : "#8a96a0",
+                            border: `1px solid ${active ? m.border : "var(--border-subtle)"}`,
+                            background: active ? m.bg : "var(--surface)",
+                            color: active ? m.color : "var(--ink-400)",
                             cursor: active ? "default" : "pointer",
                           }}
                         >

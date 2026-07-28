@@ -89,16 +89,16 @@ export default function ProgramReportGeneratePage() {
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "26px 32px 80px" }}>
         <button
           onClick={() => goToReport(id)}
-          style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#5a6b75", fontWeight: 600, marginBottom: 18 }}
+          style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--ink-600)", fontWeight: 600, marginBottom: 18 }}
         >
           <Ms name="arrow_back" size={17} />
           Gereksinimlere dön
         </button>
 
-        <h1 style={{ fontSize: 21, fontWeight: 700, color: "#14222c", margin: "0 0 4px", letterSpacing: "-.01em" }}>
+        <h1 style={{ fontSize: 21, fontWeight: 700, color: "var(--ink-900)", margin: "0 0 4px", letterSpacing: "-.01em" }}>
           Rapor hazırla
         </h1>
-        <p style={{ fontSize: 13.5, color: "#5a6b75", margin: "0 0 24px" }}>{program.name}</p>
+        <p style={{ fontSize: 13.5, color: "var(--ink-600)", margin: "0 0 24px" }}>{program.name}</p>
 
         {loadState === "loading" && <Info icon="hourglass_empty" text="Yükleniyor…" />}
         {loadState === "error" && <Info icon="cloud_off" text="Sunucuya ulaşılamadı." tone="warn" />}
@@ -108,19 +108,19 @@ export default function ProgramReportGeneratePage() {
 
         {loadState === "found" && schema && submitState !== "done" && (
           <>
-            <p style={{ fontSize: 12.5, color: "#8a96a0", margin: "0 0 18px" }}>
+            <p style={{ fontSize: 12.5, color: "var(--ink-400)", margin: "0 0 18px" }}>
               Her bölüm için elindeki bilgiyi kısaca yaz — Gravio bunları resmi rapor diline çevirecek.
               Boş bıraktığın alanlar raporda açıkça işaretlenir, uydurulmaz.
             </p>
 
             {schema.sections.map((section, i) => (
-              <div key={section.id} style={{ background: "#fff", border: "1px solid #e7e4dc", borderRadius: 12, padding: "16px 18px", marginBottom: 12 }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: "#14222c", marginBottom: 10 }}>
+              <div key={section.id} style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 12, padding: "16px 18px", marginBottom: 12 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink-900)", marginBottom: 10 }}>
                   {i + 1}. {section.title}
                 </div>
                 {section.required_fields.map((f) => (
                   <div key={f.key} style={{ marginBottom: 10 }}>
-                    <label style={{ fontSize: 12.5, fontWeight: 600, color: "#5a6b75", display: "block", marginBottom: 5 }}>
+                    <label style={{ fontSize: 12.5, fontWeight: 600, color: "var(--ink-600)", display: "block", marginBottom: 5 }}>
                       {f.label}
                     </label>
                     {f.long_text ? (
@@ -128,13 +128,13 @@ export default function ProgramReportGeneratePage() {
                         value={values[section.id]?.[f.key] ?? ""}
                         onChange={(e) => setFieldValue(section.id, f.key, e.target.value)}
                         rows={3}
-                        style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: "1.5px solid #e7e4dc", fontSize: 13.5, fontFamily: "inherit", resize: "vertical" }}
+                        style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: "1.5px solid var(--border-subtle)", background: "var(--surface-strong)", color: "var(--ink-900)", fontSize: 13.5, fontFamily: "inherit", resize: "vertical" }}
                       />
                     ) : (
                       <input
                         value={values[section.id]?.[f.key] ?? ""}
                         onChange={(e) => setFieldValue(section.id, f.key, e.target.value)}
-                        style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: "1.5px solid #e7e4dc", fontSize: 13.5 }}
+                        style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: "1.5px solid var(--border-subtle)", background: "var(--surface-strong)", color: "var(--ink-900)", fontSize: 13.5 }}
                       />
                     )}
                   </div>
@@ -155,8 +155,8 @@ export default function ProgramReportGeneratePage() {
                 padding: "13px 0",
                 borderRadius: 12,
                 border: "none",
-                background: submitState === "submitting" ? "#e7e4dc" : "linear-gradient(160deg,#f97316,#ea580c)",
-                color: submitState === "submitting" ? "#a8a296" : "#fff",
+                background: submitState === "submitting" ? "var(--border-subtle)" : "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))",
+                color: submitState === "submitting" ? "var(--ink-400)" : "var(--surface)",
                 fontSize: 14,
                 fontWeight: 700,
                 display: "flex",
@@ -173,13 +173,13 @@ export default function ProgramReportGeneratePage() {
 
         {submitState === "done" && report && (
           <>
-            <div style={{ background: "#fff", border: "1px solid #e7e4dc", borderRadius: 12, padding: "18px 20px", marginBottom: 16 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 700, color: "#14222c", margin: "0 0 4px" }}>{report.title}</h2>
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 12, padding: "18px 20px", marginBottom: 16 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--ink-900)", margin: "0 0 4px" }}>{report.title}</h2>
             </div>
             {report.sections.map((s) => (
-              <div key={s.section_id} style={{ background: "#fff", border: "1px solid #e7e4dc", borderRadius: 12, padding: "16px 18px", marginBottom: 12 }}>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: "#14222c", marginBottom: 8 }}>{s.heading}</div>
-                <p style={{ fontSize: 13, color: "#414f57", lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap" }}>{s.body}</p>
+              <div key={s.section_id} style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 12, padding: "16px 18px", marginBottom: 12 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink-900)", marginBottom: 8 }}>{s.heading}</div>
+                <p style={{ fontSize: 13, color: "var(--ink-600)", lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap" }}>{s.body}</p>
               </div>
             ))}
             <button
@@ -191,7 +191,7 @@ export default function ProgramReportGeneratePage() {
                 padding: "13px 0",
                 borderRadius: 12,
                 border: "none",
-                background: "linear-gradient(160deg,#f97316,#ea580c)",
+                background: "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))",
                 color: "#fff",
                 fontSize: 14,
                 fontWeight: 700,
@@ -212,9 +212,9 @@ export default function ProgramReportGeneratePage() {
 }
 
 function Info({ icon, text, tone = "neutral" }: { icon: string; text: string; tone?: "neutral" | "warn" }) {
-  const bg = tone === "warn" ? "#fdf6e8" : "#fff";
-  const border = tone === "warn" ? "#f0e0b8" : "#e7e4dc";
-  const color = tone === "warn" ? "#7a5f1e" : "#5a6b75";
+  const bg = tone === "warn" ? "var(--warn-100)" : "var(--surface)";
+  const border = tone === "warn" ? "var(--warn-200)" : "var(--border-subtle)";
+  const color = tone === "warn" ? "var(--warn-700)" : "var(--ink-600)";
   return (
     <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 12, padding: "16px 18px", display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 16 }}>
       <Ms name={icon} size={19} color={color} style={{ marginTop: 1, flexShrink: 0 }} />

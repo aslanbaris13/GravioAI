@@ -12,9 +12,9 @@ import type { ApplicationTrackingStatus, BackendApplicationRecord, BackendUserPr
 import type { Program } from "@/lib/types";
 
 const APPLICATION_STATUS_META: Record<ApplicationTrackingStatus, { label: string; color: string; bg: string }> = {
-  taslak: { label: "Taslak", color: "#76858d", bg: "#f4f3ee" },
-  hazirlaniyor: { label: "Hazırlanıyor", color: "#0f6ea8", bg: "#eef6fb" },
-  gonderildi: { label: "Gönderildi", color: "#15803d", bg: "#eaf7ee" },
+  taslak: { label: "Taslak", color: "var(--ink-600)", bg: "var(--paper-100)" },
+  hazirlaniyor: { label: "Hazırlanıyor", color: "var(--teal-700)", bg: "var(--teal-100)" },
+  gonderildi: { label: "Gönderildi", color: "var(--success-700)", bg: "var(--success-100)" },
 };
 
 const PROFILE_FIELD_LABELS: { key: keyof BackendUserProfile; label: string }[] = [
@@ -36,6 +36,7 @@ export default function DashboardView({
   applications,
   onOpenProgram,
   onGoToChat,
+  onGoToOnboarding,
   onGoToApplications,
   onNewPresentation,
 }: {
@@ -44,9 +45,13 @@ export default function DashboardView({
   applications: BackendApplicationRecord[];
   onOpenProgram: (id: string) => void;
   onGoToChat?: () => void;
+  onGoToOnboarding?: () => void;
   onGoToApplications?: () => void;
   onNewPresentation?: () => void;
 }) {
+  // Profil hiç çıkarılmamışsa panelin gösterecek verisi yok — kullanıcıyı boş
+  // kartlarla baş başa bırakmak yerine iki yoldan birini seçtiriyoruz.
+  const hasProfile = profile != null;
   // Web sitesi zaten başlığın altında gösteriliyor — chip listesinde tekrarlamıyoruz.
   const chips = profile ? profileToChips(profile).filter((c) => c.label !== "Web sitesi") : [];
 
@@ -87,7 +92,7 @@ export default function DashboardView({
   return (
     <section data-screen-label="Panelim" style={{ height: "100%", overflowY: "auto" }}>
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "26px 32px 60px" }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: "#97a2aa", textTransform: "uppercase", letterSpacing: ".05em" }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-400)", textTransform: "uppercase", letterSpacing: ".05em" }}>
           Panelim
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 8 }}>
@@ -97,7 +102,7 @@ export default function DashboardView({
               height: 46,
               borderRadius: 13,
               flexShrink: 0,
-              background: "linear-gradient(140deg,#f97316,#ea580c)",
+              background: "linear-gradient(140deg,var(--terracotta-600),var(--terracotta-700))",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -109,7 +114,7 @@ export default function DashboardView({
             {initials}
           </div>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#14222c", margin: 0, letterSpacing: "-.01em" }}>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--ink-900)", margin: 0, letterSpacing: "-.01em" }}>
               {companyName ?? "İşletmem"}
             </h1>
             {websiteHref ? (
@@ -117,17 +122,99 @@ export default function DashboardView({
                 href={websiteHref}
                 target="_blank"
                 rel="noreferrer"
-                style={{ fontSize: 12.5, fontWeight: 600, color: "#0f6ea8" }}
+                style={{ fontSize: 12.5, fontWeight: 600, color: "var(--teal-700)" }}
               >
                 {website}
               </a>
             ) : (
-              <p style={{ fontSize: 13, color: "#8a96a0", margin: "2px 0 0" }}>
+              <p style={{ fontSize: 13, color: "var(--ink-400)", margin: "2px 0 0" }}>
                 İşletme profilin, eşleşme özetin ve yaklaşan son tarihler.
               </p>
             )}
           </div>
         </div>
+
+        {!hasProfile && (
+          <div
+            style={{
+              marginTop: 24,
+              padding: "26px 24px",
+              background: "var(--surface)",
+              border: "1px solid var(--border-subtle)",
+              borderRadius: 16,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+              <Ms name="badge" size={22} color="var(--terracotta-700)" style={{ marginTop: 2, flexShrink: 0 }} />
+              <div>
+                <h2
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 700,
+                    color: "var(--ink-900)",
+                    margin: 0,
+                    textTransform: "none",
+                    letterSpacing: "normal",
+                  }}
+                >
+                  Henüz bir işletme profilin yok
+                </h2>
+                <p style={{ fontSize: 13.5, color: "var(--ink-600)", lineHeight: 1.6, margin: "6px 0 0" }}>
+                  Panel, profilinden çıkan eşleşmeleri ve son tarihleri gösterir.
+                  Profilini iki yoldan oluşturabilirsin — ikisi de aynı sonuca çıkar.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 18 }}>
+              {onGoToChat && (
+                <button
+                  onClick={onGoToChat}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "12px 18px",
+                    borderRadius: 12,
+                    background: "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))",
+                    color: "#fff",
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    boxShadow: "var(--shadow-cta)",
+                  }}
+                >
+                  <Ms name="forum" size={18} />
+                  Sohbetle tamamla
+                </button>
+              )}
+              {onGoToOnboarding && (
+                <button
+                  onClick={onGoToOnboarding}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "12px 18px",
+                    borderRadius: 12,
+                    background: "var(--surface-strong)",
+                    border: "1.5px solid var(--border-subtle)",
+                    color: "var(--ink-900)",
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                  }}
+                >
+                  <Ms name="assignment_ind" size={18} color="var(--ink-600)" />
+                  Formla profil oluştur
+                </button>
+              )}
+            </div>
+
+            <div style={{ fontSize: 12, color: "var(--ink-400)", marginTop: 12, lineHeight: 1.5 }}>
+              Sohbet daha hızlıdır — işletmeni birkaç cümleyle anlatman yeterli.
+              Form ise adım adım ilerler, hiçbir alanı atlamak istemiyorsan onu seç.
+            </div>
+          </div>
+        )}
 
         {programs.length > 0 && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginTop: 22 }}>
@@ -140,11 +227,11 @@ export default function DashboardView({
         {applications.length > 0 && (
           <>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28 }}>
-              <h2 style={{ fontSize: 13, fontWeight: 700, color: "#76858d", textTransform: "uppercase", letterSpacing: ".05em", margin: 0 }}>
+              <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-600)", textTransform: "uppercase", letterSpacing: ".05em", margin: 0 }}>
                 Başvuru durumu
               </h2>
               {onGoToApplications && (
-                <button onClick={onGoToApplications} style={{ fontSize: 12, fontWeight: 700, color: "#ea580c" }}>
+                <button onClick={onGoToApplications} style={{ fontSize: 12, fontWeight: 700, color: "var(--terracotta-700)" }}>
                   Tümünü gör
                 </button>
               )}
@@ -162,13 +249,13 @@ export default function DashboardView({
                       gap: 8,
                       padding: "9px 14px",
                       borderRadius: 11,
-                      background: "#fff",
-                      border: "1px solid #e7e4dc",
+                      background: "var(--surface)",
+                      border: "1px solid var(--border-subtle)",
                     }}
                   >
                     <span style={{ width: 8, height: 8, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
-                    <span style={{ fontSize: 13.5, fontWeight: 700, color: "#27353e" }}>{count}</span>
-                    <span style={{ fontSize: 12, color: "#8a96a0" }}>{meta.label}</span>
+                    <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink-900)" }}>{count}</span>
+                    <span style={{ fontSize: 12, color: "var(--ink-400)" }}>{meta.label}</span>
                   </div>
                 );
               })}
@@ -178,78 +265,85 @@ export default function DashboardView({
 
         {categoryDistribution.length > 1 && (
           <>
-            <h2 style={{ fontSize: 13, fontWeight: 700, color: "#76858d", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 28 }}>
+            <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-600)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 28 }}>
               Kategori dağılımı
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
               {categoryDistribution.map(([label, count]) => (
                 <div key={label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontSize: 12.5, color: "#5a6b75", width: 150, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <span style={{ fontSize: 12.5, color: "var(--ink-600)", width: 150, flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {label}
                   </span>
-                  <div style={{ flex: 1, height: 8, borderRadius: 999, background: "#efece3", overflow: "hidden" }}>
+                  <div style={{ flex: 1, height: 8, borderRadius: 999, background: "var(--border-subtle)", overflow: "hidden" }}>
                     <div
                       style={{
                         width: `${(count / maxCategoryCount) * 100}%`,
                         height: "100%",
                         borderRadius: 999,
-                        background: "linear-gradient(90deg,#f97316,#ea580c)",
+                        background: "linear-gradient(90deg,var(--terracotta-600),var(--terracotta-700))",
                       }}
                     />
                   </div>
-                  <span style={{ fontSize: 12.5, fontWeight: 700, color: "#27353e", width: 18, textAlign: "right" }}>{count}</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--ink-900)", width: 18, textAlign: "right" }}>{count}</span>
                 </div>
               ))}
             </div>
           </>
         )}
 
-        <h2 style={{ fontSize: 13, fontWeight: 700, color: "#76858d", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 28 }}>
-          İşletme profili
-        </h2>
-        {chips.length > 0 ? (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
-            {chips.map((ch) => (
-              <div
-                key={ch.label}
-                style={{ display: "flex", flexDirection: "column", gap: 1, padding: "9px 14px", borderRadius: 11, background: "#fff", border: "1px solid #e7e4dc" }}
-              >
-                <span style={{ fontSize: 10, fontWeight: 600, color: "#97a2aa", textTransform: "uppercase", letterSpacing: ".04em" }}>{ch.label}</span>
-                <span style={{ fontSize: 13.5, fontWeight: 600, color: "#27353e" }}>{ch.value}</span>
+        {/* Profil yokken bu bölüm hiç çizilmiyor: yukarıdaki boş durum bloğu
+            zaten aynı şeyi (ve ne yapılacağını) söylüyor — üç ayrı yerde
+            "profil yok" demek gereksiz tekrar oluyordu. */}
+        {hasProfile && (
+          <>
+            <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-600)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 28 }}>
+              İşletme profili
+            </h2>
+            {chips.length > 0 ? (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+                {chips.map((ch) => (
+                  <div
+                    key={ch.label}
+                    style={{ display: "flex", flexDirection: "column", gap: 1, padding: "9px 14px", borderRadius: 11, background: "var(--surface)", border: "1px solid var(--border-subtle)" }}
+                  >
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "var(--ink-400)", textTransform: "uppercase", letterSpacing: ".04em" }}>{ch.label}</span>
+                    <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--ink-900)" }}>{ch.value}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ marginTop: 12, padding: "16px 18px", background: "#fff", border: "1px solid #e7e4dc", borderRadius: 12, fontSize: 13.5, color: "#8a96a0" }}>
-            Henüz profil çıkarılmadı — sohbet ekranında işletmeni anlat.
-          </div>
+            ) : (
+              <div style={{ marginTop: 12, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 12, fontSize: 13.5, color: "var(--ink-400)" }}>
+                Profil alanları henüz doldurulmadı — sohbet ekranında işletmeni anlat.
+              </div>
+            )}
+          </>
         )}
 
-        {missingFields.length > 0 && (
+        {hasProfile && missingFields.length > 0 && (
           <div
             style={{
               marginTop: 14,
               padding: "13px 16px",
-              background: "#fdf6e8",
-              border: "1px solid #f0e0b8",
+              background: "var(--terracotta-100)",
+              border: "1px solid var(--terracotta-100)",
               borderRadius: 12,
               display: "flex",
               alignItems: "flex-start",
               gap: 10,
             }}
           >
-            <Ms name="info" size={18} color="#a86b12" style={{ marginTop: 1, flexShrink: 0 }} />
+            <Ms name="info" size={18} color="var(--terracotta-700)" style={{ marginTop: 1, flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#7a5f1e" }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--terracotta-700)" }}>
                 Profilinde eksik bilgiler var
               </div>
-              <div style={{ fontSize: 12.5, color: "#8a6a2e", marginTop: 2 }}>
+              <div style={{ fontSize: 12.5, color: "var(--terracotta-700)", marginTop: 2 }}>
                 {missingFields.map((f) => f.label).join(", ")} bilgisini paylaşırsan eşleşmeler daha isabetli olur.
               </div>
               {onGoToChat && (
                 <button
                   onClick={onGoToChat}
-                  style={{ marginTop: 8, fontSize: 12.5, fontWeight: 700, color: "#a86b12", textDecoration: "underline" }}
+                  style={{ marginTop: 8, fontSize: 12.5, fontWeight: 700, color: "var(--terracotta-700)", textDecoration: "underline" }}
                 >
                   Sohbete dön ve tamamla
                 </button>
@@ -258,10 +352,14 @@ export default function DashboardView({
           </div>
         )}
 
-        <h2 style={{ fontSize: 13, fontWeight: 700, color: "#76858d", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 28 }}>
-          Yaklaşan son tarihler
-        </h2>
-        {upcoming.length > 0 ? (
+        {/* Profil yokken eşleşme de yok — "yaklaşan son tarih yok" demek
+            boş yere gürültü, boş durum bloğu zaten yönlendiriyor. */}
+        {hasProfile && (
+          <>
+            <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-600)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 28 }}>
+              Yaklaşan son tarihler
+            </h2>
+            {upcoming.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
             {upcoming.map((p) => {
               const days = p.deadlineDays as number;
@@ -275,16 +373,16 @@ export default function DashboardView({
                     alignItems: "center",
                     gap: 13,
                     textAlign: "left",
-                    background: "#fff",
-                    border: "1px solid #e7e4dc",
+                    background: "var(--surface)",
+                    border: "1px solid var(--border-subtle)",
                     borderRadius: 13,
                     padding: "14px 16px",
                   }}
                 >
-                  <Ms name="event" size={20} color={urgent ? "#b45309" : "#0f6ea8"} />
+                  <Ms name="event" size={20} color={urgent ? "var(--terracotta-700)" : "var(--teal-700)"} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 600, color: "#27353e" }}>{p.name}</div>
-                    <div style={{ fontSize: 12, color: "#8a96a0", marginTop: 2 }}>{p.deadlineText}</div>
+                    <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--ink-900)" }}>{p.name}</div>
+                    <div style={{ fontSize: 12, color: "var(--ink-400)", marginTop: 2 }}>{p.deadlineText}</div>
                   </div>
                   <span
                     style={{
@@ -292,8 +390,8 @@ export default function DashboardView({
                       fontWeight: 700,
                       padding: "5px 11px",
                       borderRadius: 999,
-                      background: urgent ? "#fdf6e3" : "#eaf7ee",
-                      color: urgent ? "#b45309" : "#15803d",
+                      background: urgent ? "var(--terracotta-100)" : "var(--success-100)",
+                      color: urgent ? "var(--terracotta-700)" : "var(--success-700)",
                       whiteSpace: "nowrap",
                     }}
                   >
@@ -303,10 +401,12 @@ export default function DashboardView({
               );
             })}
           </div>
-        ) : (
-          <div style={{ marginTop: 12, padding: "16px 18px", background: "#fff", border: "1px solid #e7e4dc", borderRadius: 12, fontSize: 13.5, color: "#8a96a0" }}>
-            Yaklaşan bir son tarih yok.
-          </div>
+            ) : (
+              <div style={{ marginTop: 12, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 12, fontSize: 13.5, color: "var(--ink-400)" }}>
+                Yaklaşan bir son tarih yok.
+              </div>
+            )}
+          </>
         )}
 
         {onNewPresentation && (
@@ -320,15 +420,15 @@ export default function DashboardView({
               marginTop: 28,
               padding: "14px 16px",
               borderRadius: 13,
-              background: "#fff",
-              border: "1.5px dashed #d8c9b0",
+              background: "var(--surface)",
+              border: "1.5px dashed var(--border-subtle)",
               textAlign: "left",
             }}
           >
-            <Ms name="slideshow" size={20} color="#ea580c" />
+            <Ms name="slideshow" size={20} color="var(--terracotta-700)" />
             <div>
-              <div style={{ fontSize: 13.5, fontWeight: 700, color: "#27353e" }}>Şirket sunumu oluştur</div>
-              <div style={{ fontSize: 12, color: "#8a96a0", marginTop: 1 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink-900)" }}>Şirket sunumu oluştur</div>
+              <div style={{ fontSize: 12, color: "var(--ink-400)", marginTop: 1 }}>
                 Yatırımcı/müşteri sunumu — düzenlenebilir PPTX olarak indir
               </div>
             </div>
@@ -350,12 +450,12 @@ function StatTile({
   label: string;
   tone?: "neutral" | "good" | "warn";
 }) {
-  const color = tone === "good" ? "#15803d" : tone === "warn" ? "#b45309" : "#27353e";
+  const color = tone === "good" ? "var(--success-700)" : tone === "warn" ? "var(--terracotta-700)" : "var(--ink-900)";
   return (
-    <div style={{ background: "#fff", border: "1px solid #e7e4dc", borderRadius: 13, padding: "13px 14px" }}>
+    <div style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 13, padding: "13px 14px" }}>
       <Ms name={icon} size={18} color={color} />
       <div style={{ fontSize: 20, fontWeight: 800, color, marginTop: 6, fontVariantNumeric: "tabular-nums" }}>{value}</div>
-      <div style={{ fontSize: 11.5, color: "#8a96a0", marginTop: 2 }}>{label}</div>
+      <div style={{ fontSize: 11.5, color: "var(--ink-400)", marginTop: 2 }}>{label}</div>
     </div>
   );
 }

@@ -6,10 +6,10 @@ export default function AydinlatmaMetniPage() {
   return (
     <section style={{ height: "100%", overflowY: "auto" }}>
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "36px 32px 80px" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: "#14222c", margin: "0 0 6px", letterSpacing: "-.01em" }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--ink-900)", margin: "0 0 6px", letterSpacing: "-.01em" }}>
           Kişisel Verilerin Korunması Kanunu Kapsamında Aydınlatma Metni
         </h1>
-        <p style={{ fontSize: 13, color: "#8a96a0", margin: "0 0 28px" }}>
+        <p style={{ fontSize: 13, color: "var(--ink-400)", margin: "0 0 28px" }}>
           6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") madde 10 uyarınca hazırlanmıştır. Son güncelleme: 17 Temmuz 2026.
         </p>
 
@@ -113,12 +113,12 @@ export default function AydinlatmaMetniPage() {
 }
 
 function Legal({ children }: { children: React.ReactNode }) {
-  return <div style={{ fontSize: 14, lineHeight: 1.7, color: "#27353e" }}>{children}</div>;
+  return <div style={{ fontSize: 14, lineHeight: 1.7, color: "var(--ink-900)" }}>{children}</div>;
 }
 
 function H({ children }: { children: React.ReactNode }) {
   return (
-    <h2 style={{ fontSize: 15.5, fontWeight: 700, color: "#14222c", margin: "26px 0 8px" }}>{children}</h2>
+    <h2 style={{ fontSize: 15.5, fontWeight: 700, color: "var(--ink-900)", margin: "26px 0 8px" }}>{children}</h2>
   );
 }
 
@@ -127,7 +127,7 @@ function P({ children }: { children: React.ReactNode }) {
 }
 
 function B({ children }: { children: React.ReactNode }) {
-  return <b style={{ fontWeight: 700, color: "#14222c" }}>{children}</b>;
+  return <b style={{ fontWeight: 700, color: "var(--ink-900)" }}>{children}</b>;
 }
 
 function Ul({ items }: { items: React.ReactNode[] }) {
@@ -144,12 +144,12 @@ function Note({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
-        background: "#fdf6e8",
-        border: "1px solid #f0e0b8",
+        background: "var(--warn-100)",
+        border: "1px solid var(--warn-200)",
         borderRadius: 10,
         padding: "12px 14px",
         fontSize: 12.5,
-        color: "#7a5f1e",
+        color: "var(--warn-700)",
         margin: "0 0 16px",
         lineHeight: 1.55,
       }}

@@ -1,6 +1,7 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
+import SidebarRail from "./SidebarRail";
 import Toast from "./Toast";
 import Ms from "./Ms";
 import { useAppState } from "@/lib/AppStateContext";
@@ -12,6 +13,8 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
   const {
     sidebarOpen,
     setSidebarOpen,
+    sidebarCollapsed,
+    setSidebarCollapsed,
     matchCount,
     onNewChat,
     toastShow,
@@ -20,19 +23,30 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
     trackedApplications,
   } = useAppState();
 
-  if (pathname === "/onboarding") {
+  if (pathname === "/onboarding" || pathname === "/") {
     return <>{children}</>;
   }
 
+  /** Rota değiştirir ve mobil çekmeceyi kapatır (masaüstünde etkisi yok). */
+  const go = (path: string) => {
+    router.push(path);
+    setSidebarOpen(false);
+  };
+
   return (
-    <div style={{ display: "flex", height: "100vh", background: "#f4f3ef" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "var(--paper-100)" }}>
+      {/* Ana sayfadaki marka şeridi — uygulama içi ekranlarda da aynı işaret. */}
+      <div className="brand-strip" />
+      {/* overflow:hidden — daraltılırken sola kayan panel sayfanın dışına
+          taşıp yatay kaydırma çubuğu açmasın. */}
+      <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
       <button
         className="mobile-menu-button"
         onClick={() => setSidebarOpen(true)}
         aria-label="Menüyü aç"
         style={{
           position: "fixed",
-          top: 14,
+          top: 18,
           left: 14,
           zIndex: 20,
           width: 38,
@@ -40,8 +54,8 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 10,
-          background: "#0d2a3c",
-          boxShadow: "0 2px 10px rgba(20,34,44,.25)",
+          background: "var(--teal-900)",
+          boxShadow: "0 2px 10px rgba(22,48,46,.25)",
         }}
       >
         <Ms name="menu" size={20} color="#fff" />
@@ -50,34 +64,42 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
         className={`sidebar-backdrop${sidebarOpen ? " sidebar-open" : ""}`}
         onClick={() => setSidebarOpen(false)}
       />
+      {/* Daraltılmış haldeki ince ikon rayı — tam panelin yerini alır.
+          Mobilde CSS ile gizlenir; orada daraltma yerine off-canvas çekmece
+          kullanılıyor. */}
+      <SidebarRail
+        matchCount={matchCount}
+        applicationCount={trackedApplications.length}
+        hidden={!sidebarCollapsed}
+        profile={currentProfile}
+        onOpen={() => setSidebarCollapsed(false)}
+        onNewChat={() => {
+          onNewChat();
+          go("/chat");
+        }}
+        onNavChat={() => go("/chat")}
+        onNavMatches={() => go("/matches")}
+        onNavApplications={() => go("/applications")}
+        onNavProfile={() => go("/panel")}
+      />
       <Sidebar
         matchCount={matchCount}
         applicationCount={trackedApplications.length}
         open={sidebarOpen}
+        collapsed={sidebarCollapsed}
         profile={currentProfile}
+        onCollapse={() => setSidebarCollapsed(true)}
         onNewChat={() => {
           onNewChat();
-          router.push("/chat");
-          setSidebarOpen(false);
+          go("/chat");
         }}
-        onNavChat={() => {
-          router.push("/chat");
-          setSidebarOpen(false);
-        }}
-        onNavMatches={() => {
-          router.push("/matches");
-          setSidebarOpen(false);
-        }}
-        onNavApplications={() => {
-          router.push("/applications");
-          setSidebarOpen(false);
-        }}
-        onNavProfile={() => {
-          router.push("/panel");
-          setSidebarOpen(false);
-        }}
+        onNavChat={() => go("/chat")}
+        onNavMatches={() => go("/matches")}
+        onNavApplications={() => go("/applications")}
+        onNavProfile={() => go("/panel")}
       />
       <main style={{ flex: 1, minWidth: 0, position: "relative" }}>{children}</main>
+      </div>
       <Toast show={toastShow} text={toastText} />
     </div>
   );

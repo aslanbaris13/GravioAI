@@ -99,16 +99,16 @@ export default function NewPresentationPage() {
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "26px 32px 80px" }}>
         <button
           onClick={goToPanel}
-          style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#5a6b75", fontWeight: 600, marginBottom: 18 }}
+          style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--ink-600)", fontWeight: 600, marginBottom: 18 }}
         >
           <Ms name="arrow_back" size={17} />
           Panelime dön
         </button>
 
-        <h1 style={{ fontSize: 21, fontWeight: 700, color: "#14222c", margin: "0 0 4px", letterSpacing: "-.01em" }}>
+        <h1 style={{ fontSize: 21, fontWeight: 700, color: "var(--ink-900)", margin: "0 0 4px", letterSpacing: "-.01em" }}>
           Şirket sunumu oluştur
         </h1>
-        <p style={{ fontSize: 13.5, color: "#5a6b75", margin: "0 0 24px" }}>
+        <p style={{ fontSize: 13.5, color: "var(--ink-600)", margin: "0 0 24px" }}>
           Gerçek yatırımcı sunumu şablonlarına (Airbnb'nin ilk yatırım sunumu, Y Combinator ve Sequoia'nın
           önerdiği yapı) dayanan sabit bir iskeleti (kapak, problem, çözüm, neden şimdi, ürün, pazar,
           traksiyon, rekabet, iş modeli, ekip, finansal projeksiyon, yol haritası, kapanış) profiline göre
@@ -117,7 +117,7 @@ export default function NewPresentationPage() {
 
         {submitState !== "done" && pastPresentations.length > 0 && (
           <div style={{ marginBottom: 22 }}>
-            <h2 style={{ fontSize: 13, fontWeight: 700, color: "#76858d", textTransform: "uppercase", letterSpacing: ".05em", margin: "0 0 10px" }}>
+            <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-400)", textTransform: "uppercase", letterSpacing: ".05em", margin: "0 0 10px" }}>
               Geçmiş Sunumlarım
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -126,24 +126,15 @@ export default function NewPresentationPage() {
                   key={p.id}
                   style={{
                     display: "flex", alignItems: "center", gap: 12,
-                    background: "#fff", border: "1px solid #e7e4dc", borderRadius: 12, padding: "12px 14px",
+                    background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 12, padding: "12px 14px",
                   }}
                 >
-                  <div
-                    style={{
-                      width: 34, height: 34, borderRadius: 9, flexShrink: 0,
-                      background: "linear-gradient(140deg,#f97316,#ea580c)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 14, color: "#fff",
-                    }}
-                  >
-                    ◎
-                  </div>
+                  <img src="/brand/gravio-mark.png" alt="" style={{ width: 30, height: "auto", flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 700, color: "#27353e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink-900)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {p.title}
                     </div>
-                    <div style={{ fontSize: 11.5, color: "#8a96a0", marginTop: 1 }}>
+                    <div style={{ fontSize: 11.5, color: "var(--ink-400)", marginTop: 1 }}>
                       {p.slides.length + 1} slayt · {formatDate(p.created_at)}
                     </div>
                   </div>
@@ -152,8 +143,8 @@ export default function NewPresentationPage() {
                     disabled={downloadingPastId === p.id}
                     style={{
                       display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
-                      fontSize: 12.5, fontWeight: 700, color: "#ea580c",
-                      padding: "7px 12px", borderRadius: 9, border: "1px solid #f0d9c5", background: "#fff7ed",
+                      fontSize: 12.5, fontWeight: 700, color: "var(--terracotta-700)",
+                      padding: "7px 12px", borderRadius: 9, border: "1px solid var(--terracotta-100)", background: "var(--terracotta-100)",
                     }}
                   >
                     <Ms name="download" size={15} />
@@ -167,17 +158,17 @@ export default function NewPresentationPage() {
 
         {submitState !== "done" && (
           <>
-            <div style={{ background: "#fff", border: "1px solid #e7e4dc", borderRadius: 12, padding: "16px 18px", marginBottom: 12 }}>
-              <label style={{ fontSize: 12.5, fontWeight: 600, color: "#5a6b75", display: "block", marginBottom: 6 }}>
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 12, padding: "16px 18px", marginBottom: 12 }}>
+              <label style={{ fontSize: 12.5, fontWeight: 600, color: "var(--ink-600)", display: "block", marginBottom: 6 }}>
                 Şirket adı
               </label>
               <input
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 placeholder="ör. Nova AI Yazılım"
-                style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: "1.5px solid #e7e4dc", fontSize: 13.5, marginBottom: 14 }}
+                style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: "1.5px solid var(--border-subtle)", background: "var(--surface-strong)", color: "var(--ink-900)", fontSize: 13.5, marginBottom: 14 }}
               />
-              <label style={{ fontSize: 12.5, fontWeight: 600, color: "#5a6b75", display: "block", marginBottom: 6 }}>
+              <label style={{ fontSize: 12.5, fontWeight: 600, color: "var(--ink-600)", display: "block", marginBottom: 6 }}>
                 Ek bağlam (opsiyonel)
               </label>
               <textarea
@@ -185,12 +176,12 @@ export default function NewPresentationPage() {
                 onChange={(e) => setExtraContext(e.target.value)}
                 rows={4}
                 placeholder="Ürün hakkında, rakiplerden farkın, hedeflerin vb. — ne kadar çok bilgi verirsen o kadar isabetli olur."
-                style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: "1.5px solid #e7e4dc", fontSize: 13.5, fontFamily: "inherit", resize: "vertical" }}
+                style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: "1.5px solid var(--border-subtle)", background: "var(--surface-strong)", color: "var(--ink-900)", fontSize: 13.5, fontFamily: "inherit", resize: "vertical" }}
               />
             </div>
 
             {submitState === "error" && (
-              <div style={{ background: "#fdf6e8", border: "1px solid #f0e0b8", borderRadius: 12, padding: "13px 16px", marginBottom: 12, fontSize: 13, color: "#7a5f1e" }}>
+              <div style={{ background: "var(--warn-100)", border: "1px solid var(--warn-200)", borderRadius: 12, padding: "13px 16px", marginBottom: 12, fontSize: 13, color: "var(--warn-700)" }}>
                 {submitError || "Sunum oluşturulamadı, tekrar dene."}
               </div>
             )}
@@ -203,8 +194,8 @@ export default function NewPresentationPage() {
                 padding: "13px 0",
                 borderRadius: 12,
                 border: "none",
-                background: submitState === "submitting" ? "#e7e4dc" : "linear-gradient(160deg,#f97316,#ea580c)",
-                color: submitState === "submitting" ? "#a8a296" : "#fff",
+                background: submitState === "submitting" ? "var(--border-subtle)" : "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))",
+                color: submitState === "submitting" ? "var(--ink-400)" : "var(--surface)",
                 fontSize: 14,
                 fontWeight: 700,
                 display: "flex",
@@ -221,14 +212,14 @@ export default function NewPresentationPage() {
 
         {submitState === "done" && presentation && (
           <>
-            <p style={{ fontSize: 12, color: "#8a96a0", margin: "0 0 12px" }}>
+            <p style={{ fontSize: 12, color: "var(--ink-400)", margin: "0 0 12px" }}>
               {presentation.slides.length + 1} slaytlık önizleme — PowerPoint&apos;te tamamen düzenlenebilir.
             </p>
 
             {/* Kapak — gerçek PPTX'teki lacivert kapak slaydının önizlemesi */}
             <div
               style={{
-                background: "linear-gradient(155deg,#0a1f2d,#0d2a3c)",
+                background: "linear-gradient(155deg,var(--teal-900),var(--teal-800))",
                 borderRadius: 14,
                 padding: "28px 26px",
                 marginBottom: 12,
@@ -238,20 +229,12 @@ export default function NewPresentationPage() {
                 justifyContent: "center",
               }}
             >
-              <div
-                style={{
-                  width: 42, height: 42, borderRadius: "50%", background: "linear-gradient(140deg,#f97316,#ea580c)",
-                  display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16,
-                  fontSize: 18, color: "#fff", fontWeight: 700,
-                }}
-              >
-                ◎
-              </div>
+              <img src="/brand/gravio-mark.png" alt="" style={{ width: 42, height: "auto", display: "block", marginBottom: 16 }} />
               <h2 style={{ fontSize: 24, fontWeight: 700, color: "#fff", margin: "0 0 6px", letterSpacing: "-.01em" }}>
                 {presentation.title}
               </h2>
               {presentation.subtitle && (
-                <p style={{ fontSize: 13, color: "#aec4d2", margin: 0, fontStyle: "italic" }}>{presentation.subtitle}</p>
+                <p style={{ fontSize: 13, color: "var(--on-dark-muted)", margin: 0, fontStyle: "italic" }}>{presentation.subtitle}</p>
               )}
             </div>
 
@@ -261,8 +244,8 @@ export default function NewPresentationPage() {
                 <div
                   key={s.slide_id}
                   style={{
-                    background: isClosing ? "#0a1f2d" : "#fff",
-                    border: isClosing ? "none" : "1px solid #e7e4dc",
+                    background: isClosing ? "var(--teal-900)" : "var(--surface)",
+                    border: isClosing ? "none" : "1px solid var(--border-subtle)",
                     borderRadius: 14,
                     padding: "20px 22px",
                     marginBottom: 10,
@@ -271,17 +254,17 @@ export default function NewPresentationPage() {
                     flexDirection: "column",
                   }}
                 >
-                  <div style={{ fontSize: 11.5, fontWeight: 700, color: isClosing ? "#f97316" : "#ea580c", marginBottom: 4 }}>
+                  <div style={{ fontSize: 11.5, fontWeight: 700, color: isClosing ? "var(--terracotta-400)" : "var(--terracotta-700)", marginBottom: 4 }}>
                     {String(i + 1).padStart(2, "0")}
                   </div>
-                  <div style={{ fontSize: 17, fontWeight: 700, color: isClosing ? "#fff" : "#14222c", marginBottom: 12 }}>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: isClosing ? "#fff" : "var(--ink-900)", marginBottom: 12 }}>
                     {s.heading}
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, overflow: "hidden" }}>
                     {s.bullets.map((b, j) => (
                       <div key={j} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                        <span style={{ color: isClosing ? "#f97316" : "#ea580c", fontSize: 11, marginTop: 3, flexShrink: 0 }}>●</span>
-                        <span style={{ fontSize: 12.5, color: isClosing ? "#d7e2e8" : "#414f57", lineHeight: 1.45 }}>{b}</span>
+                        <span style={{ color: isClosing ? "var(--terracotta-400)" : "var(--terracotta-700)", fontSize: 11, marginTop: 3, flexShrink: 0 }}>●</span>
+                        <span style={{ fontSize: 12.5, color: isClosing ? "var(--on-dark)" : "var(--ink-600)", lineHeight: 1.45 }}>{b}</span>
                       </div>
                     ))}
                   </div>
@@ -297,7 +280,7 @@ export default function NewPresentationPage() {
                 padding: "13px 0",
                 borderRadius: 12,
                 border: "none",
-                background: "linear-gradient(160deg,#f97316,#ea580c)",
+                background: "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))",
                 color: "#fff",
                 fontSize: 14,
                 fontWeight: 700,

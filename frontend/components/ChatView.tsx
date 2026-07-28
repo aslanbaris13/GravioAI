@@ -57,27 +57,17 @@ export default function ChatView({
           alignItems: "center",
           gap: 12,
           padding: "15px 26px",
-          borderBottom: "1px solid #e7e4dc",
-          background: "#fbfaf7",
+          borderBottom: "1px solid var(--border-subtle)",
+          background: "var(--paper-50)",
         }}
       >
-        <div
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 10,
-            background: "linear-gradient(140deg,#f97316,#ea580c)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Ms name="radar" size={19} color="#fff" />
-        </div>
+        <img src="/brand/gravio-mark.png" alt="" style={{ width: 32, height: "auto", flexShrink: 0 }} />
         <div style={{ lineHeight: 1.15 }}>
-          <div style={{ fontSize: 14.5, fontWeight: 700, color: "#14222c" }}>Gravio Asistan</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "#5b8a3c" }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22a447", display: "inline-block" }} />
+          <div style={{ fontFamily: "var(--font-display)", fontSize: 14.5, fontWeight: 700, color: "var(--ink-900)" }}>
+            Gravio Asistan
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, color: "var(--success-700)" }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--success-500)", display: "inline-block" }} />
             Çevrimiçi · destek evrenini tarıyor
           </div>
         </div>
@@ -90,10 +80,10 @@ export default function ChatView({
             gap: 6,
             fontSize: 12.5,
             fontWeight: 600,
-            color: "#5a6b75",
+            color: "var(--ink-600)",
             padding: "7px 12px",
             borderRadius: 9,
-            border: "1px solid #e3e0d8",
+            border: "1px solid var(--border-subtle)",
           }}
         >
           <Ms name="grid_view" size={17} />
@@ -105,24 +95,11 @@ export default function ChatView({
         <div className="chat-scroll-padding" style={{ maxWidth: 760, margin: "0 auto", padding: "0 24px" }}>
           {showEmpty && (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "66px 0 20px" }}>
-              <div
-                style={{
-                  width: 62,
-                  height: 62,
-                  borderRadius: 18,
-                  background: "linear-gradient(140deg,#f97316,#ea580c)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 10px 30px rgba(234,88,12,.3)",
-                }}
-              >
-                <Ms name="radar" size={34} color="#fff" />
-              </div>
-              <h1 style={{ fontSize: 27, fontWeight: 700, letterSpacing: "-.025em", margin: "22px 0 0", color: "#14222c" }}>
+              <img src="/brand/gravio-mark.png" alt="" style={{ width: 62, height: "auto", display: "block" }} />
+              <h1 style={{ fontSize: 27, fontWeight: 700, letterSpacing: "-.025em", margin: "22px 0 0", color: "var(--ink-900)" }}>
                 Yüzeyin altındaki fırsatı çıkaralım.
               </h1>
-              <p style={{ fontSize: 15, lineHeight: 1.6, color: "#5a6b75", maxWidth: 500, margin: "13px 0 0" }}>
+              <p style={{ fontSize: 15, lineHeight: 1.6, color: "var(--ink-600)", maxWidth: 500, margin: "13px 0 0" }}>
                 İşletmeni birkaç cümleyle anlat — sana uygun devlet ve özel sektör desteklerini bulayım, uygunluğunu
                 kontrol edip başvurunu hazırlayayım. Form yok, sadece sohbet.
               </p>
@@ -142,18 +119,18 @@ export default function ChatView({
                       textAlign: "left",
                       padding: "15px 16px",
                       borderRadius: 14,
-                      background: "#fff",
-                      border: "1px solid #e7e4dc",
-                      boxShadow: "0 1px 2px rgba(20,34,44,.04)",
+                      background: "var(--surface)",
+                      border: "1px solid var(--border-subtle)",
+                      boxShadow: "0 1px 2px rgba(22,48,46,.04)",
                     }}
                   >
-                    <Ms name={s.icon} size={20} color="#f97316" style={{ marginTop: 1 }} />
-                    <span style={{ fontSize: 13.5, fontWeight: 500, lineHeight: 1.45, color: "#27353e" }}>{s.label}</span>
+                    <Ms name={s.icon} size={20} color="var(--terracotta-600)" style={{ marginTop: 1 }} />
+                    <span style={{ fontSize: 13.5, fontWeight: 500, lineHeight: 1.45, color: "var(--ink-900)" }}>{s.label}</span>
                   </button>
                 ))}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 26, fontSize: 12, color: "#8a96a0" }}>
-                <Ms name="verified_user" size={16} color="#22a447" />
+              <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 26, fontSize: 12, color: "var(--ink-400)" }}>
+                <Ms name="verified_user" size={16} color="var(--success-500)" />
                 Önerilerin tümü resmî kaynaklara dayanır ve "son güncelleme" tarihiyle gösterilir.
               </div>
             </div>
@@ -175,7 +152,7 @@ export default function ChatView({
         </div>
       </div>
 
-      <div className="chat-scroll-padding" style={{ padding: "8px 24px 18px", background: "linear-gradient(0deg,#fbfaf7 65%,rgba(251,250,247,0))" }}>
+      <div className="chat-scroll-padding" style={{ padding: "8px 24px 18px", background: "linear-gradient(0deg,var(--paper-50) 65%,rgba(251,248,241,0))" }}>
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
           {followups.length > 0 && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
@@ -189,14 +166,14 @@ export default function ChatView({
                     gap: 6,
                     fontSize: 12.5,
                     fontWeight: 500,
-                    color: "#27353e",
-                    background: "#fff",
-                    border: "1px solid #e3e0d8",
+                    color: "var(--ink-900)",
+                    background: "var(--surface)",
+                    border: "1px solid var(--border-subtle)",
                     padding: "8px 13px",
                     borderRadius: 999,
                   }}
                 >
-                  <Ms name="bolt" size={16} color="#f97316" />
+                  <Ms name="bolt" size={16} color="var(--terracotta-600)" />
                   {f.label}
                 </button>
               ))}
@@ -207,11 +184,11 @@ export default function ChatView({
               display: "flex",
               alignItems: "flex-end",
               gap: 10,
-              background: "#fff",
-              border: "1.5px solid #e0ddd4",
+              background: "var(--surface-strong)",
+              border: "1.5px solid var(--border-subtle)",
               borderRadius: 16,
               padding: "8px 8px 8px 18px",
-              boxShadow: "0 2px 12px rgba(20,34,44,.06)",
+              boxShadow: "0 2px 12px rgba(22,48,46,.06)",
             }}
           >
             <input
@@ -224,7 +201,7 @@ export default function ChatView({
                 }
               }}
               placeholder="İşletmeni anlat ya da bir soru sor…"
-              style={{ flex: 1, border: "none", outline: "none", fontSize: 14.5, color: "#14222c", background: "transparent", padding: "8px 0" }}
+              style={{ flex: 1, border: "none", fontSize: 14.5, color: "var(--ink-900)", background: "transparent", padding: "8px 0" }}
             />
             <button
               onClick={onSend}
@@ -232,18 +209,18 @@ export default function ChatView({
                 width: 40,
                 height: 40,
                 borderRadius: 11,
-                background: "linear-gradient(160deg,#f97316,#ea580c)",
+                background: "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
-                boxShadow: "0 4px 12px rgba(234,88,12,.3)",
+                boxShadow: "0 4px 12px rgba(168,80,46,.3)",
               }}
             >
               <Ms name="arrow_upward" size={20} color="#fff" />
             </button>
           </div>
-          <div style={{ textAlign: "center", fontSize: 11, color: "#a0aab2", marginTop: 9 }}>
+          <div style={{ textAlign: "center", fontSize: 11, color: "var(--ink-400)", marginTop: 9 }}>
             Gravio resmî kaynaklara dayanır. Başvuru göndermeden önce bilgileri doğrula.
           </div>
         </div>
@@ -279,13 +256,13 @@ function MessageRow({
         <div
           style={{
             maxWidth: "74%",
-            background: "linear-gradient(160deg,#13384e,#0f2a3c)",
-            color: "#eef4f7",
+            background: "linear-gradient(160deg,var(--teal-800),var(--teal-900))",
+            color: "var(--teal-100)",
             padding: "12px 16px",
             borderRadius: "16px 16px 4px 16px",
             fontSize: 14,
             lineHeight: 1.55,
-            boxShadow: "0 2px 8px rgba(15,42,60,.18)",
+            boxShadow: "0 2px 8px rgba(22,48,46,.18)",
           }}
         >
           {m.text}
@@ -301,14 +278,14 @@ function MessageRow({
           <AssistantAvatar />
           <div
             style={{
-              background: "#fff",
-              border: "1px solid #ebe8e0",
+              background: "var(--surface)",
+              border: "1px solid var(--border-subtle)",
               padding: "12px 16px",
               borderRadius: "4px 16px 16px 16px",
               fontSize: 14,
               lineHeight: 1.6,
-              color: "#27353e",
-              boxShadow: "0 1px 2px rgba(20,34,44,.04)",
+              color: "var(--ink-900)",
+              boxShadow: "0 1px 2px rgba(22,48,46,.04)",
             }}
           >
             {formatChatText(m.text)}
@@ -325,25 +302,25 @@ function MessageRow({
           style={{
             marginLeft: 41,
             maxWidth: "88%",
-            background: "#fff",
-            border: "1px solid #ebe8e0",
+            background: "var(--surface)",
+            border: "1px solid var(--border-subtle)",
             borderRadius: 14,
             padding: "14px 16px",
-            boxShadow: "0 1px 2px rgba(20,34,44,.04)",
+            boxShadow: "0 1px 2px rgba(22,48,46,.04)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, fontWeight: 600, color: "#76858d", marginBottom: 12 }}>
-            <Ms name="badge" size={16} color="#0f6ea8" />
+          <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, fontWeight: 600, color: "var(--ink-600)", marginBottom: 12 }}>
+            <Ms name="badge" size={16} color="var(--teal-700)" />
             Çıkarılan işletme profili
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {m.chips.map((ch) => (
               <div
                 key={ch.label}
-                style={{ display: "flex", flexDirection: "column", gap: 1, padding: "7px 12px", borderRadius: 10, background: "#f6f5f1", border: "1px solid #ebe8e0" }}
+                style={{ display: "flex", flexDirection: "column", gap: 1, padding: "7px 12px", borderRadius: 10, background: "var(--paper-50)", border: "1px solid var(--border-subtle)" }}
               >
-                <span style={{ fontSize: 10, fontWeight: 600, color: "#97a2aa", textTransform: "uppercase", letterSpacing: ".04em" }}>{ch.label}</span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#27353e" }}>{ch.value}</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "var(--ink-400)", textTransform: "uppercase", letterSpacing: ".04em" }}>{ch.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink-900)" }}>{ch.value}</span>
               </div>
             ))}
           </div>
@@ -369,11 +346,11 @@ function MessageRow({
                   alignItems: "center",
                   gap: 14,
                   textAlign: "left",
-                  background: "#fff",
-                  border: "1px solid #ebe8e0",
+                  background: "var(--surface)",
+                  border: "1px solid var(--border-subtle)",
                   borderRadius: 14,
                   padding: "13px 15px",
-                  boxShadow: "0 1px 2px rgba(20,34,44,.04)",
+                  boxShadow: "0 1px 2px rgba(22,48,46,.04)",
                 }}
               >
                 <div style={c.iconWrapStyle}>
@@ -381,21 +358,21 @@ function MessageRow({
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#14222c", minWidth: 0 }}>{c.name}</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "var(--ink-900)", minWidth: 0 }}>{c.name}</span>
                     <span style={c.eligBadgeStyle}>
                       <Ms name={c.eligIconName} size={14} />
                       {c.eligLabel}
                     </span>
                   </div>
-                  <div style={{ fontSize: 11.5, color: "#8a96a0" }}>
+                  <div style={{ fontSize: 11.5, color: "var(--ink-400)" }}>
                     {c.org} · {c.typeLabel}
                   </div>
                 </div>
                 <div style={{ textAlign: "right", flexShrink: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: "#ea580c", fontVariantNumeric: "tabular-nums" }}>{c.amountDisplayText}</div>
-                  <div style={{ fontSize: 10.5, color: "#97a2aa", fontWeight: 600 }}>{c.amountSub}</div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: "var(--terracotta-700)", fontVariantNumeric: "tabular-nums" }}>{c.amountDisplayText}</div>
+                  <div style={{ fontSize: 10.5, color: "var(--ink-400)", fontWeight: 600 }}>{c.amountSub}</div>
                 </div>
-                <Ms name="chevron_right" size={20} color="#c2bdb1" />
+                <Ms name="chevron_right" size={20} color="var(--ink-400)" />
               </button>
             );
           })}
@@ -412,8 +389,8 @@ function MessageRow({
           <AssistantAvatar />
           <div
             style={{
-              background: "#fff",
-              border: "1px solid #ebe8e0",
+              background: "var(--surface)",
+              border: "1px solid var(--border-subtle)",
               padding: "15px 17px",
               borderRadius: "4px 16px 16px 16px",
               display: "flex",
@@ -421,9 +398,9 @@ function MessageRow({
               alignItems: "center",
             }}
           >
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f97316", animation: "blink 1.2s infinite 0s" }} />
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f97316", animation: "blink 1.2s infinite .2s" }} />
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f97316", animation: "blink 1.2s infinite .4s" }} />
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--terracotta-600)", animation: "blink 1.2s infinite 0s" }} />
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--terracotta-600)", animation: "blink 1.2s infinite .2s" }} />
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--terracotta-600)", animation: "blink 1.2s infinite .4s" }} />
           </div>
         </div>
       </div>
@@ -438,19 +415,19 @@ function MessageRow({
           <AssistantAvatar />
           <div
             style={{
-              background: "#fff8f6",
-              border: "1px solid #f9cfc5",
+              background: "var(--danger-100)",
+              border: "1px solid var(--danger-200)",
               padding: "12px 16px",
               borderRadius: "4px 16px 16px 16px",
               fontSize: 14,
               lineHeight: 1.6,
-              color: "#b94040",
+              color: "var(--danger-700)",
               display: "flex",
               alignItems: "center",
               gap: 8,
             }}
           >
-            <Ms name="error_outline" size={18} color="#e05050" />
+            <Ms name="error_outline" size={18} color="var(--danger-500)" />
             {m.text}
           </div>
         </div>
@@ -468,13 +445,13 @@ function MessageRow({
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
-              background: "linear-gradient(160deg,#f97316,#ea580c)",
+              background: "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))",
               color: "#fff",
               fontSize: 13.5,
               fontWeight: 600,
               padding: "11px 18px",
               borderRadius: 11,
-              boxShadow: "0 6px 16px rgba(234,88,12,.28)",
+              boxShadow: "0 6px 16px rgba(168,80,46,.28)",
             }}
           >
             {m.label}
@@ -488,8 +465,8 @@ function MessageRow({
   // note
   return (
     <div style={rowStyle}>
-      <div style={{ marginLeft: 41, display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: "#8a96a0", padding: "2px 0" }}>
-        <Ms name="verified_user" size={16} color="#22a447" />
+      <div style={{ marginLeft: 41, display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: "var(--ink-400)", padding: "2px 0" }}>
+        <Ms name="verified_user" size={16} color="var(--success-500)" />
         {m.text}
       </div>
     </div>
@@ -498,20 +475,10 @@ function MessageRow({
 
 function AssistantAvatar() {
   return (
-    <div
-      style={{
-        width: 30,
-        height: 30,
-        borderRadius: 9,
-        flexShrink: 0,
-        background: "linear-gradient(140deg,#f97316,#ea580c)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 1,
-      }}
-    >
-      <Ms name="radar" size={17} color="#fff" />
-    </div>
+    <img
+      src="/brand/gravio-mark.png"
+      alt=""
+      style={{ width: 28, height: "auto", flexShrink: 0, marginTop: 1 }}
+    />
   );
 }

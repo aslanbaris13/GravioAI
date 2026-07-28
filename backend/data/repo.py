@@ -14,6 +14,7 @@ from pydantic import ValidationError
 from supabase import Client, create_client
 
 from core.config import get_settings
+from data.loader import load_programs
 from models import Category, ProgramMatch, SupportProgram
 from models.application import ApplicationRecord
 from models.presentation import GeneratedPresentation, PresentationRecord
@@ -141,20 +142,51 @@ def log_ingestion_run(
     }
     _client().table(_INGESTION_RUNS).insert(row).execute()
 
-def get_programs(category: Category | None = None) -> list[SupportProgram]:
-    """Kategoriye göre (isteğe bağlı) tüm programları getirir."""
-    query = _client().table(_TABLE).select("*").order("program_id")
+
+def _local_programs(category: Category | None = None) -> list[SupportProgram]:
+    """Diskteki `data/programs/*.json` — Supabase'e ulaşılamadığında kullanılan
+    yedek kaynak. Bu dosyalar programların resmî sayfalarından toplanmıştır
+    (her kayıtta `source_url` ile), yani uydurma değil, yalnızca DB'ye
+    yüklenmiş kopyadan daha eski olabilir."""
+    programs = load_programs()
     if category is not None:
-        query = query.eq("category", category.value)
-    resp = query.execute()
-    return [p for r in (resp.data or []) if (p := _from_row_safe(r)) is not None]
+        programs = [p for p in programs if p.category == category.value]
+    return sorted(programs, key=lambda p: p.program_id)
+
+
+def get_programs(category: Category | None = None) -> list[SupportProgram]:
+    """Kategoriye göre (isteğe bağlı) tüm programları getirir.
+
+    Supabase erişilemezse (proje kapalı/silinmiş, ağ yok, anahtar geçersiz)
+    program listesi tamamen boş kalmasın diye diskteki JSON'a düşülür —
+    aksi halde ana sayfadaki vitrin ve program detayları çalışmaz."""
+    try:
+        query = _client().table(_TABLE).select("*").order("program_id")
+        if category is not None:
+            query = query.eq("category", category.value)
+        resp = query.execute()
+        return [p for r in (resp.data or []) if (p := _from_row_safe(r)) is not None]
+    except Exception:
+        logger.warning(
+            "programs_db_unavailable — yerel JSON yedeğine düşülüyor (veri güncel olmayabilir)",
+            exc_info=True,
+        )
+        return _local_programs(category)
 
 
 def get_program(program_id: str) -> SupportProgram | None:
-    """Tek bir programı program_id'sine göre getirir."""
-    resp = _client().table(_TABLE).select("*").eq("program_id", program_id).limit(1).execute()
-    data = resp.data or []
-    return _from_row_safe(data[0]) if data else None
+    """Tek bir programı program_id'sine göre getirir (DB yoksa yerel JSON'dan)."""
+    try:
+        resp = _client().table(_TABLE).select("*").eq("program_id", program_id).limit(1).execute()
+        data = resp.data or []
+        return _from_row_safe(data[0]) if data else None
+    except Exception:
+        logger.warning(
+            "program_db_unavailable program_id=%s — yerel JSON yedeğine düşülüyor",
+            program_id,
+            exc_info=True,
+        )
+        return next((p for p in _local_programs() if p.program_id == program_id), None)
 
 
 def match_programs(
