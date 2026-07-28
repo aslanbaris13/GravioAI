@@ -10,6 +10,7 @@ import type {
   BackendApplicationDraft,
   BackendAssistResult,
   BackendEligibilityResult,
+  BackendIngestionRun,
   BackendSessionState,
   BackendSupportProgram,
   BackendUserProfile,
@@ -354,4 +355,37 @@ export function adaptApplicationDraft(raw: BackendApplicationDraft): {
     planSections: raw.plan_sections,
     docs,
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* Veri senkronizasyonu (ingestion) geçmişi                             */
+/* ------------------------------------------------------------------ */
+
+/** Her kaynağın (kosgeb/tubitak/...) en güncel çalıştırmasını döner — liste
+ * `started_at`'e göre en yeni önce geldiği varsayılır (bkz. `listIngestionRuns`). */
+export function latestIngestionRunBySource(runs: BackendIngestionRun[]): BackendIngestionRun[] {
+  const seen = new Set<string>();
+  const latest: BackendIngestionRun[] = [];
+  for (const run of runs) {
+    if (seen.has(run.source)) continue;
+    seen.add(run.source);
+    latest.push(run);
+  }
+  return latest.sort((a, b) => a.source.localeCompare(b.source, "tr"));
+}
+
+/** "3 gün önce", "2 saat önce" gibi göreli bir zaman metni üretir. */
+export function formatRelativeTime(isoDate: string): string {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return isoDate;
+
+  const diffMs = Date.now() - date.getTime();
+  const diffMin = Math.floor(diffMs / (1000 * 60));
+  if (diffMin < 1) return "az önce";
+  if (diffMin < 60) return `${diffMin} dakika önce`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour} saat önce`;
+  const diffDay = Math.floor(diffHour / 24);
+  if (diffDay < 30) return `${diffDay} gün önce`;
+  return date.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
 }

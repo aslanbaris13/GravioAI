@@ -22,6 +22,7 @@ import {
   fetchSession,
   getProgram,
   listApplicationTracking,
+  listIngestionRuns,
   saveSession,
   startApplicationTracking,
   updateApplicationTracking,
@@ -31,6 +32,7 @@ import type {
   AssistStreamEvent,
   BackendApplicationRecord,
   BackendEligibilityResult,
+  BackendIngestionRun,
   BackendUserProfile,
   ConversationTurn,
 } from "@/lib/api";
@@ -106,6 +108,7 @@ interface AppState {
   matchCount: number;
   trackedApplications: BackendApplicationRecord[];
   refreshApplications: () => Promise<void>;
+  ingestionRuns: BackendIngestionRun[];
   updateApplicationRecord: (
     id: string,
     fields: { status?: ApplicationTrackingStatus; note?: string; reminder_date?: string },
@@ -171,6 +174,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [applicationDraft, setApplicationDraft] = useState<ApplicationDraft | null>(null);
   const [applyLoading, setApplyLoading] = useState(false);
   const [trackedApplications, setTrackedApplications] = useState<BackendApplicationRecord[]>([]);
+  const [ingestionRuns, setIngestionRuns] = useState<BackendIngestionRun[]>([]);
 
   const idRef = useRef(1);
   const nextId = () => String(idRef.current++);
@@ -219,6 +223,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refreshApplications();
   }, [refreshApplications]);
+
+  /** Panelde "veri ne zaman güncellendi" göstermek için — oturumdan bağımsız,
+   *  uygulama açılışında bir kez çekilir. */
+  useEffect(() => {
+    listIngestionRuns()
+      .then(setIngestionRuns)
+      .catch(() => {
+        // Sessizce yoksay — panel bu bilgi olmadan da çalışır
+      });
+  }, []);
 
   /** Bir başvuru kaydının durum/not alanlarını günceller ve listeyi tazeler. */
   async function updateApplicationRecord(
@@ -644,6 +658,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     matchCount,
     trackedApplications,
     refreshApplications,
+    ingestionRuns,
     updateApplicationRecord,
     onNewChat,
     onOnboardingComplete,

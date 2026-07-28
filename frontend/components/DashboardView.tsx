@@ -7,9 +7,26 @@
  */
 "use client";
 import Ms from "./Ms";
-import { profileToChips } from "@/lib/adapter";
-import type { ApplicationTrackingStatus, BackendApplicationRecord, BackendUserProfile } from "@/lib/api";
+import { formatRelativeTime, latestIngestionRunBySource, profileToChips } from "@/lib/adapter";
+import type {
+  ApplicationTrackingStatus,
+  BackendApplicationRecord,
+  BackendIngestionRun,
+  BackendUserProfile,
+} from "@/lib/api";
 import type { Program } from "@/lib/types";
+
+const INGESTION_SOURCE_LABELS: Record<string, string> = {
+  kosgeb: "KOSGEB",
+  kalkinma: "Kalkınma Ajansı",
+  tubitak: "TÜBİTAK",
+  google_startup: "Google for Startups",
+  avrupa_birligi: "Avrupa Birliği",
+  kgf: "KGF",
+  turkpatent: "Türk Patent",
+  sanayi_bakanligi: "Sanayi Bakanlığı",
+  ingest_batch: "Veri işleme",
+};
 
 const APPLICATION_STATUS_META: Record<ApplicationTrackingStatus, { label: string; color: string; bg: string }> = {
   taslak: { label: "Taslak", color: "var(--ink-600)", bg: "var(--paper-100)" },
@@ -34,6 +51,7 @@ export default function DashboardView({
   profile,
   programs,
   applications,
+  ingestionRuns,
   onOpenProgram,
   onGoToChat,
   onGoToOnboarding,
@@ -43,6 +61,7 @@ export default function DashboardView({
   profile: BackendUserProfile | null;
   programs: Program[];
   applications: BackendApplicationRecord[];
+  ingestionRuns?: BackendIngestionRun[];
   onOpenProgram: (id: string) => void;
   onGoToChat?: () => void;
   onGoToOnboarding?: () => void;
@@ -89,6 +108,8 @@ export default function DashboardView({
   };
   for (const a of applications) applicationStatusCounts[a.status] += 1;
 
+  const latestIngestionRuns = ingestionRuns ? latestIngestionRunBySource(ingestionRuns) : [];
+
   return (
     <section data-screen-label="Panelim" style={{ height: "100%", overflowY: "auto" }}>
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "26px 32px 60px" }}>
@@ -133,6 +154,46 @@ export default function DashboardView({
             )}
           </div>
         </div>
+
+        {latestIngestionRuns.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
+            {latestIngestionRuns.map((run) => {
+              const ok = run.status === "success";
+              return (
+                <div
+                  key={run.source}
+                  title={run.error_msg ?? undefined}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 7,
+                    padding: "6px 11px",
+                    borderRadius: 999,
+                    background: "var(--surface)",
+                    border: "1px solid var(--border-subtle)",
+                    fontSize: 11.5,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      background: ok ? "var(--success-700)" : "var(--terracotta-700)",
+                    }}
+                  />
+                  <span style={{ fontWeight: 700, color: "var(--ink-900)" }}>
+                    {INGESTION_SOURCE_LABELS[run.source] ?? run.source}
+                  </span>
+                  <span style={{ color: "var(--ink-400)" }}>
+                    {ok ? `${formatRelativeTime(run.finished_at)} güncellendi` : "güncelleme başarısız"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {!hasProfile && (
           <div
