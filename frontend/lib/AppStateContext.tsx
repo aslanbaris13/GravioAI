@@ -30,6 +30,7 @@ import type {
   ApplicationTrackingStatus,
   AssistStreamEvent,
   BackendApplicationRecord,
+  BackendEligibilityResult,
   BackendUserProfile,
   ConversationTurn,
 } from "@/lib/api";
@@ -53,6 +54,19 @@ import type {
 
 const TOAST_MS = 2200;
 
+/** Ana sayfadaki ChatWidget'ın yazdığı ilk mesajı /chat'e taşıdığı anahtar.
+ *  Tek kaynak olsun diye ChatWidget da bunu import eder. */
+export const WIDGET_DRAFT_KEY = "gravioai_widget_draft";
+
+/** Uygunluk değerlendirmesi yapılamadığında kullanılan nötr yer tutucu —
+ *  "uygun değilsin" demez, "henüz bakılmadı" der (bkz. ensureProgram). */
+const UNEVALUATED_ELIGIBILITY: BackendEligibilityResult = {
+  state: "locked",
+  score: 0,
+  label: "Uygunluk hesaplanmadı",
+  conditions: [],
+};
+
 const EMPTY_PROFILE: BackendUserProfile = {
   company_name: null,
   website: null,
@@ -70,6 +84,10 @@ const EMPTY_PROFILE: BackendUserProfile = {
 
 interface AppState {
   sidebarOpen: boolean;
+  /** Masaüstünde tam panelin daraltılıp ince ikon rayına düşmesi.
+   *  `sidebarOpen` mobil çekmece içindir, ikisi ayrı kavram. */
+  sidebarCollapsed: boolean;
+  setSidebarCollapsed: (v: boolean) => void;
   setSidebarOpen: (v: boolean) => void;
   filterCat: "all" | ProgramCategory;
   setFilterCat: (v: "all" | ProgramCategory) => void;
@@ -97,6 +115,7 @@ interface AppState {
   onOnboardingComplete: (profile: BackendUserProfile) => void;
   onOnboardingSkip: () => void;
   onSend: () => Promise<void>;
+  consumeWidgetDraft: () => void;
   onFollowup: (key: string) => void;
   onSuggestion: (key: string) => void;
   onCtaAction: (action: "go-matches" | "apply-bigg") => void;
@@ -108,6 +127,7 @@ interface AppState {
   applyProgram: (id: string) => Promise<void>;
 
   goToChat: () => void;
+  goToOnboarding: () => void;
   goToMatches: () => void;
   goToProgram: (id: string) => void;
   goToEligibility: (id: string) => void;
@@ -130,6 +150,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [filterCat, setFilterCat] = useState<"all" | ProgramCategory>("all");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [typing, setTyping] = useState(false);
@@ -141,6 +162,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const [currentProfile, setCurrentProfile] = useState<BackendUserProfile | null>(null);
   const [apiPrograms, setApiPrograms] = useState<Program[]>([]);
+  // Yalnızca görüntülemek için çekilen programlar (ana sayfadaki vitrinden,
+  // paylaşılan bir linkten ya da sayfa yenilemesinden gelinen detaylar).
+  // `apiPrograms`ten kasıtlı olarak ayrı tutulur: orası profile göre gerçekten
+  // eşleşen programların listesidir ve Eşleşmelerim/Panelim ile sidebar
+  // rozetini besler — göz atılan bir program eşleşme sayılmamalı.
+  const [browsedPrograms, setBrowsedPrograms] = useState<Program[]>([]);
   const [applicationDraft, setApplicationDraft] = useState<ApplicationDraft | null>(null);
   const [applyLoading, setApplyLoading] = useState(false);
   const [trackedApplications, setTrackedApplications] = useState<BackendApplicationRecord[]>([]);
@@ -364,6 +391,26 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, typing]);
 
+  /** Ana sayfadaki ChatWidget, kullanıcının yazdığı ilk mesajı localStorage'a
+   *  bırakıp /chat'e yönlendirir. Sohbet ekranı açılınca o mesaj burada
+   *  tüketilip gerçek bir tura dönüştürülür — yoksa kullanıcı yazdığı soruyu
+   *  kaybedip boş bir sohbete düşüyordu. */
+  function consumeWidgetDraft() {
+    let draft: string | null = null;
+    try {
+      draft = window.localStorage.getItem(WIDGET_DRAFT_KEY);
+      if (draft) window.localStorage.removeItem(WIDGET_DRAFT_KEY);
+    } catch {
+      return; // depolama kapalıysa taslak da yoktur
+    }
+    const text = draft?.trim();
+    if (!text || typing) return;
+    const history = buildHistory(messages);
+    // onSuggestion ile aynı gerekçe: StrictMode'un çift render'ında isteği
+    // ikiye katlamamak için ağ çağrısı bir tur ertelenir.
+    setTimeout(() => void sendMessage(text, history), 50);
+  }
+
   function onFollowup(key: string) {
     if (key === "apply" && apiPrograms.length > 0) {
       applyProgram(apiPrograms[0].id);
@@ -397,6 +444,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   function goToChat() {
     router.push("/chat");
+  }
+
+  function goToOnboarding() {
+    router.push("/onboarding");
   }
 
   function goToMatches() {
@@ -518,9 +569,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }
 
   /** Yalnızca API'den gelen gerçek programlara bakar — bulunamazsa null döner
-   * (sessizce sahte bir mock programa düşülmüyor). */
+   * (sessizce sahte bir mock programa düşülmüyor). Önce eşleşmelere, sonra
+   * yalnızca görüntülenmiş programlara bakar: aynı program ikisinde birdense
+   * eşleşme kaydı kazanır, çünkü orada gerçek uygunluk değerlendirmesi var. */
   function resolveProgram(id: string): Program | null {
-    return apiPrograms.find((p) => p.id === id) ?? null;
+    return (
+      apiPrograms.find((p) => p.id === id) ??
+      browsedPrograms.find((p) => p.id === id) ??
+      null
+    );
   }
 
   /** `resolveProgram` bu oturumda daha önce görülmüş (sohbetten/session'dan
@@ -531,15 +588,34 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   async function ensureProgram(id: string): Promise<Program | null> {
     const cached = resolveProgram(id);
     if (cached) return cached;
+
+    // Programın kendisi ile uygunluk değerlendirmesi kasıtlı olarak ayrı
+    // denenir: /eligibility bir LLM çağrısıdır (yavaş + rate-limit'li) ve
+    // profili olmayan bir ziyaretçi için zaten anlamlı bir sonuç üretmez.
+    // Başarısız olursa programı komple "bulunamadı" saymak yanlış olur —
+    // detay ekranının gösterdiği her şey (tutar, kriterler, kaynak, özet)
+    // programın kendisinden gelir. Bu yüzden nötr bir uygunluk yer tutucusuyla
+    // devam ediyoruz; gerçek değerlendirme kullanıcı Uygunluk ekranına
+    // geçtiğinde yapılır.
+    let sp;
     try {
-      const sp = await getProgram(id);
-      const er = await evaluateEligibility(currentProfile ?? EMPTY_PROFILE, id);
-      const program = adaptProgram(sp, er);
-      setApiPrograms((prev) => (prev.some((p) => p.id === program.id) ? prev : [...prev, program]));
-      return program;
+      sp = await getProgram(id);
     } catch {
-      return null;
+      return null; // program gerçekten yok/erişilemiyor
     }
+
+    let er: BackendEligibilityResult;
+    try {
+      er = await evaluateEligibility(currentProfile ?? EMPTY_PROFILE, id);
+    } catch {
+      er = UNEVALUATED_ELIGIBILITY;
+    }
+
+    const program = adaptProgram(sp, er);
+    // Eşleşme listesine DEĞİL, göz atılanlar önbelleğine yazılır — bu program
+    // kullanıcının profiline göre eşleştirilmedi, sadece açıldı.
+    setBrowsedPrograms((prev) => (prev.some((p) => p.id === program.id) ? prev : [...prev, program]));
+    return program;
   }
 
   // Süresi geçmiş programlar Eşleşmelerim listesinde gösterilmiyor
@@ -549,6 +625,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const value: AppState = {
     sidebarOpen,
     setSidebarOpen,
+    sidebarCollapsed,
+    setSidebarCollapsed,
     filterCat,
     setFilterCat,
     messages,
@@ -571,6 +649,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     onOnboardingComplete,
     onOnboardingSkip,
     onSend,
+    consumeWidgetDraft,
     onFollowup,
     onSuggestion,
     onCtaAction,
@@ -581,6 +660,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     ensureProgram,
     applyProgram,
     goToChat,
+    goToOnboarding,
     goToMatches,
     goToProgram,
     goToEligibility,

@@ -9,6 +9,7 @@ export default function PanelPage() {
     trackedApplications,
     goToProgram,
     goToChat,
+    goToOnboarding,
     goToApplications,
     goToNewPresentation,
   } = useAppState();
@@ -19,6 +20,7 @@ export default function PanelPage() {
       applications={trackedApplications}
       onOpenProgram={goToProgram}
       onGoToChat={goToChat}
+      onGoToOnboarding={goToOnboarding}
       onGoToApplications={goToApplications}
       onNewPresentation={goToNewPresentation}
     />

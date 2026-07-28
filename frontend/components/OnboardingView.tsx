@@ -138,17 +138,16 @@ const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "13px 16px",
   borderRadius: 12,
-  border: "1.5px solid #e0ddd4",
+  border: "1.5px solid var(--border-subtle)",
   fontSize: 15,
-  color: "#14222c",
-  background: "#fff",
-  outline: "none",
+  color: "var(--ink-900)",
+  background: "var(--surface-strong)",
 };
 
 const labelStyle: React.CSSProperties = {
   fontSize: 13.5,
   fontWeight: 600,
-  color: "#5a6b75",
+  color: "var(--ink-600)",
   display: "block",
   marginBottom: 8,
 };
@@ -156,10 +155,10 @@ const labelStyle: React.CSSProperties = {
 function StepHeading({ title, sub }: { title: string; sub: string }) {
   return (
     <div style={{ marginBottom: 28 }}>
-      <h2 style={{ fontSize: 24, fontWeight: 700, color: "#14222c", margin: "0 0 6px", letterSpacing: "-.01em" }}>
+      <h2 style={{ fontSize: 24, fontWeight: 700, color: "var(--ink-900)", margin: "0 0 6px", letterSpacing: "-.01em" }}>
         {title}
       </h2>
-      <p style={{ fontSize: 14.5, color: "#8b969c", margin: 0 }}>{sub}</p>
+      <p style={{ fontSize: 14.5, color: "var(--ink-400)", margin: 0 }}>{sub}</p>
     </div>
   );
 }
@@ -232,7 +231,10 @@ export default function OnboardingView({
   const canProceed = step !== "consent" || form.consent;
 
   return (
-    <section style={{ display: "flex", height: "100vh", background: "#eceae4" }}>
+    <section style={{ display: "flex", flexDirection: "column", height: "100vh", background: "var(--paper-100)" }}>
+      {/* Ana sayfadaki marka şeridi — onboarding de aynı işaretle açılır. */}
+      <div className="brand-strip" />
+      <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
       {/* ---------------- Sol panel — marka + ilerleme ---------------- */}
       <aside
         className="onboarding-aside"
@@ -241,36 +243,25 @@ export default function OnboardingView({
           flexShrink: 0,
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(177deg,#0d2a3c 0%,#0a1f2d 100%)",
-          color: "#c6d3db",
+          background: "linear-gradient(177deg,var(--teal-800) 0%,var(--teal-900) 100%)",
+          color: "var(--on-dark)",
           padding: "34px 30px",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: 12,
-              background: "linear-gradient(140deg,#f97316,#ea580c)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 4px 14px rgba(234,88,12,.35)",
-            }}
-          >
-            <Ms name="radar" size={24} color="#fff" />
-          </div>
+          <img src="/brand/gravio-mark.png" alt="" style={{ width: 40, height: "auto", flexShrink: 0 }} />
           <div style={{ lineHeight: 1.05 }}>
-            <div style={{ fontSize: 19, fontWeight: 700, color: "#fff", letterSpacing: "-.02em" }}>GravioAI</div>
-            <div style={{ fontSize: 11, color: "#7d93a1", fontWeight: 500, marginTop: 2 }}>Fırsat asistanı</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 19, fontWeight: 700, color: "#fff", letterSpacing: "-.02em" }}>
+              GravioAI
+            </div>
+            <div style={{ fontSize: 11, color: "var(--on-dark-faint)", fontWeight: 500, marginTop: 2 }}>Fırsat asistanı</div>
           </div>
         </div>
 
         <h1 style={{ fontSize: 24, fontWeight: 700, color: "#fff", lineHeight: 1.3, letterSpacing: "-.01em", margin: "44px 0 10px" }}>
           Yüzeyin altındaki fırsatı çıkaralım.
         </h1>
-        <p style={{ fontSize: 13.5, color: "#8fa3b0", lineHeight: 1.6, margin: "0 0 36px" }}>
+        <p style={{ fontSize: 13.5, color: "var(--on-dark-muted)", lineHeight: 1.6, margin: "0 0 36px" }}>
           Birkaç soruyla işletmeni tanıyalım — sana uygun devlet ve özel sektör
           desteklerini bulalım, uygunluğunu kontrol edip başvurunu hazırlayalım.
         </p>
@@ -290,7 +281,7 @@ export default function OnboardingView({
                   padding: "10px 12px",
                   borderRadius: 11,
                   background: active ? "rgba(255,255,255,.09)" : "transparent",
-                  boxShadow: active ? "inset 3px 0 0 #f97316" : "none",
+                  boxShadow: active ? "inset 3px 0 0 var(--terracotta-600)" : "none",
                 }}
               >
                 <div
@@ -302,21 +293,21 @@ export default function OnboardingView({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: done ? "linear-gradient(140deg,#f97316,#ea580c)" : active ? "rgba(249,115,22,.18)" : "rgba(255,255,255,.06)",
-                    border: active ? "1.5px solid #f97316" : "1.5px solid transparent",
+                    background: done ? "linear-gradient(140deg,var(--terracotta-600),var(--terracotta-700))" : active ? "rgba(201,106,70,.18)" : "rgba(255,255,255,.06)",
+                    border: active ? "1.5px solid var(--terracotta-600)" : "1.5px solid transparent",
                   }}
                 >
                   {done ? (
                     <Ms name="check" size={16} color="#fff" />
                   ) : (
-                    <Ms name={s.icon} size={15} color={active ? "#ffb27a" : "#5f7686"} />
+                    <Ms name={s.icon} size={15} color={active ? "var(--terracotta-400)" : "var(--on-dark-faint)"} />
                   )}
                 </div>
                 <span
                   style={{
                     fontSize: 13.5,
                     fontWeight: 600,
-                    color: done ? "#dce6ec" : active ? "#fff" : "#5f7686",
+                    color: done ? "var(--on-dark)" : active ? "#fff" : "var(--on-dark-faint)",
                   }}
                 >
                   {s.label}
@@ -337,10 +328,10 @@ export default function OnboardingView({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 7 }}>
-            <Ms name="verified_user" size={17} color="#ffb27a" />
-            <span style={{ fontSize: 12, fontWeight: 600, color: "#dce6ec" }}>Verilerin güvende</span>
+            <Ms name="verified_user" size={17} color="var(--terracotta-400)" />
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--on-dark)" }}>Verilerin güvende</span>
           </div>
-          <div style={{ fontSize: 11.5, lineHeight: 1.55, color: "#8499a6" }}>
+          <div style={{ fontSize: 11.5, lineHeight: 1.55, color: "var(--on-dark-muted)" }}>
             Verdiğin bilgiler yalnızca sana uygun destekleri bulmak için kullanılır,
             şifreli saklanır ve dilediğin zaman silebilirsin.
           </div>
@@ -370,7 +361,7 @@ export default function OnboardingView({
                       flex: 1,
                       height: 4,
                       borderRadius: 999,
-                      background: stepIndex >= idx ? "#f97316" : "#ddd8cc",
+                      background: stepIndex >= idx ? "var(--terracotta-600)" : "var(--border-subtle)",
                       transition: "background .25s",
                     }}
                   />
@@ -382,29 +373,24 @@ export default function OnboardingView({
           <div key={step} style={{ animation: "viewIn .3s ease" }}>
             {step === "welcome" && (
               <div style={{ paddingTop: 24 }}>
-                <div
-                  style={{
-                    width: 68,
-                    height: 68,
-                    borderRadius: 18,
-                    background: "linear-gradient(160deg,#f97316,#ea580c)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: "0 10px 28px rgba(234,88,12,.3)",
-                    marginBottom: 26,
-                  }}
-                >
-                  <Ms name="radar" size={34} color="#fff" />
-                </div>
-                <h2 style={{ fontSize: 28, fontWeight: 700, color: "#14222c", margin: "0 0 12px", letterSpacing: "-.015em", lineHeight: 1.25 }}>
+                {/* Roket işareti yerine "GravioAI" kelime markası. Görsel
+                    736x142 (oran ~5.2) — genişlik buna göre verildi, yoksa
+                    roketin 68px'inde okunamayacak kadar inceliyor.
+                    Dosya adındaki büyük T bilerek: Linux'ta dosya adları
+                    büyük/küçük harfe duyarlı. */}
+                <img
+                  src="/brand/gravio-Text.png"
+                  alt="GravioAI"
+                  style={{ width: 270, maxWidth: "100%", height: "auto", display: "block", marginBottom: 26 }}
+                />
+                <h2 style={{ fontSize: 28, fontWeight: 700, color: "var(--ink-900)", margin: "0 0 12px", letterSpacing: "-.015em", lineHeight: 1.25 }}>
                   Hoş geldin! İşletmeni tanıyalım.
                 </h2>
-                <p style={{ fontSize: 15.5, color: "#5a6b75", lineHeight: 1.65, margin: "0 0 10px", maxWidth: 520 }}>
+                <p style={{ fontSize: 15.5, color: "var(--ink-600)", lineHeight: 1.65, margin: "0 0 10px", maxWidth: 520 }}>
                   Yaklaşık bir dakikanı alacak birkaç soruyla profilini çıkaracağız.
                   Ne kadar çok bilgi verirsen, eşleşmeler o kadar isabetli olur.
                 </p>
-                <p style={{ fontSize: 13.5, color: "#8b969c", lineHeight: 1.6, margin: "0 0 34px", maxWidth: 520 }}>
+                <p style={{ fontSize: 13.5, color: "var(--ink-400)", lineHeight: 1.6, margin: "0 0 34px", maxWidth: 520 }}>
                   Form doldurmayı sevmiyorsan atlayabilirsin — sohbet ekranında
                   işletmeni kendi cümlelerinle anlatman da yeterli.
                 </p>
@@ -415,18 +401,18 @@ export default function OnboardingView({
                       padding: "15px 44px",
                       borderRadius: 13,
                       border: "none",
-                      background: "linear-gradient(160deg,#f97316,#ea580c)",
+                      background: "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))",
                       color: "#fff",
                       fontSize: 15.5,
                       fontWeight: 700,
-                      boxShadow: "0 8px 20px rgba(234,88,12,.28)",
+                      boxShadow: "0 8px 20px rgba(168,80,46,.28)",
                     }}
                   >
                     Başlayalım
                   </button>
                   <button
                     onClick={onSkip}
-                    style={{ fontSize: 14, color: "#8b969c", textDecoration: "underline" }}
+                    style={{ fontSize: 14, color: "var(--ink-400)", textDecoration: "underline" }}
                   >
                     Geç, direkt sohbete başlayayım
                   </button>
@@ -451,15 +437,15 @@ export default function OnboardingView({
                           gap: 12,
                           padding: "18px 16px",
                           borderRadius: 14,
-                          border: active ? "1.5px solid #f97316" : "1.5px solid #e0ddd4",
-                          background: active ? "#fff7ed" : "#fff",
+                          border: active ? "1.5px solid var(--terracotta-600)" : "1.5px solid var(--border-subtle)",
+                          background: active ? "var(--terracotta-100)" : "var(--surface)",
                           textAlign: "left",
-                          boxShadow: active ? "0 4px 14px rgba(234,88,12,.12)" : "none",
+                          boxShadow: active ? "0 4px 14px rgba(168,80,46,.12)" : "none",
                           transition: "border .15s, background .15s, box-shadow .15s",
                         }}
                       >
-                        <Ms name={s.icon} size={26} color={active ? "#ea580c" : "#5a6b75"} />
-                        <span style={{ fontSize: 13.5, fontWeight: 600, color: "#27353e", lineHeight: 1.3 }}>{s.key}</span>
+                        <Ms name={s.icon} size={26} color={active ? "var(--terracotta-700)" : "var(--ink-600)"} />
+                        <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--ink-900)", lineHeight: 1.3 }}>{s.key}</span>
                       </button>
                     );
                   })}
@@ -503,14 +489,14 @@ export default function OnboardingView({
                           gap: 9,
                           padding: "15px 0",
                           borderRadius: 12,
-                          border: active ? "1.5px solid #f97316" : "1.5px solid #e0ddd4",
-                          background: active ? "#fff7ed" : "#fff",
+                          border: active ? "1.5px solid var(--terracotta-600)" : "1.5px solid var(--border-subtle)",
+                          background: active ? "var(--terracotta-100)" : "var(--surface)",
                           fontSize: 14.5,
                           fontWeight: 600,
-                          color: "#27353e",
+                          color: "var(--ink-900)",
                         }}
                       >
-                        <Ms name={o.icon} size={19} color={active ? "#ea580c" : "#5a6b75"} />
+                        <Ms name={o.icon} size={19} color={active ? "var(--terracotta-700)" : "var(--ink-600)"} />
                         {o.l}
                       </button>
                     );
@@ -528,7 +514,7 @@ export default function OnboardingView({
                       placeholder="ör. 2"
                       style={{ ...inputStyle, marginBottom: 24 }}
                     />
-                    <p style={{ fontSize: 12.5, color: "#97a2aa", marginTop: -16, marginBottom: 24 }}>
+                    <p style={{ fontSize: 12.5, color: "var(--ink-400)", marginTop: -16, marginBottom: 24 }}>
                       Bazı programlar yalnızca belirli yaştan genç şirketlere açık — bu yüzden soruyoruz.
                     </p>
                   </>
@@ -576,20 +562,20 @@ export default function OnboardingView({
                           gap: 14,
                           padding: "15px 16px",
                           borderRadius: 13,
-                          border: active ? "1.5px solid #f97316" : "1.5px solid #e0ddd4",
-                          background: active ? "#fff7ed" : "#fff",
+                          border: active ? "1.5px solid var(--terracotta-600)" : "1.5px solid var(--border-subtle)",
+                          background: active ? "var(--terracotta-100)" : "var(--surface)",
                           textAlign: "left",
                         }}
                       >
-                        <Ms name={o.icon} size={22} color={active ? "#ea580c" : "#5a6b75"} />
+                        <Ms name={o.icon} size={22} color={active ? "var(--terracotta-700)" : "var(--ink-600)"} />
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 14.5, fontWeight: 600, color: "#27353e" }}>{o.label}</div>
-                          <div style={{ fontSize: 12.5, color: "#97a2aa", marginTop: 1 }}>{o.desc}</div>
+                          <div style={{ fontSize: 14.5, fontWeight: 600, color: "var(--ink-900)" }}>{o.label}</div>
+                          <div style={{ fontSize: 12.5, color: "var(--ink-400)", marginTop: 1 }}>{o.desc}</div>
                         </div>
                         <Ms
                           name={active ? "check_circle" : "radio_button_unchecked"}
                           size={21}
-                          color={active ? "#ea580c" : "#d0cdc4"}
+                          color={active ? "var(--terracotta-700)" : "var(--border-subtle)"}
                         />
                       </button>
                     );
@@ -615,11 +601,11 @@ export default function OnboardingView({
                           gap: 8,
                           padding: "15px 16px",
                           borderRadius: 12,
-                          border: active ? "1.5px solid #f97316" : "1.5px solid #e0ddd4",
-                          background: active ? "#fff7ed" : "#fff",
+                          border: active ? "1.5px solid var(--terracotta-600)" : "1.5px solid var(--border-subtle)",
+                          background: active ? "var(--terracotta-100)" : "var(--surface)",
                           fontSize: 14,
                           fontWeight: 600,
-                          color: "#27353e",
+                          color: "var(--ink-900)",
                           textAlign: "left",
                         }}
                       >
@@ -627,7 +613,7 @@ export default function OnboardingView({
                         <Ms
                           name={active ? "check_circle" : "add_circle"}
                           size={19}
-                          color={active ? "#ea580c" : "#d0cdc4"}
+                          color={active ? "var(--terracotta-700)" : "var(--border-subtle)"}
                         />
                       </button>
                     );
@@ -662,15 +648,15 @@ export default function OnboardingView({
                       gap: 7,
                       fontSize: 13,
                       fontWeight: 600,
-                      color: "#5a6b75",
+                      color: "var(--ink-600)",
                       cursor: docUpload.status === "loading" ? "default" : "pointer",
                       padding: "9px 15px",
-                      border: "1.5px solid #e0ddd4",
+                      border: "1.5px solid var(--border-subtle)",
                       borderRadius: 10,
-                      background: "#fff",
+                      background: "var(--surface)",
                     }}
                   >
-                    <Ms name={docUpload.status === "loading" ? "hourglass_top" : "upload_file"} size={16} color="#5a6b75" />
+                    <Ms name={docUpload.status === "loading" ? "hourglass_top" : "upload_file"} size={16} color="var(--ink-600)" />
                     {docUpload.status === "loading" ? "Okunuyor…" : "CV/şirket dokümanı yükle (PDF/DOCX)"}
                     <input
                       type="file"
@@ -682,15 +668,15 @@ export default function OnboardingView({
                   </label>
                 </div>
                 {docUpload.status === "success" && (
-                  <p style={{ fontSize: 12.5, color: "#1f6f5c", marginTop: 8 }}>{docUpload.message}</p>
+                  <p style={{ fontSize: 12.5, color: "var(--success-700)", marginTop: 8 }}>{docUpload.message}</p>
                 )}
                 {docUpload.status === "error" && (
-                  <p style={{ fontSize: 12.5, color: "#b94040", marginTop: 8 }}>{docUpload.message}</p>
+                  <p style={{ fontSize: 12.5, color: "var(--danger-700)", marginTop: 8 }}>{docUpload.message}</p>
                 )}
 
-                <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 14, padding: "12px 14px", background: "#fff", border: "1px solid #e7e4dc", borderRadius: 11 }}>
-                  <Ms name="tips_and_updates" size={17} color="#a86b12" style={{ marginTop: 1, flexShrink: 0 }} />
-                  <p style={{ fontSize: 12.5, color: "#7a6a45", lineHeight: 1.55, margin: 0 }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 14, padding: "12px 14px", background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 11 }}>
+                  <Ms name="tips_and_updates" size={17} color="var(--terracotta-700)" style={{ marginTop: 1, flexShrink: 0 }} />
+                  <p style={{ fontSize: 12.5, color: "var(--terracotta-700)", lineHeight: 1.55, margin: 0 }}>
                     Ne ürettiğini, kime sattığını ve desteği ne için istediğini yazarsan
                     en isabetli sonuçları alırsın.
                   </p>
@@ -702,10 +688,10 @@ export default function OnboardingView({
               <div>
                 <StepHeading title="Son bir adım" sub="Verilerini nasıl kullandığımızı onaylaman gerekiyor" />
 
-                <div style={{ background: "#fff", border: "1px solid #e7e4dc", borderRadius: 14, padding: "18px 20px", marginBottom: 18 }}>
+                <div style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 14, padding: "18px 20px", marginBottom: 18 }}>
                   <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                    <Ms name="verified_user" size={20} color="#1f6f5c" style={{ marginTop: 1, flexShrink: 0 }} />
-                    <p style={{ fontSize: 13.5, color: "#4b5a54", lineHeight: 1.6, margin: 0 }}>
+                    <Ms name="verified_user" size={20} color="var(--success-700)" style={{ marginTop: 1, flexShrink: 0 }} />
+                    <p style={{ fontSize: 13.5, color: "var(--ink-600)", lineHeight: 1.6, margin: 0 }}>
                       Verdiğin bilgiler yalnızca sana uygun destekleri bulmak ve başvuru
                       hazırlamak için kullanılır, şifreli saklanır ve dilediğin zaman
                       silebilirsin.
@@ -719,11 +705,11 @@ export default function OnboardingView({
                     alignItems: "flex-start",
                     gap: 12,
                     fontSize: 14,
-                    color: "#27353e",
+                    color: "var(--ink-900)",
                     cursor: "pointer",
                     padding: "15px 16px",
-                    background: form.consent ? "#fff7ed" : "#fff",
-                    border: form.consent ? "1.5px solid #f97316" : "1.5px solid #e0ddd4",
+                    background: form.consent ? "var(--terracotta-100)" : "var(--surface)",
+                    border: form.consent ? "1.5px solid var(--terracotta-600)" : "1.5px solid var(--border-subtle)",
                     borderRadius: 13,
                   }}
                 >
@@ -731,7 +717,7 @@ export default function OnboardingView({
                     type="checkbox"
                     checked={form.consent}
                     onChange={(e) => setForm((f) => ({ ...f, consent: e.target.checked }))}
-                    style={{ width: 19, height: 19, marginTop: 1, accentColor: "#f97316", flexShrink: 0 }}
+                    style={{ width: 19, height: 19, marginTop: 1, accentColor: "var(--terracotta-600)", flexShrink: 0 }}
                   />
                   <span style={{ lineHeight: 1.55 }}>
                     Kişisel verilerimin{" "}
@@ -740,7 +726,7 @@ export default function OnboardingView({
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      style={{ color: "#ea580c", textDecoration: "underline" }}
+                      style={{ color: "var(--terracotta-700)", textDecoration: "underline" }}
                     >
                       Aydınlatma Metni
                     </a>{" "}
@@ -761,11 +747,11 @@ export default function OnboardingView({
                     gap: 7,
                     padding: "14px 22px",
                     borderRadius: 13,
-                    border: "1.5px solid #e0ddd4",
-                    background: "#fff",
+                    border: "1.5px solid var(--border-subtle)",
+                    background: "var(--surface)",
                     fontSize: 14.5,
                     fontWeight: 600,
-                    color: "#5a6b75",
+                    color: "var(--ink-600)",
                   }}
                 >
                   <Ms name="arrow_back" size={17} />
@@ -784,12 +770,12 @@ export default function OnboardingView({
                     padding: "14px 0",
                     borderRadius: 13,
                     border: "none",
-                    background: canProceed ? "linear-gradient(160deg,#f97316,#ea580c)" : "#e7e4dc",
-                    color: canProceed ? "#fff" : "#a8a296",
+                    background: canProceed ? "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))" : "var(--border-subtle)",
+                    color: canProceed ? "#fff" : "var(--ink-400)",
                     fontSize: 15,
                     fontWeight: 700,
                     cursor: canProceed ? "pointer" : "not-allowed",
-                    boxShadow: canProceed ? "0 8px 20px rgba(234,88,12,.25)" : "none",
+                    boxShadow: canProceed ? "0 8px 20px rgba(168,80,46,.25)" : "none",
                   }}
                 >
                   {isLast ? "Profili oluştur" : "Devam et"}
@@ -800,6 +786,7 @@ export default function OnboardingView({
           </div>
         </div>
       </main>
+      </div>
     </section>
   );
 }

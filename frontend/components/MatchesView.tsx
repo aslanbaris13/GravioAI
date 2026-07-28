@@ -62,10 +62,10 @@ export default function MatchesView({
   return (
     <section data-screen-label="Eşleşmelerim" style={{ height: "100%", overflowY: "auto" }}>
       <div style={{ maxWidth: 1040, margin: "0 auto", padding: "30px 32px 60px" }}>
-        <h1 style={{ fontSize: 25, fontWeight: 700, color: "#14222c", letterSpacing: "-.02em", margin: 0 }}>
+        <h1 style={{ fontSize: 25, fontWeight: 700, color: "var(--ink-900)", letterSpacing: "-.02em", margin: 0 }}>
           Eşleşmelerim
         </h1>
-        <p style={{ fontSize: 14, color: "#5a6b75", marginTop: 6 }}>
+        <p style={{ fontSize: 14, color: "var(--ink-600)", marginTop: 6 }}>
           {isEmpty
             ? "Henüz eşleşme yok — chat ekranında işletmeni anlat."
             : `Profiline göre bulunan ${openPrograms.length} fırsat, uygunluk durumuna göre sıralandı.`}
@@ -80,8 +80,8 @@ export default function MatchesView({
                 display: "flex",
                 alignItems: "center",
                 gap: 13,
-                background: "#fff",
-                border: "1px solid #e7e4dc",
+                background: "var(--surface)",
+                border: "1px solid var(--border-subtle)",
                 borderRadius: 14,
                 padding: "16px 18px",
               }}
@@ -91,8 +91,8 @@ export default function MatchesView({
                   width: 40,
                   height: 40,
                   borderRadius: 11,
-                  background: "#fff3ea",
-                  color: "#ea580c",
+                  background: "var(--terracotta-100)",
+                  color: "var(--terracotta-700)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -102,8 +102,8 @@ export default function MatchesView({
                 <Ms name={s.icon} size={21} />
               </div>
               <div>
-                <div style={{ fontSize: 19, fontWeight: 700, color: "#14222c", lineHeight: 1.1 }}>{s.value}</div>
-                <div style={{ fontSize: 12, color: "#8a96a0", marginTop: 1 }}>{s.label}</div>
+                <div style={{ fontSize: 19, fontWeight: 700, color: "var(--ink-900)", lineHeight: 1.1 }}>{s.value}</div>
+                <div style={{ fontSize: 12, color: "var(--ink-400)", marginTop: 1 }}>{s.label}</div>
               </div>
             </div>
           ))}
@@ -119,16 +119,16 @@ export default function MatchesView({
               alignItems: "center",
               textAlign: "center",
               padding: "40px 24px",
-              background: "#fff",
-              border: "1px solid #e7e4dc",
+              background: "var(--surface)",
+              border: "1px solid var(--border-subtle)",
               borderRadius: 18,
             }}
           >
-            <Ms name="search_off" size={40} color="#d0cdc4" />
-            <div style={{ fontSize: 17, fontWeight: 700, color: "#27353e", marginTop: 14 }}>
+            <Ms name="search_off" size={40} color="var(--border-subtle)" />
+            <div style={{ fontSize: 17, fontWeight: 700, color: "var(--ink-900)", marginTop: 14 }}>
               Henüz eşleşme bulunamadı
             </div>
-            <div style={{ fontSize: 14, color: "#8a96a0", marginTop: 8, maxWidth: 380, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 14, color: "var(--ink-400)", marginTop: 8, maxWidth: 380, lineHeight: 1.6 }}>
               Chat ekranında işletmeni anlat; Gravio profilini çıkarıp sana uygun
               destek programlarını buraya listeleyecek.
             </div>
@@ -156,9 +156,9 @@ export default function MatchesView({
                       fontWeight: 600,
                       padding: "8px 15px",
                       borderRadius: 999,
-                      border: active ? "1px solid #ea580c" : "1px solid #e3e0d8",
-                      background: active ? "#fff3ea" : "#fff",
-                      color: active ? "#ea580c" : "#5a6b75",
+                      border: active ? "1px solid var(--terracotta-700)" : "1px solid var(--border-subtle)",
+                      background: active ? "var(--terracotta-100)" : "var(--surface)",
+                      color: active ? "var(--terracotta-700)" : "var(--ink-600)",
                     }}
                   >
                     {f.label}
@@ -179,11 +179,11 @@ export default function MatchesView({
                     onClick={() => onOpenProgram(p.id)}
                     style={{
                       textAlign: "left",
-                      background: "#fff",
-                      border: "1px solid #e7e4dc",
+                      background: "var(--surface)",
+                      border: "1px solid var(--border-subtle)",
                       borderRadius: 16,
                       padding: 18,
-                      boxShadow: "0 1px 2px rgba(20,34,44,.04)",
+                      boxShadow: "0 1px 2px rgba(22,48,46,.04)",
                       display: "flex",
                       flexDirection: "column",
                       gap: 13,
@@ -194,8 +194,8 @@ export default function MatchesView({
                         <Ms name={c.icon} size={22} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 15, fontWeight: 700, color: "#14222c", lineHeight: 1.25 }}>{c.name}</div>
-                        <div style={{ fontSize: 12, color: "#8a96a0", marginTop: 2 }}>{c.org}</div>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: "var(--ink-900)", lineHeight: 1.25 }}>{c.name}</div>
+                        <div style={{ fontSize: 12, color: "var(--ink-400)", marginTop: 2 }}>{c.org}</div>
                       </div>
                       <span style={c.statusBadgeStyle}>
                         <span style={c.statusDotStyle} />
@@ -204,10 +204,10 @@ export default function MatchesView({
                     </div>
 
                     <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                      <span style={{ fontSize: 19, fontWeight: 800, color: "#ea580c", fontVariantNumeric: "tabular-nums" }}>
+                      <span style={{ fontSize: 19, fontWeight: 800, color: "var(--terracotta-700)", fontVariantNumeric: "tabular-nums" }}>
                         {c.amountDisplayText}
                       </span>
-                      <span style={{ fontSize: 11.5, color: "#97a2aa", fontWeight: 600 }}>{c.amountSub}</span>
+                      <span style={{ fontSize: 11.5, color: "var(--ink-400)", fontWeight: 600 }}>{c.amountSub}</span>
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -215,7 +215,7 @@ export default function MatchesView({
                         <Ms name={c.eligIconName} size={14} />
                         {c.eligLabel}
                       </span>
-                      <span style={{ fontSize: 11.5, color: "#97a2aa" }}>{c.deadlineText}</span>
+                      <span style={{ fontSize: 11.5, color: "var(--ink-400)" }}>{c.deadlineText}</span>
                     </div>
                   </button>
                 );

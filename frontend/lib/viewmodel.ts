@@ -1,18 +1,20 @@
 import type { CSSProperties } from "react";
 import type { Condition, EligState, Program, ProgramCategory, ProgramStatus } from "./types";
 
+/** Kategori renkleri marka ailesinde tutulur (bkz. globals.css) — parlak
+ *  mavi/mor yerine teal, terracotta ve onlara komşu ısınmış tonlar. */
 const CATEGORY_COLORS: Record<ProgramCategory, [string, string]> = {
-  kamu: ["#fff3ea", "#ea580c"],
-  bulut: ["#eef6fb", "#0f6ea8"],
-  hizlandirici: ["#f3eefb", "#7a4fd0"],
-  vergi: ["#eaf7ee", "#15803d"],
-  yatirim: ["#fef3ed", "#c2410c"],
-  yarisma: ["#fdf6e3", "#b45309"],
-  global: ["#eef6fb", "#0f6ea8"],
+  kamu: ["var(--terracotta-100)", "var(--terracotta-700)"],
+  bulut: ["var(--teal-100)", "var(--teal-700)"],
+  hizlandirici: ["var(--plum-100)", "var(--plum-700)"],
+  vergi: ["var(--success-100)", "var(--success-700)"],
+  yatirim: ["var(--danger-100)", "var(--danger-700)"],
+  yarisma: ["var(--warn-100)", "var(--warn-700)"],
+  global: ["var(--slate-100)", "var(--slate-700)"],
 };
 
 export function iconWrap(category: ProgramCategory, big = false): CSSProperties {
-  const [bg, color] = CATEGORY_COLORS[category] ?? ["#f4f3ee", "#5a6b75"];
+  const [bg, color] = CATEGORY_COLORS[category] ?? ["var(--neutral-100)", "var(--neutral-600)"];
   const size = big ? 56 : 44;
   return {
     width: size,
@@ -28,9 +30,9 @@ export function iconWrap(category: ProgramCategory, big = false): CSSProperties 
 }
 
 const ELIG_COLORS: Record<EligState, [string, string, string]> = {
-  full: ["#eaf7ee", "#cdeccf", "#15803d"],
-  partial: ["#fdf6e3", "#f0e0b0", "#b45309"],
-  locked: ["#f1f0ec", "#e2dfd6", "#76858d"],
+  full: ["var(--success-100)", "var(--success-200)", "var(--success-700)"],
+  partial: ["var(--warn-100)", "var(--warn-200)", "var(--warn-700)"],
+  locked: ["var(--neutral-100)", "var(--neutral-200)", "var(--neutral-600)"],
 };
 
 export function eligBadge(state: EligState): CSSProperties {
@@ -56,7 +58,9 @@ export function eligIcon(state: EligState): string {
 
 export function statusBadge(status: ProgramStatus): { badge: CSSProperties; dot: CSSProperties } {
   const [bg, fg, dotColor] =
-    status === "open" ? ["#eaf7ee", "#15803d", "#16a34a"] : ["#eef6fb", "#0f6ea8", "#2a8fd0"];
+    status === "open"
+      ? ["var(--success-100)", "var(--success-700)", "var(--success-500)"]
+      : ["var(--teal-100)", "var(--teal-700)", "var(--teal-500)"];
   return {
     badge: {
       display: "inline-flex",
@@ -77,9 +81,9 @@ export function curBadge(): CSSProperties {
   return {
     fontSize: 11,
     fontWeight: 700,
-    color: "#97a2aa",
-    background: "#f4f3ee",
-    border: "1px solid #e7e4dc",
+    color: "var(--neutral-600)",
+    background: "var(--neutral-100)",
+    border: "1px solid var(--border-subtle)",
     padding: "2px 7px",
     borderRadius: 6,
     letterSpacing: ".03em",
@@ -138,8 +142,8 @@ export function deadlinePillStyle(deadlineDays: number | null): CSSProperties {
       padding: "6px 12px",
       borderRadius: 999,
       whiteSpace: "nowrap",
-      background: urgent ? "#fdf6e3" : "#eaf7ee",
-      color: urgent ? "#b45309" : "#15803d",
+      background: urgent ? "var(--warn-100)" : "var(--success-100)",
+      color: urgent ? "var(--warn-700)" : "var(--success-700)",
     };
   }
   return {
@@ -147,8 +151,8 @@ export function deadlinePillStyle(deadlineDays: number | null): CSSProperties {
     fontWeight: 700,
     padding: "6px 12px",
     borderRadius: 999,
-    background: "#eef6fb",
-    color: "#0f6ea8",
+    background: "var(--teal-100)",
+    color: "var(--teal-700)",
   };
 }
 
@@ -157,9 +161,9 @@ export function deadlineDaysText(deadlineDays: number | null): string {
 }
 
 const RING_COLORS: Record<EligState, string> = {
-  full: "#16a34a",
-  partial: "#d99a2b",
-  locked: "#9aa6ad",
+  full: "var(--success-500)",
+  partial: "var(--warn-500)",
+  locked: "var(--neutral-600)",
 };
 
 export function eligRingStyle(state: EligState, score: number): CSSProperties {
@@ -171,7 +175,7 @@ export function eligRingStyle(state: EligState, score: number): CSSProperties {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: `conic-gradient(${RING_COLORS[state]} ${score * 3.6}deg, #ececec 0deg)`,
+    background: `conic-gradient(${RING_COLORS[state]} ${score * 3.6}deg, var(--sand-200) 0deg)`,
   };
 }
 
@@ -191,10 +195,12 @@ export function eligHeadline(state: EligState, conditions: Condition[]): string 
   return remaining.length === 1 ? "Şu an bir koşul karşılanmıyor" : `Şu an ${remaining.length} koşul karşılanmıyor`;
 }
 
+/** Koşul kartları: zemin her durumda kart yüzeyi, durum bilgisini kenarlık +
+ *  ikon + etiket taşır (renkli zemin üstünde renkli etiket okunmuyordu). */
 export const CONDITION_STYLE = {
-  met: { icon: "check_circle", col: "#15803d", bg: "#fbfdfb", bd: "#e3efe5", tag: "Karşılandı", tagBg: "#eaf7ee", tagFg: "#15803d" },
-  action: { icon: "bolt", col: "#0f6ea8", bg: "#fbfdff", bd: "#dde9f2", tag: "Hazır", tagBg: "#eef6fb", tagFg: "#0f6ea8" },
-  unmet: { icon: "pending", col: "#b45309", bg: "#fffdf6", bd: "#f0e6c8", tag: "Eksik", tagBg: "#fdf6e3", tagFg: "#b45309" },
+  met: { icon: "check_circle", col: "var(--success-700)", bg: "var(--surface)", bd: "var(--success-200)", tag: "Karşılandı", tagBg: "var(--success-100)", tagFg: "var(--success-700)" },
+  action: { icon: "bolt", col: "var(--teal-700)", bg: "var(--surface)", bd: "var(--teal-200)", tag: "Hazır", tagBg: "var(--teal-100)", tagFg: "var(--teal-700)" },
+  unmet: { icon: "pending", col: "var(--warn-700)", bg: "var(--surface)", bd: "var(--warn-200)", tag: "Eksik", tagBg: "var(--warn-100)", tagFg: "var(--warn-700)" },
 } as const;
 
 export function eligCta(state: EligState, conditions: Condition[]): { icon: string; text: string; btn: string } {

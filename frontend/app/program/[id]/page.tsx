@@ -8,7 +8,7 @@ import { useProgram } from "@/lib/useProgram";
 
 export default function ProgramDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { goToMatches, goToEligibility, goToReport } = useAppState();
+  const { goToMatches, goToEligibility, goToReport, apiPrograms } = useAppState();
   const { program, state } = useProgram(id);
 
   if (state === "loading") return <ProgramLoading />;
@@ -17,7 +17,7 @@ export default function ProgramDetailPage() {
   return (
     <DetailView
       program={program}
-      onBack={goToMatches}
+      onBack={apiPrograms.length > 0 ? goToMatches : undefined}
       onCheckEligibility={() => goToEligibility(id)}
       onViewReportRequirements={() => goToReport(id)}
     />

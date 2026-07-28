@@ -1,3 +1,88 @@
+:root {
+  /* Zemin — sıcak kağıt tonu (logo arka planıyla aynı aile) */
+  --paper-100: #f5efe1;
+  --paper-50: #fbf8f1;
+  --sand-200: #eae1ce;
+  --border-subtle: #e3dac2;
+
+  /* Metin */
+  --ink-900: #16302e;
+  --ink-600: #4b615c;
+  /* Eski değer #8a988f, --paper-100 üzerinde 2.63:1 kontrast veriyordu (WCAG AA
+     için 4.5 gerekli) — üstelik 60'tan fazla yerde, çoğu 10-12px ikincil metin.
+     Bu ton 4.65:1 (kart yüzeyinde 5.02) ve aynı gri-yeşil ailede kalıyor. */
+  --ink-400: #5f6f63;
+
+  /* Birincil vurgu — teal (roketin üst kısmı, "AI") */
+  --teal-900: #0f2f33;
+  --teal-800: #143e42;
+  --teal-700: #1b6b72;
+  --teal-500: #2e8a92;
+  --teal-400: #4e9ca3;
+  --teal-100: #dcebea;
+
+  /* İkincil vurgu — terracotta (roketin alt kısmı, "Gravio") */
+  --terracotta-700: #a8502e;
+  --terracotta-600: #c96a46;
+  --terracotta-400: #d98a63;
+  --terracotta-100: #f7e7db;
+
+  --rust-600: #a8462c;
+  --rust-100: #f6e3dc;
+
+  /* Yüzeyler — kart/panel zeminleri. Sayfa zemini --paper-100, kartlar bir
+     ton açık --surface; input gibi etkileşimli alanlar en açık tonda. */
+  --surface: #fbf8f1;
+  --surface-strong: #fffdf8;
+  --surface-sunken: #f0e9d8;
+
+  /* Koyu zemin (sidebar, onboarding paneli, koyu bölümler) üzerindeki metin.
+     --ink-* tonları kağıt zemin içindir; koyu teal üzerinde okunmaz. */
+  --on-dark: #dcebea;
+  --on-dark-muted: #9db4b2;
+  --on-dark-faint: #8aa19f;
+
+  /* Durum renkleri — marka ailesinde tutuldu (parlak yeşil/mavi yerine
+     teal'e ve terracotta'ya komşu, kağıt zeminde ısınmış tonlar). */
+  --success-700: #2f6b4f;
+  --success-500: #3f8a63;
+  --success-300: #7fc79b;
+  --success-200: #cde1d3;
+  --success-100: #e4f0e7;
+
+  --warn-700: #8a5a1c;
+  --warn-500: #b8802e;
+  --warn-200: #ecd9b4;
+  --warn-100: #f7ecd6;
+
+  --danger-700: #a8462c;
+  --danger-500: #c25a3c;
+  --danger-200: #eac6b8;
+  --danger-100: #f6e3dc;
+
+  --teal-200: #c4dedd;
+
+  /* Nötr/pasif rozetler (kilitli uygunluk, para birimi etiketi vb.) */
+  --neutral-600: #7c8580;
+  --neutral-200: #dcd8c8;
+  --neutral-100: #eceade;
+
+  /* Kategori renkleri — yukarıdaki ailede kalmayan iki kategori için */
+  --plum-700: #8a4a63;
+  --plum-100: #efe4ea;
+  --slate-700: #4a5a7a;
+  --slate-100: #e4e8ef;
+
+  /* Marka şeridi ve ortak gölgeler */
+  --brand-gradient: linear-gradient(90deg, var(--teal-700), var(--terracotta-600));
+  --shadow-card: 0 1px 2px rgba(22, 48, 46, 0.05);
+  --shadow-raised: 0 8px 24px rgba(22, 48, 46, 0.1);
+  --shadow-cta: 0 8px 20px rgba(168, 80, 46, 0.24);
+
+  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
 * {
   box-sizing: border-box;
 }
@@ -7,10 +92,17 @@ body {
   padding: 0;
 }
 body {
-  font-family: "Inter", system-ui, sans-serif;
-  background: #eceae4;
-  color: #14222c;
+  font-family: var(--font-body);
+  background: var(--paper-100);
+  color: var(--ink-900);
   -webkit-font-smoothing: antialiased;
+}
+/* Başlıklar ana sayfayla aynı display fontunu kullanır — tek tek inline
+   fontFamily vermek yerine tüm ekranlarda tek noktadan uygulanıyor. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
 }
 button {
   font-family: inherit;
@@ -21,6 +113,25 @@ button {
 input,
 textarea {
   font-family: inherit;
+}
+
+/* Ana sayfanın üstündeki ince marka şeridi — uygulama içi ekranlarda da
+   aynı işareti taşımak için ortak sınıf. */
+.brand-strip {
+  height: 4px;
+  flex-shrink: 0;
+  background: var(--brand-gradient);
+}
+
+/* Program kartı açıklaması — kaynak metinler 150-340 karakter arasında
+   değişiyor, kırpılmazsa kartlar farklı boylarda uzuyor. Üç satırda kesilir,
+   tamamı program detayında görünür. */
+.program-card-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .ms {
   font-family: "Material Symbols Rounded";
@@ -81,6 +192,63 @@ textarea {
     transform: none;
   }
 }
+@keyframes sproutPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.16);
+    opacity: 1;
+  }
+}
+@keyframes growFill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes widgetRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+@keyframes widgetIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes marqueeScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 ::-webkit-scrollbar {
   width: 11px;
   height: 11px;
@@ -114,6 +282,33 @@ textarea {
   display: none;
 }
 
+/* Masaüstünde tam panel daraltılabilir: panel sola kayar, yerini SidebarRail
+   (ince ikon rayı) alır. `display:none` ile gizlemek animasyonu imkânsız
+   kılıyordu (display geçişlendirilemez, panel bir anda yok oluyordu); bunun
+   yerine negatif margin ile layout'tan çıkarılıp transform ile kaydırılıyor.
+   Kayarken 46px'lik rayın üstünden geçtiği için ray daha yüksek z-index'te
+   duruyor, panel arkasına süzülüyor.
+   Mobilde bu kavram yok — orada panel zaten off-canvas çekmece, aşağıdaki
+   media query bu kuralları geri alıyor. */
+.sidebar {
+  position: relative;
+  z-index: 1;
+  transition: margin-left 0.22s ease, transform 0.22s ease, visibility 0s linear 0s;
+}
+
+.sidebar.sidebar-collapsed {
+  margin-left: -256px;
+  /* Kaydırma bittikten sonra gizlenir: görünmez panel klavye ile
+     sekmelenebilir kalmasın. */
+  visibility: hidden;
+  transition: margin-left 0.22s ease, transform 0.22s ease, visibility 0s linear 0.22s;
+}
+
+.sidebar-rail {
+  position: relative;
+  z-index: 2;
+}
+
 @media (max-width: 768px) {
   .mobile-menu-button {
     display: flex;
@@ -121,10 +316,35 @@ textarea {
 
   .sidebar {
     position: fixed;
-    inset: 0 auto 0 0;
+    /* üstteki 4px marka şeridi açık sidebar'ın altında kalmasın */
+    inset: 4px auto 0 0;
     z-index: 40;
     transform: translateX(-100%);
     transition: transform 0.22s ease;
+  }
+
+  /* Mobilde daraltma yok: masaüstünde bırakılmış "daraltılmış" durum, dar
+     ekranda hamburger'in paneli açmasını engellememeli. Ray da gizlenir.
+     Masaüstündeki kaydırma kuralları (margin/visibility) burada sıfırlanır;
+     bu kırılımda paneli transform yönetiyor. */
+  .sidebar.sidebar-collapsed {
+    margin-left: 0;
+    visibility: visible;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+  }
+
+  .sidebar.sidebar-collapsed.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-rail {
+    display: none !important;
+  }
+
+  /* Daraltma düğmesi de gizlenir — mobilde kapatma işi backdrop'ta. */
+  .sidebar-collapse-btn {
+    display: none !important;
   }
 
   .sidebar.sidebar-open {
@@ -175,10 +395,9 @@ textarea {
 }
 
 /* ------------------------------------------------------------------ */
-/* Onboarding — split layout                                            */
-/* Masaüstünde solda markalı ilerleme paneli + sağda adım içeriği;      */
-/* dar ekranda sol panel gizlenir, üstte ince bir ilerleme çubuğu       */
-/* gösterilir.                                                          */
+/* Onboarding — üstte ince marka şeridi + yatay roket-yörünge          */
+/* göstergesi (masaüstü); dar ekranda gizlenir, yerine tek parça       */
+/* .onboarding-mobile-progress çubuğu gösterilir.                      */
 /* ------------------------------------------------------------------ */
 
 .onboarding-mobile-progress {
@@ -186,7 +405,7 @@ textarea {
 }
 
 @media (max-width: 900px) {
-  .onboarding-aside {
+  .onboarding-trajectory {
     display: none !important;
   }
 
@@ -204,5 +423,78 @@ textarea {
 
   .onboarding-goals-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+/* ---------------- Landing sayfası responsive ---------------- */
+@media (max-width: 900px) {
+  .landing-nav-links {
+    display: none !important;
+  }
+
+  .programs-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .how-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .programs-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Etkileşim geri bildirimi                                             */
+/* Stiller satır içi yazıldığı için :hover/:focus JSX'ten verilemiyor;  */
+/* bu yüzden merkezi olarak burada tanımlanıyor.                        */
+/* ------------------------------------------------------------------ */
+
+button,
+a {
+  transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
+button:hover:not(:disabled),
+a:hover {
+  filter: brightness(0.96);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  cursor: default;
+}
+
+/* Klavye odağı görünür olmalı — fare kullanıcısını rahatsız etmeden. */
+:focus-visible {
+  outline: 2px solid var(--teal-700);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Hareket hassasiyeti: sonsuz dönen marquee/nabız gibi animasyonlar kapanır. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Sohbet widget'ı: sabit 430px dar ekranda viewport'tan taşıyordu. */
+@media (max-width: 520px) {
+  .chat-widget-panel {
+    width: auto !important;
+    left: 12px !important;
+    right: 12px !important;
   }
 }
