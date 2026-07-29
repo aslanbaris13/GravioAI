@@ -1,0 +1,51 @@
+{
+  "key": "kosgeb_stratejik_urun",
+  "program_name": "KOSGEB Stratejik Ürün Destek Programı",
+  "institution": "KOSGEB",
+  "match_keywords": ["stratejik ürün", "stratejik urun"],
+  "summary": "İthalatı yüksek olan stratejik ürünlerin yerlileştirilmesi ve milli imkanlarla üretilmesine yönelik KOBİ imalat yatırımlarının desteklenmesi.",
+  "sections": [
+    {
+      "id": "stratejik_urun_tanimi",
+      "title": "Ürünün Stratejik Önemi ve İthalat Bağımlılığı (Bölüm A)",
+      "description": "Üretilecek ürünün ithalat boyutu, cari açığa etkisi ve stratejik önemi.",
+      "required_fields": [
+        {
+          "key": "urun_gtip_ve_tanim",
+          "label": "Ürün Adı, GTİP Kodu ve İthalat Verileri",
+          "description": "Yerlileştirilecek ürünün GTİP kodunu ve Türkiye'deki yıllık ithalat hacmini belirtiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "yerli_uretim_potansiyeli",
+          "label": "Yerli Üretim ve İkame Kabiliyeti",
+          "description": "Ürünün yerli üretilmesinin sağlayacağı ulusal ve ekonomik avantajları açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "uretim_altyapisi_yatirim",
+      "title": "Üretim Altyapısı ve Makine-Teçhizat Planı (Bölüm B)",
+      "description": "Seri üretim için kurulacak tesis ve makine parkuru.",
+      "char_limit": 4000,
+      "required_fields": [
+        {
+          "key": "makine_teçhizat_listesi",
+          "label": "Alınacak Makine ve Seri Üretim Ekipmanları",
+          "description": "Yerli üretim hattında kullanılacak makine, kalıp ve test donanımlarını detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Stratejik Ürün Yerlileştirme Belgesi / Bakanlık Onayı",
+    "KOSGEB KOBİ Beyannamesi",
+    "Yatırım Fizibilite Raporu",
+    "Makine-Teçhizat Proforma Faturaları"
+  ]
+}

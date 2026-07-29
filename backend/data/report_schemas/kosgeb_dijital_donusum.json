@@ -1,0 +1,58 @@
+{
+  "key": "kosgeb_dijital_donusum",
+  "program_name": "KOSGEB KOBİ Dijital Dönüşüm Destek Programı",
+  "institution": "KOSGEB",
+  "match_keywords": ["dijital dönüşüm", "dijital donusum", "kobi dijital"],
+  "summary": "İmalat sanayi KOBİ'lerinin dijital dönüşüm olgunluk seviyelerini artırmaya yönelik yazılım, donanım, otomasyon ve danışmanlık harcamalarının desteklenmesi.",
+  "sections": [
+    {
+      "id": "mevcut_dijital_olgunluk",
+      "title": "Mevcut Durum ve Dijital Olgunluk Seviyesi (Bölüm A)",
+      "description": "İşletmenin mevcut bilişim/otomasyon altyapısı ve dijital dönüşüm ihtiyaç analizi.",
+      "required_fields": [
+        {
+          "key": "mevcut_altyapi",
+          "label": "Mevcut ERP/CRM ve Otomasyon Altyapısı",
+          "description": "İşletmede aktif olarak kullanılan yazılım, donanım ve otomasyon sistemlerini açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "dijitallesme_ihtiyaci",
+          "label": "Dijital Dönüşüm İhtiyacı ve Hedeflenen Seviye",
+          "description": "Proje sonrası hedeflenen verimlilik artışı ve dijitalleşme hedeflerini belirtiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "dijital_donusum_yatirim_plani",
+      "title": "Yazılım, Donanım ve Danışmanlık Yatırım Planı (Bölüm B)",
+      "description": "Satın alınacak teknoloji kalemleri ve entegrasyon süreci.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "yazilim_donanim_kalemleri",
+          "label": "Alınacak Yazılım ve Donanım Kalemleri",
+          "description": "Proje kapsamında tedarik edilecek lisans, sensör, sunucu ve sanayiye yönelik yazılım detaylarını yazınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "danismanlik_ve_hizmet",
+          "label": "Dijital Dönüşüm Danışmanlığı ve Eğitim Hizmeti",
+          "description": "Yetkili merkezlerden alınacak danışmanlık ve eğitim detaylarını belirtiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "KOSGEB KOBİ Beyannamesi",
+    "Dijital Olgunluk Değerlendirme Raporu",
+    "Proforma Fatura / Fiyat Teklifleri",
+    "Vergi Levhası ve Onaylı İmza Sirküleri"
+  ]
+}
