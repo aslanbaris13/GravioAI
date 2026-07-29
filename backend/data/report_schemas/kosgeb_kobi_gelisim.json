@@ -1,0 +1,51 @@
+{
+  "key": "kosgeb_kobi_gelisim",
+  "program_name": "KOSGEB KOBİGEL - KOBİ Gelişim Destek Programı",
+  "institution": "KOSGEB",
+  "match_keywords": ["kobigel", "kobi gelişim", "kobi gelisim", "kobi gelişim destek programı"],
+  "summary": "İmalat sanayi KOBİ'lerinin imalat kapasitelerini, rekabet güçlerini ve verimliliklerini artırmaya yönelik proje bazlı çağrılı destek programı.",
+  "sections": [
+    {
+      "id": "kobi_mevcut_durum_ve_proje_amaci",
+      "title": "İşletme Mevcut Üretim Kapasitesi ve Proje Amacı (Bölüm A)",
+      "description": "İşletmenin mevcut imalat/hizmet kapasitesi ve projeyle hedeflenen büyüme ivmesi.",
+      "required_fields": [
+        {
+          "key": "mevcut_kapasite_ve_darbogazlar",
+          "label": "Mevcut Üretim Altyapısı ve Darboğazlar",
+          "description": "İşletmenizin mevcut üretim hatlarını, karşılaşılan kapasite/verimlilik sorunlarını açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "kobigel_hedefleri",
+          "label": "Proje Sonunda Hedeflenen Verimlilik ve İhracat Artışı",
+          "description": "Proje tamamlandığında hedeflenen ciro, istihdam ve üretim artış oranlarını belirtiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "teknoloji_ve_kapasite_yatirimi",
+      "title": "Makine-Teçhizat ve Yazılım Yatırım Planı (Bölüm B)",
+      "description": "Modernizasyon, otomasyon ve kapasite artırımı için alınacak donanımlar.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "kapasite_artirim_makineleri",
+          "label": "Alınacak Yeni Nesil Üretim Makineleri ve Otomasyon",
+          "description": "Üretim hattına eklenecek yeni makine, teçhizat ve kalite kontrol cihazlarını listeleyiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "KOSGEB KOBİ Beyannamesi",
+    "Kapasite Raporu (Sanayi Odası Onaylı)",
+    "Son 2 Yıla Ait Onaylı Mali Tablolar (Bilanço/Gelir Tablosu)",
+    "Makine-Teçhizat Proforma Faturaları"
+  ]
+}
