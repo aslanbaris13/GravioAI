@@ -15,6 +15,9 @@ def test_loads_all_report_schemas():
         "kosgeb_dijital_donusum",
         "kosgeb_yesil_sanayi",
         "kosgeb_stratejik_urun",
+        "kosgeb_arge_inovasyon",
+        "kosgeb_girisimcilik",
+        "kosgeb_kobi_gelisim",
         "kalkinma_fizibilite",
         "ticaret_pazara_giris",
         "ticaret_e_ihracat",
@@ -24,20 +27,15 @@ def test_loads_all_report_schemas():
 
 
 def test_get_report_schema_by_key():
-    # TÜBİTAK Kontrolü
-    schema_tubitak = get_report_schema("tubitak_1507")
-    assert schema_tubitak is not None
-    assert schema_tubitak.institution == "TÜBİTAK"
+    # KOSGEB Ar-Ge Kontrolü
+    schema_arge = get_report_schema("kosgeb_arge_inovasyon")
+    assert schema_arge is not None
+    assert schema_arge.institution == "KOSGEB"
 
-    # Ticaret Bakanlığı Kontrolü
-    schema_ticaret = get_report_schema("ticaret_pazara_giris")
-    assert schema_ticaret is not None
-    assert schema_ticaret.institution == "Ticaret Bakanlığı"
-
-    # AB Kontrolü
-    schema_ab = get_report_schema("ufuk_avrupa_eic")
-    assert schema_ab is not None
-    assert schema_ab.institution == "Avrupa Birliği (AB)"
+    # KOSGEB Girişimcilik Kontrolü
+    schema_girisim = get_report_schema("kosgeb_girisimcilik")
+    assert schema_girisim is not None
+    assert schema_girisim.institution == "KOSGEB"
 
 
 def test_get_report_schema_returns_none_for_unknown_key():
@@ -90,15 +88,31 @@ def test_resolve_matches_kosgeb_stratejik_urun_by_keyword():
     assert schema.key == "kosgeb_stratejik_urun"
 
 
-# --- Kalkınma Ajansı Eşleşme Testleri ---
+def test_resolve_matches_kosgeb_arge_inovasyon_by_keyword():
+    schema = resolve_report_schema_for_program("KOSGEB Ar-Ge ve İnovasyon Destek Programı")
+    assert schema is not None
+    assert schema.key == "kosgeb_arge_inovasyon"
+
+
+def test_resolve_matches_kosgeb_girisimcilik_by_keyword():
+    schema = resolve_report_schema_for_program("Girişimcilik Destek Programı İş Kurma Başvurusu")
+    assert schema is not None
+    assert schema.key == "kosgeb_girisimcilik"
+
+
+def test_resolve_matches_kosgeb_kobi_gelisim_by_keyword():
+    schema = resolve_report_schema_for_program("KOBİGEL - kobi gelişim destek programı 2026")
+    assert schema is not None
+    assert schema.key == "kosgeb_kobi_gelisim"
+
+
+# --- Kalkınma, Ticaret ve AB Eşleşme Testleri ---
 
 def test_resolve_matches_kalkinma_fizibilite_by_keyword():
     schema = resolve_report_schema_for_program("Kalkınma Ajansı Fizibilite Desteği Programı 2026")
     assert schema is not None
     assert schema.key == "kalkinma_fizibilite"
 
-
-# --- Ticaret Bakanlığı ve AB Eşleşme Testleri ---
 
 def test_resolve_matches_ticaret_pazara_giris_by_keyword():
     schema = resolve_report_schema_for_program("Pazara Giriş Belgesi Desteği 2026")

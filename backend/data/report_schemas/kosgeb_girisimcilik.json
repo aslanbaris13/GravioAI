@@ -1,0 +1,51 @@
+{
+  "key": "kosgeb_girisimcilik",
+  "program_name": "KOSGEB Girişimcilik Destek Programı",
+  "institution": "KOSGEB",
+  "match_keywords": ["girişimcilik", "girisimcilik", "iş kurma", "iş geliştirme"],
+  "summary": "Yeni kurulan genç ve yenilikçi işletmelerin hayatta kalma oranlarını artırmak amacıyla kuruluş, makine-teçhizat ve işletme giderlerinin desteklenmesi.",
+  "sections": [
+    {
+      "id": "is_fikri_ve_pazar_analizi",
+      "title": "İş Fikri Özeti ve Müşteri Potansiyeli (Bölüm A)",
+      "description": "Kurulan/kurulacak işletmenin faaliyet konusu, hedef müşteri kitlesi ve pazardaki yeri.",
+      "required_fields": [
+        {
+          "key": "is_fikri_tanimi",
+          "label": "İş Fikri, Sunulan Ürün/Hizmet ve Değer Önerisi",
+          "description": "İşletmenizin hangi sorunu çözdüğünü ve müşterilere sunduğu temel değer önerisini açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "pazar_ve_rakip_analizi",
+          "label": "Hedef Pazar, Rekabet Analizi ve Satış Stratejisi",
+          "description": "Rakiplerinizi, hedef müşteri kitlenizi ve ürün/hizmet satış kanallarınızı belirtiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "kurulus_ve_makine_giderleri",
+      "title": "Kuruluş ve Başlangıç Ekipman Planı (Bölüm B)",
+      "description": "Şirket kuruluş masrafları, ofis/üretim donanımları ve personel giderleri.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "ofis_makine_donanim_kalemleri",
+          "label": "Satın Alınacak Temel İşletme Ekipmanları",
+          "description": "İşletmenin faaliyete geçmesi için gerekli bilgisayar, yazılım, makine ve kuruluş giderlerini detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Girişimcilik Eğitimi Sertifikası / Onay Belgesi",
+    "Girişimci CV ve Kurucu Ortaklık Pay Cetveli",
+    "Ticaret Sicil Gazetesi ve Vergi Levhası",
+    "Gerekli Ekipman ve Yazılım Proforma Faturaları"
+  ]
+}

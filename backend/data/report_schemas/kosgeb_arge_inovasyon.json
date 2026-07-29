@@ -1,0 +1,51 @@
+{
+  "key": "kosgeb_arge_inovasyon",
+  "program_name": "KOSGEB Ar-Ge, Ür-Ge ve İnovasyon Destek Programı",
+  "institution": "KOSGEB",
+  "match_keywords": ["ar-ge ve inovasyon", "arge inovasyon", "ür-ge", "ürge desteği", "kosgeb ar-ge"],
+  "summary": "KOBİ'lerin ve girişimcilerin yeni bir ürün/süreç geliştirmelerine, mevcut ürün kalitesini artırmalarına ve prototip üretimine yönelik Ar-Ge/Ür-Ge projelerinin desteklenmesi.",
+  "sections": [
+    {
+      "id": "arge_proje_tanimi_ve_inovasyon",
+      "title": "Ar-Ge / Ür-Ge Proje Konusu ve İnovatif Yönü (Bölüm A)",
+      "description": "Geliştirilecek yeni ürün/proses, yenilikçi yönü ve Ar-Ge niteliği.",
+      "required_fields": [
+        {
+          "key": "proje_konusu_ve_yenilik",
+          "label": "Geliştirilecek Ürün/Proses ve İnovasyon Derecesi",
+          "description": "Proje çıktısının pazardaki muadillerine göre teknolojik yeniliklerini ve Ar-Ge içeriğini açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "prototip_ve_test_metodolojisi",
+          "label": "Prototip Geliştirme ve Test Süreçleri",
+          "description": "Prototip imalatı, test-analiz adımları ve doğrulama metodolojisini detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "bütce_ve_donanim_ihtiyaci",
+      "title": "Makine-Teçhizat, Personel ve Hizmet Alımı Bütçesi (Bölüm B)",
+      "description": "Projede görev alacak Ar-Ge personeli, test cihazları ve hammadde bütçesi.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "makine_techizat_personel_listesi",
+          "label": "Gerekli Laboratuvar/Test Cihazları ve Personel Planı",
+          "description": "Alınacak cihazlar, yazılım lisansları ve çalıştırılacak Ar-Ge personelinin niteliklerini yazınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "KOSGEB KOBİ Beyannamesi",
+    "Ar-Ge Projesi Detaylı İş Planı",
+    "Ar-Ge Personeli CV ve Lisan / Lisansüstü Diplomaları",
+    "Proforma Faturalar ve Teknik Şartnameler"
+  ]
+}
