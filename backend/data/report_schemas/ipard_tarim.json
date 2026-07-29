@@ -1,0 +1,51 @@
+{
+  "key": "ipard_tarim",
+  "program_name": "TKDK / IPARD - Tarım ve Kırsal Kalkınmayı Destekleme Programı",
+  "institution": "TKDK (Tarım ve Kırsal Kalkınmayı Destekleme Kurumu)",
+  "match_keywords": ["ipard", "tkdk", "kırsal kalkınma", "kirsal kalkinma", "tarımsal işletme desteği", "ipard destekleri"],
+  "summary": "Tarımsal işletmelerin fiziki varlıklarına yönelik yatırımlar, çiftlik faaliyetlerinin geliştirilmesi ve işleme/pazarlama tesislerinin AB standartlarına yükseltilmesi.",
+  "sections": [
+    {
+      "id": "tarimsal_yatirim_ve_fizibilite",
+      "title": "Yatırım Konusu, Kapasite ve AB Standartları (Bölüm A)",
+      "description": "Tesis/çiftlik kapasitesi, modernizasyon planı, hijyen ve çevre standartlarına uyum.",
+      "required_fields": [
+        {
+          "key": "yatirim_gerekcesi_ve_kapasite",
+          "label": "Tarımsal Yatırım Niteliği ve Kapasite Artış Planı",
+          "description": "Kurulacak veya modernize edilecek hayvancılık/gıda işleme tesisinin teknik detaylarını ve üretim kapasitesini yazınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "ab_standartlari_ve_cevre",
+          "label": "AB Hijyen, Çevre ve Hayvan Refahı Standartları Uyum Planı",
+          "description": "Yatırımın AB nitelikli çevre koruma, atık yönetimi ve hayvan refahı kriterlerine uyumunu açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "yapi_ve_makine_butcesi",
+      "title": "Inşaat İşleri, Makine Parkuru ve Finansman (Bölüm B)",
+      "description": "Yapım işleri bütçesi, traktör/makine ekipman alımı ve hibe finansman oranı.",
+      "char_limit": 4000,
+      "required_fields": [
+        {
+          "key": "ipard_hibe_butcesi_ve_harcamalar",
+          "label": "Yapım İşleri ve Makine-Ekipman Proforma Detayları",
+          "description": "Tesis inşaatı, yenilenebilir enerji sistemleri ve tarımsal makine alım bütçesini hibe oranları ile detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "IPARD İş Planı ve Yatırım Projesi (Fizibilite Raporu)",
+    "Yapı Ruhsatı / Mimari Projeler (İnşaat içeren yatırımlar için)",
+    "ÇED Gerekli Değildir / Muafiyet Yazısı",
+    "Teknik Teknik Şartnameler ve Uygun Proforma Faturalar"
+  ]
+}
