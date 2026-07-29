@@ -15,6 +15,7 @@ def test_loads_all_report_schemas():
         "kosgeb_dijital_donusum",
         "kosgeb_yesil_sanayi",
         "kosgeb_stratejik_urun",
+        "kalkinma_fizibilite",
     }
     assert expected_keys.issubset(keys)
 
@@ -31,6 +32,12 @@ def test_get_report_schema_by_key():
     assert schema_kosgeb is not None
     assert schema_kosgeb.institution == "KOSGEB"
     assert len(schema_kosgeb.sections) > 0
+
+    # Kalkınma Ajansı Kontrolü
+    schema_kalkinma = get_report_schema("kalkinma_fizibilite")
+    assert schema_kalkinma is not None
+    assert schema_kalkinma.institution == "Kalkınma Ajansı"
+    assert len(schema_kalkinma.sections) > 0
 
 
 def test_get_report_schema_returns_none_for_unknown_key():
@@ -81,6 +88,14 @@ def test_resolve_matches_kosgeb_stratejik_urun_by_keyword():
     schema = resolve_report_schema_for_program("Stratejik Ürün Destek Programı Başvuru")
     assert schema is not None
     assert schema.key == "kosgeb_stratejik_urun"
+
+
+# --- Kalkınma Ajansı Eşleşme (Resolve) Testleri ---
+
+def test_resolve_matches_kalkinma_fizibilite_by_keyword():
+    schema = resolve_report_schema_for_program("Kalkınma Ajansı Fizibilite Desteği Programı 2026")
+    assert schema is not None
+    assert schema.key == "kalkinma_fizibilite"
 
 
 # --- Olumsuz Durum ve Şema İçerik Doğrulama Testleri ---
