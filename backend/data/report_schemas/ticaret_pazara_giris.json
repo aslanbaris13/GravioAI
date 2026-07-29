@@ -1,0 +1,51 @@
+{
+  "key": "ticaret_pazara_giris",
+  "program_name": "Ticaret Bakanlığı Pazara Giriş Belgesi Desteği",
+  "institution": "Ticaret Bakanlığı",
+  "match_keywords": ["pazara giriş belgesi", "pazara giris", "ticaret bakanlığı pazara giriş"],
+  "summary": "Şirketlerin küresel pazarlara erişimini kolaylaştırmak amacıyla uluslararası kalite, çevre, güvenlik belgeleri ile test/analiz raporu giderlerinin desteklenmesi.",
+  "sections": [
+    {
+      "id": "hedef_pazar_ve_belge_ihtiyaci",
+      "title": "Hedef Pazar Analizi ve Belgelendirme Gerekçesi (Bölüm A)",
+      "description": "Hedef ihracat pazarları, pazara giriş engelleri ve gerekli sertifikasyonlar.",
+      "required_fields": [
+        {
+          "key": "hedef_ulkele_ve_potansiyel",
+          "label": "Hedef İhracat Ülkeleri ve Pazar Potansiyeli",
+          "description": "Ürünün ihraç edileceği öncelikli ülkeleri ve bu pazarlardaki talep durumunu açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "alınacak_belge_ve_standartlar",
+          "label": "Alınacak Kalite/Görünürlük Belgeleri ve Testler",
+          "description": "Başvurulacak uluslararası belge (CE, ISO, FDA, sertifikasyon vb.) ve gerekçesini yazınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "belgelendirme_maliyet_ve_surec",
+      "title": "Sertifikasyon Maliyet ve Danışmanlık Planı (Bölüm B)",
+      "description": "Belgelendirme kuruluşları, test harcamaları ve danışmanlık bütçesi.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "test_analiz_kuruluslari",
+          "label": "Akredite Test ve Belgelendirme Kuruluşu Bilgileri",
+          "description": "Hizmet alınacak akredite kurumların detaylarını ve proforma fatura özetini giriniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Ticaret Sicil Gazetesi ve İmza Sirküleri",
+    "Kapasite Raporu veya Yerli Üretim Belgesi",
+    "Belgelendirme Kuruluşu Akreditasyon Belgesi",
+    "Proforma Fatura ve Fiyat Teklifleri"
+  ]
+}
