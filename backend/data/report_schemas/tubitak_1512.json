@@ -1,0 +1,51 @@
+{
+  "key": "tubitak_1512",
+  "program_name": "TÜBİTAK 1512 - BİGG Bireysel Genç Girişim Destek Programı",
+  "institution": "TÜBİTAK",
+  "match_keywords": ["1512", "bigg", "tubitak 1512", "bireysel genç girişim", "bigg sermaye desteği"],
+  "summary": "Girişimcilerin teknoloji ve yenilik odaklı iş fikirlerini nitelikli iş planlarına dönüştürerek sermaye desteğiyle şirketleşmelerini sağlayan program.",
+  "sections": [
+    {
+      "id": "is_fikri_ve_teknolojik_yenilik",
+      "title": "İş Fikri, Teknolojik Yenilik ve Değer Önerisi (Bölüm A)",
+      "description": "Teknolojik iş fikrinin özgünlüğü, yenilikçi yönü ve çözdüğü pazar problemi.",
+      "required_fields": [
+        {
+          "key": "teknolojik_is_fikri_detayi",
+          "label": "Teknolojik İş Fikri ve Ar-Ge/Yenilik Unsuru",
+          "description": "İş fikrinizin temel teknolojisini, yenilikçi yönlerini ve mevcut çözümlerden farkını detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "hedef_pazar_ve_musteri_dogrulama",
+          "label": "Hedef Müşteri Segmenti ve Pazar Büyüklüğü",
+          "description": "Hedef kitlenizi, pazardaki problemi ve yaptığınız doğrulama/görüşme çalışmalarını açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "sirketlesme_ve_uygulama_plani",
+      "title": "Şirketleşme Yol Haritası ve Bütçe (Bölüm B)",
+      "description": "Kurulacak şirket yapısı, ilk prototip maliyetleri ve personel bütçesi.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "prototip_ve_harcama_planı",
+          "label": "BİGG Sermaye Desteği Harcama ve İş Paketleri Planı",
+          "description": "Girişim sermayesi ile yapılacak yazılım/donanım, personel ve şirket kuruluş harcamalarını detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Girişimci Lisans / Lisansüstü Öğrenci veya Mezuniyet Belgesi",
+    "Uygulayıcı Kuruluş Onay / Değerlendirme Raporu",
+    "İş Fikri Sunum Panosu ve Prototip Şeması",
+    "Girişimci Özgeçmişi"
+  ]
+}

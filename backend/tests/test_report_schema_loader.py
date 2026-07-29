@@ -13,12 +13,15 @@ def test_loads_all_report_schemas():
         "tubitak_1711",
         "tubitak_1831",
         "tubitak_1001",
+        "tubitak_1505",
+        "tubitak_1512",
         "kosgeb_dijital_donusum",
         "kosgeb_yesil_sanayi",
         "kosgeb_stratejik_urun",
         "kosgeb_arge_inovasyon",
         "kosgeb_girisimcilik",
         "kosgeb_kobi_gelisim",
+        "kosgeb_isletme_gelistirme",
         "kalkinma_fizibilite",
         "ticaret_pazara_giris",
         "ticaret_e_ihracat",
@@ -30,20 +33,17 @@ def test_loads_all_report_schemas():
 
 
 def test_get_report_schema_by_key():
-    # Sanayi Hamle Kontrolü
-    schema_hamle = get_report_schema("sanayi_hamle")
-    assert schema_hamle is not None
-    assert schema_hamle.institution == "Sanayi ve Teknoloji Bakanlığı"
+    schema_1505 = get_report_schema("tubitak_1505")
+    assert schema_1505 is not None
+    assert schema_1505.institution == "TÜBİTAK"
 
-    # TÜBİTAK 1001 Kontrolü
-    schema_1001 = get_report_schema("tubitak_1001")
-    assert schema_1001 is not None
-    assert schema_1001.institution == "TÜBİTAK"
+    schema_1512 = get_report_schema("tubitak_1512")
+    assert schema_1512 is not None
+    assert schema_1512.institution == "TÜBİTAK"
 
-    # Hazine KGF Kontrolü
-    schema_hazine = get_report_schema("hazine_kobi_finansman")
-    assert schema_hazine is not None
-    assert schema_hazine.institution == "Hazine ve Maliye Bakanlığı"
+    schema_isletme = get_report_schema("kosgeb_isletme_gelistirme")
+    assert schema_isletme is not None
+    assert schema_isletme.institution == "KOSGEB"
 
 
 def test_get_report_schema_returns_none_for_unknown_key():
@@ -82,6 +82,18 @@ def test_resolve_matches_1001_by_keyword():
     assert schema.key == "tubitak_1001"
 
 
+def test_resolve_matches_1505_by_keyword():
+    schema = resolve_report_schema_for_program("TÜBİTAK 1505 Üniversite Sanayi İşbirliği Programı")
+    assert schema is not None
+    assert schema.key == "tubitak_1505"
+
+
+def test_resolve_matches_1512_by_keyword():
+    schema = resolve_report_schema_for_program("TÜBİTAK 1512 BİGG Bireysel Genç Girişim")
+    assert schema is not None
+    assert schema.key == "tubitak_1512"
+
+
 # --- KOSGEB Eşleşme (Resolve) Testleri ---
 
 def test_resolve_matches_kosgeb_dijital_donusum_by_keyword():
@@ -118,6 +130,12 @@ def test_resolve_matches_kosgeb_kobi_gelisim_by_keyword():
     schema = resolve_report_schema_for_program("kobigel - kobi gelişim destek programı 2026")
     assert schema is not None
     assert schema.key == "kosgeb_kobi_gelisim"
+
+
+def test_resolve_matches_kosgeb_isletme_gelistirme_by_keyword():
+    schema = resolve_report_schema_for_program("kosgeb işletme geliştirme destek programı başvurusu")
+    assert schema is not None
+    assert schema.key == "kosgeb_isletme_gelistirme"
 
 
 # --- Kalkınma, Ticaret, AB, Sanayi ve Hazine Eşleşme Testleri ---
