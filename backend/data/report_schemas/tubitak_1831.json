@@ -1,0 +1,33 @@
+{
+  "key": "tubitak_1831",
+  "program_name": "TÜBİTAK 1831 - Yeşil İnovasyon Teknoloji Mentorluk Desteği",
+  "institution": "TÜBİTAK",
+  "match_keywords": ["1831", "yeşil inovasyon", "yesil inovasyon", "mentorluk desteği"],
+  "summary": "KOBİ'lerin yeşil dönüşüm (karbon ayak izi azaltımı, döngüsel ekonomi, kaynak verimliliği) süreçlerinde alacakları teknik mentorluk ve danışmanlık hizmetlerinin desteklenmesi.",
+  "sections": [
+    {
+      "id": "mevcut_durum_karbon_salinimi",
+      "title": "Mevcut Durum ve Yeşil Dönüşüm İhtiyacı (Bölüm A)",
+      "description": "İşletmenin enerji, kaynak ve atık yönetimindeki mevcut durumu ve yeşil dönüşüm hedefleri.",
+      "required_fields": [
+        { "key": "mevcut_durum", "label": "İşletmenin mevcut üretim ve enerji/kaynak tüketim yapısı", "description": "", "long_text": true, "prefillable_from_profile": null },
+        { "key": "yesil_donusum_hedefi", "label": "Karbon ayak izi azaltımı ve yeşil dönüşüm hedefleri", "description": "", "long_text": true, "prefillable_from_profile": null }
+      ]
+    },
+    {
+      "id": "mentorluk_kapsami_ve_danisman",
+      "title": "Mentorluk Hizmeti ve Çalışma Planı (Bölüm B)",
+      "description": "Alınacak danışmanlık/mentorluk hizmetinin kapsamı ve rehberlik altyapısı.",
+      "char_limit": 3000,
+      "required_fields": [
+        { "key": "mentor_bilgisi", "label": "TÜBİTAK Havuzundan Seçilen Mentor / Danışman bilgileri", "description": "", "long_text": false, "prefillable_from_profile": null },
+        { "key": "hizmet_kapsami", "label": "Mentorluk sürecinde gerçekleştirilecek analiz ve yol haritası çalışmaları", "description": "", "long_text": true, "prefillable_from_profile": null }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Mentorluk Hizmet Sözleşmesi Taslağı",
+    "KOBİ Beyannamesi",
+    "Son yıla ait Enerji / Kaynak Tüketim Belgeleri"
+  ]
+}
