@@ -5,21 +5,39 @@ from data.report_schema_loader import (
 )
 
 
-def test_loads_both_bootcamp_schemas():
+def test_loads_all_report_schemas():
     keys = {s.key for s in load_report_schemas()}
-    assert keys == {"tubitak_1507", "tubitak_1501", "tubitak_1711", "tubitak_1831"}
+    expected_keys = {
+        "tubitak_1507",
+        "tubitak_1501",
+        "tubitak_1711",
+        "tubitak_1831",
+        "kosgeb_dijital_donusum",
+        "kosgeb_yesil_sanayi",
+        "kosgeb_stratejik_urun",
+    }
+    assert expected_keys.issubset(keys)
 
 
 def test_get_report_schema_by_key():
-    schema = get_report_schema("tubitak_1507")
-    assert schema is not None
-    assert schema.institution == "TÜBİTAK"
-    assert len(schema.sections) > 0
+    # TÜBİTAK Kontrolü
+    schema_tubitak = get_report_schema("tubitak_1507")
+    assert schema_tubitak is not None
+    assert schema_tubitak.institution == "TÜBİTAK"
+    assert len(schema_tubitak.sections) > 0
+
+    # KOSGEB Kontrolü
+    schema_kosgeb = get_report_schema("kosgeb_dijital_donusum")
+    assert schema_kosgeb is not None
+    assert schema_kosgeb.institution == "KOSGEB"
+    assert len(schema_kosgeb.sections) > 0
 
 
 def test_get_report_schema_returns_none_for_unknown_key():
     assert get_report_schema("bilinmeyen_program") is None
 
+
+# --- TÜBİTAK Eşleşme (Resolve) Testleri ---
 
 def test_resolve_matches_1507_by_keyword():
     schema = resolve_report_schema_for_program("TÜBİTAK 1507 - KOBİ Ar-Ge Başlangıç Destek Programı")
@@ -32,6 +50,40 @@ def test_resolve_matches_1501_by_keyword():
     assert schema is not None
     assert schema.key == "tubitak_1501"
 
+
+def test_resolve_matches_1711_by_keyword():
+    schema = resolve_report_schema_for_program("TÜBİTAK 1711 Yapay Zeka Ekosistem Çağrısı")
+    assert schema is not None
+    assert schema.key == "tubitak_1711"
+
+
+def test_resolve_matches_1831_by_keyword():
+    schema = resolve_report_schema_for_program("1831 - Yeşil İnovasyon Teknoloji Mentorluk Desteği")
+    assert schema is not None
+    assert schema.key == "tubitak_1831"
+
+
+# --- KOSGEB Eşleşme (Resolve) Testleri ---
+
+def test_resolve_matches_kosgeb_dijital_donusum_by_keyword():
+    schema = resolve_report_schema_for_program("KOBİ Dijital Dönüşüm Destek Programı")
+    assert schema is not None
+    assert schema.key == "kosgeb_dijital_donusum"
+
+
+def test_resolve_matches_kosgeb_yesil_sanayi_by_keyword():
+    schema = resolve_report_schema_for_program("KOSGEB Yeşil Sanayi Destek Programı 2026")
+    assert schema is not None
+    assert schema.key == "kosgeb_yesil_sanayi"
+
+
+def test_resolve_matches_kosgeb_stratejik_urun_by_keyword():
+    schema = resolve_report_schema_for_program("Stratejik Ürün Destek Programı Başvuru")
+    assert schema is not None
+    assert schema.key == "kosgeb_stratejik_urun"
+
+
+# --- Olumsuz Durum ve Şema İçerik Doğrulama Testleri ---
 
 def test_resolve_returns_none_for_unrecognized_program():
     assert resolve_report_schema_for_program("Kadın Girişimci Destek Kredisi") is None

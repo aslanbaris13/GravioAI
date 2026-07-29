@@ -1,0 +1,51 @@
+{
+  "key": "kosgeb_yesil_sanayi",
+  "program_name": "KOSGEB Yeşil Sanayi Destek Programı",
+  "institution": "KOSGEB",
+  "match_keywords": ["yeşil sanayi", "yesil sanayi"],
+  "summary": "KOBİ'lerin kaynak verimliliği, atık yönetimi, yenilenebilir enerji ve karbon emisyonu azaltımına yönelik yeşil dönüşüm projelerinin desteklenmesi.",
+  "sections": [
+    {
+      "id": "mevcut_cevresel_durum",
+      "title": "Mevcut Çevresel Etki ve Kaynak Tüketimi (Bölüm A)",
+      "description": "İşletmenin enerji, su, hammadde tüketimi ve mevcut atık durumu.",
+      "required_fields": [
+        {
+          "key": "enerji_ve_kaynak_haritasi",
+          "label": "Mevcut Enerji ve Kaynak Tüketim Durumu",
+          "description": "Yıllık elektrik, gaz, su tüketimleri ile atık yönetim süreçlerinizi açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "proje_surdurulebilirlik_hedefi",
+          "label": "Projenin Karbon Ayak İzi ve Tasarruf Hedefleri",
+          "description": "Yatırım sonunda hedeflenen % enerji/kaynak tasarrufu ve CO2 emisyon azaltım miktarını yazınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "yesil_yatirim_ve_teknoloji",
+      "title": "Yeşil Teknoloji Yatırımları ve Ekipman Planı (Bölüm B)",
+      "description": "Yenilenebilir enerji sistemleri (GES vb.) ve enerji verimli makine alımları.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "yatirim_kalemleri",
+          "label": "Alınacak Yeşil Teknoloji Ekipman ve Sistemler",
+          "description": "Enerji verimli motorlar, atık ısı geri kazanım veya GES panelleri gibi sistem detaylarını belirtiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Enerji Etüt Raporu veya Karbon Ayak İzi Belgesi",
+    "KOSGEB KOBİ Beyannamesi",
+    "Teknik Proje Şartnamesi",
+    "Proforma Faturalar"
+  ]
+}
