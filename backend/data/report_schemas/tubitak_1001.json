@@ -1,0 +1,51 @@
+{
+  "key": "tubitak_1001",
+  "program_name": "TÜBİTAK 1001 - Bilimsel ve Teknolojik Araştırma Projelerini Destekleme Programı",
+  "institution": "TÜBİTAK",
+  "match_keywords": ["1001", "tubitak 1001", "1001 desteği", "bilimsel araştırma projesi", "1001 programı"],
+  "summary": "Yeni bilimsel bilginin üretilmesi, teknolojik gelişmenin sağlanması veya yeni araştırma yöntemlerinin geliştirilmesine yönelik akademik ve kurumsal araştırma projelerinin desteklenmesi.",
+  "sections": [
+    {
+      "id": "ozgun_deger_ve_hipotez",
+      "title": "Projenin Özgün Değeri ve Araştırma Hipotezi (Bölüm A)",
+      "description": "Bilimsel/teknolojik özgünlük, literatürdeki boşluklar ve çalışma hipotezi.",
+      "required_fields": [
+        {
+          "key": "ozgun_deger_ve_literatur",
+          "label": "Bilimsel/Teknolojik Özgün Değer ve Literatür Özeti",
+          "description": "Projenin ulusal ve uluslararası literatürdeki yerini, özgün değerini ve bilime katkısını açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "hipotez_ve_yontem",
+          "label": "Araştırma Hipotezi ve Metodoloji",
+          "description": "Kullanılacak araştırma yöntemlerini, veri toplama ve analiz tekniklerini detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "yaygin_etki_ve_ekip",
+      "title": "Yaygın Etki ve Araştırmacı Kadrosu (Bölüm B)",
+      "description": "Makale, patent, nitelikli insan kaynağı yetiştirilmesi ve proje ekibi.",
+      "char_limit": 4000,
+      "required_fields": [
+        {
+          "key": "akademik_ve_toplumsal_etki",
+          "label": "Hedeflenen Çıktılar (Makale, Lisansüstü Tez, Patent)",
+          "description": "Proje sonucunda beklenen akademik ve sosyo-ekonomik çıktıları listeleyiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Proje Yürütücüsü ve Araştırmacı Özgeçmişleri (ARDSİS/AVESİS)",
+    "Etik Kurul Onay Belgesi (Gerekli ise)",
+    "Yasal/Özel İzin Belgeleri",
+    "Makine-Teçhizat ve Sarf Malzeme Proforma Faturaları"
+  ]
+}
