@@ -1,0 +1,51 @@
+{
+  "key": "ufuk_avrupa_eic",
+  "program_name": "AB Ufuk Avrupa / EIC Accelerator Programı",
+  "institution": "Avrupa Birliği (AB)",
+  "match_keywords": ["ufuk avrupa", "eic accelerator", "horizon europe"],
+  "summary": "Radyal yenilikçi, yüksek riskli ve yüksek büyüme potansiyeline sahip derin teknoloji (Deep-Tech) girişimlerinin ticari ölçeklenmesini destekleyen hibe ve karma finansman programı.",
+  "sections": [
+    {
+      "id": "excellence_and_deeptech",
+      "title": "Mükemmeliyet ve Derin Teknoloji Yeniliği (Excellence - Section 1)",
+      "description": "Teknolojinin radyal yenilik derecesi, TRL (Teknoloji Hazırlık Seviyesi) ve patent/fikri mülkiyet durumu.",
+      "required_fields": [
+        {
+          "key": "radikal_yenilik_ve_trl",
+          "label": "Radyal Yenilik Tanımı ve Mevcut TRL Seviyesi",
+          "description": "Çözümün mevcut piyasa teknolojilerinden farkını ve TRL seviyesini (Mevcut TRL 5-6 -> Hedef TRL 8-9) açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "fikri_mulkiyet_haklari",
+          "label": "Fikri ve Sınai Mülkiyet (IPR) Stratejisi",
+          "description": "Patente konu buluşlar, koruma stratejisi ve özgür uygulama (Freedom to Operate) durumunu belirtiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "impact_and_scaleup",
+      "title": "Pazar Etkisi ve Ölçeklenme Potansiyeli (Impact - Section 2)",
+      "description": "AB ölçeğinde pazar büyüklüğü, ticari model ve ölçeklenme (Scale-up) projeksiyonu.",
+      "char_limit": 5000,
+      "required_fields": [
+        {
+          "key": "pazar_boyutu_ve_go_to_market",
+          "label": "Pazar Büyüklüğü (TAM/SAM/SOM) ve Pazara Giriş Stratejisi",
+          "description": "Avrupa ve küresel pazar büyüklüğünü, gelir modelini ve müşteri edinim stratejisini detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "EIC Pitch Deck Sunumu",
+    "Freedom to Operate (FTO) Analiz Raporu",
+    "Finansal Projeksiyon ve Bütçe Tablosu",
+    "Şirket Kurucuları ve Ana Ekip Özgeçmişleri (CV)"
+  ]
+}

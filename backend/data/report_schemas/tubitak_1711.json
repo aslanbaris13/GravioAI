@@ -1,0 +1,46 @@
+{
+  "key": "tubitak_1711",
+  "program_name": "TÜBİTAK 1711 - Yapay Zeka Ekosistem Çağrısı",
+  "institution": "TÜBİTAK",
+  "match_keywords": ["1711", "yapay zeka ekosistem", "yapay zeka kredi"],
+  "summary": "Özel sektörün ihtiyaç duyduğu yapay zeka çözümlerinin yerli teknoloji geliştirici KOBİ'ler ve üniversiteler/araştırma merkezleri iş birliğiyle geliştirilmesini sağlayan öncelikli alan Ar-Ge destek programı.",
+  "sections": [
+    {
+      "id": "kurulus_ve_proje_ozeti",
+      "title": "Konsorsiyum ve Proje Özeti (Bölüm A)",
+      "description": "Müşteri kuruluş, teknoloji sağlayıcı KOBİ ve üniversite/araştırma merkezinden oluşan konsorsiyum yapısı ve projenin amacı.",
+      "required_fields": [
+        { "key": "konsorsiyum_yapisi", "label": "Konsorsiyum ortakları ve görev dağılımı", "description": "", "long_text": true, "prefillable_from_profile": null },
+        { "key": "musteri_ihtiyaci", "label": "Müşteri kuruluşun yapay zeka alanındaki problemi/ihtiyacı", "description": "", "long_text": true, "prefillable_from_profile": null },
+        { "key": "proje_amaci", "label": "Projenin genel amacı", "description": "", "long_text": true, "prefillable_from_profile": null }
+      ]
+    },
+    {
+      "id": "yapay_zeka_model_mimarisi",
+      "title": "Yapay Zeka Modeli, Veri Seti ve Yenilikçi Yön (Bölüm B)",
+      "description": "Kullanılacak veri setleri, veri gizliliği, YZ algoritma/mimari seçimi ve teknik zorluklar.",
+      "char_limit": 4000,
+      "required_fields": [
+        { "key": "veri_seti_ve_gizlilik", "label": "Kullanılacak veri setleri, boyutu ve etiketleme/gizlilik süreçleri", "description": "", "long_text": true, "prefillable_from_profile": null },
+        { "key": "yz_model_mimarisi", "label": "Geliştirilecek YZ modeli, algoritma ve kullanılacak mimari", "description": "", "long_text": true, "prefillable_from_profile": null },
+        { "key": "teknik_zorluklar", "label": "Aşılması gereken teknik belirsizlikler ve doğrulama metrikleri (Accuracy, F1 vb.)", "description": "", "long_text": true, "prefillable_from_profile": null }
+      ]
+    },
+    {
+      "id": "ekonomik_yarar_ve_entegrasyon",
+      "title": "Ürüne Dönüştürme ve Müşteri Entegrasyonu (Bölüm D)",
+      "description": "Geliştirilen YZ modelinin müşteri kuruluşun canlı sistemlerine entegrasyonu ve ticarileşme potansiyeli.",
+      "char_limit": 2000,
+      "required_fields": [
+        { "key": "canliya_alma_plani", "label": "YZ modelinin müşteri ortamına entegrasyonu ve canlıya alma planı", "description": "", "long_text": true, "prefillable_from_profile": null },
+        { "key": "ticari_potansiyel", "label": "Çözümün yaygınlaşma ve başka müşterilere satılma potansiyeli", "description": "", "long_text": true, "prefillable_from_profile": null }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Konsorsiyum İş Birliği Protokolü",
+    "Müşteri Kuruluş Niyet Mektubu / Taahhütname",
+    "Veri Paylaşımı ve Gizlilik Sözleşmesi Taslağı",
+    "Firma Vergi Levhaları ve İmza Sirküleri"
+  ]
+}

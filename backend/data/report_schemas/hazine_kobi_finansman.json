@@ -1,0 +1,51 @@
+{
+  "key": "hazine_kobi_finansman",
+  "program_name": "Hazine / KGF Destekli KOBİ Finansman Paketi",
+  "institution": "Hazine ve Maliye Bakanlığı",
+  "match_keywords": ["hazine destekli", "kgf desteği", "kobi finansman paketi", "hazine kredi kefalet"],
+  "summary": "KOBİ'lerin finansmana erişimini kolaylaştırmak, işletme sermayesi ve yatırım harcamalarını Hazine destekli kefalet sistemi ile desteklemek.",
+  "sections": [
+    {
+      "id": "kredi_kullanim_amaci",
+      "title": "Kredi Kullanım Amacı ve İşletme İhtiyacı (Bölüm A)",
+      "description": "Finansmanın işletme sermayesi, hammadde alımı veya yatırım harcamalarındaki kullanım detayları.",
+      "required_fields": [
+        {
+          "key": "finansman_gerekcesi",
+          "label": "Finansman İhtiyacı ve Nakit Akış Planı",
+          "description": "Talep edilen kredinin işletmenin hangi operasyonel veya yatırım ihtiyacı için kullanılacağını açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "geri_odeme_kapasitesi",
+          "label": "Mali Yapı ve Geri Ödeme Projeksiyonu",
+          "description": "İşletmenin mevcut borçluluk durumunu, ciro büyümesini ve kredi geri ödeme kapasitesini özetleyiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "teminat_ve_kefalet_yapisi",
+      "title": "KGF Kefalet ve Teminat Yapısı (Bölüm B)",
+      "description": "Krediye konu kefalet oranları ve banka protokol süreçleri.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "varlik_ve_teminat_dökümü",
+          "label": "İşletme Varlık Yapısı ve Sunulabilecek Ek Teminatlar",
+          "description": "KGF kefaleti dışındaki mevcut teminat yapısını ve banka nezdindeki kredibilitenizi detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Vergi Levhası ve Ticaret Sicil Gazetesi",
+    "Son 3 Yıla Ait Bilanço ve Gelir Tabloları",
+    "SGK Borcu Yoktur Belgesi",
+    "Bankalardan Alınan Kredi Durum Yazıları"
+  ]
+}

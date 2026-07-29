@@ -1,0 +1,51 @@
+{
+  "key": "kosgeb_yalin_donusum",
+  "program_name": "KOSGEB Yalın Dönüşüm Destek Programı",
+  "institution": "KOSGEB",
+  "match_keywords": ["yalın dönüşüm", "yalin donusum", "model fabrika", "kosgeb yalın", "yalın üretim"],
+  "summary": "İmalat sanayi KOBİ'lerinin Model Fabrikalardan alacakları öğren-dönüş projesi hizmetleri ile israflardan arınmasını ve verimliliklerini artırmasını sağlayan destek programı.",
+  "sections": [
+    {
+      "id": "model_fabrika_ve_mevcut_durum",
+      "title": "Model Fabrika Hizmet Alımı ve İsraf Analizi (Bölüm A)",
+      "description": "Firma üretim sahasındaki israflar, Model Fabrika eğitimi ve yalın dönüşüm hedefleri.",
+      "required_fields": [
+        {
+          "key": "yalin_donusum_ihtiyaci",
+          "label": "Mevcut Üretim İsrafları ve Yalın Dönüşüm Gerekçesi",
+          "description": "Üretim hattınızdaki hat dengeleme, kurulum süreleri (SMED), stok/fire sorunlarını ve yalın dönüşüm ihtiyacını açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "model_fabrika_isbirligi",
+          "label": "Seçilen Model Fabrika ve Danışmanlık Kapsamı",
+          "description": "Hizmet alınacak Yetkinlik ve Dijital Dönüşüm Merkezi (Model Fabrika) ve Eğitim-Dönüşüm modüllerini yazınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "ogren_donus_projesi_ve_kazanimlar",
+      "title": "Öğren-Dönüş Projesi İş Planı ve Verimlilik Hedefleri (Bölüm B)",
+      "description": "Saha uygulaması, verimlilik artış oranı ve bütçe planı.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "verimlilik_hedefleri_ve_butce",
+          "label": "OEE/Verimlilik Artış Hedefleri ve Hizmet Bütçesi",
+          "description": "Proje sonunda hedeflenen Toplam Ekipman Etkinliği (OEE) artışını, adam-saat tasarrufunu ve hizmet alım giderlerini detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "KOSGEB KOBİ Beyannamesi",
+    "Model Fabrika Hizmet/Eğitim Teklif Belgesi",
+    "Yalın Dönüşüm Ön Değerlendirme / Anket Raporu",
+    "İmza Sirküleri ve SGK Borcu Yoktur Belgesi"
+  ]
+}

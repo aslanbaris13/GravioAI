@@ -1,0 +1,51 @@
+{
+  "key": "tubitak_1505",
+  "program_name": "TÜBİTAK 1505 - Üniversite-Sanayi İşbirliği Destek Programı",
+  "institution": "TÜBİTAK",
+  "match_keywords": ["1505", "tubitak 1505", "üniversite sanayi işbirliği", "universite sanayi isbirligi"],
+  "summary": "Üniversitelerdeki/araştırma kurumlarındaki bilgi birikiminin sanayiye aktarılarak ticari ürüne veya sürece dönüştürülmesi amacıyla yapılan ortak Ar-Ge projelerinin desteklenmesi.",
+  "sections": [
+    {
+      "id": "isbirligi_ve_ozgun_deger",
+      "title": "Üniversite-Sanayi İşbirliği ve Projenin Özgün Değeri (Bölüm A)",
+      "description": "Müşteri kuruluş ile müşteri araştırmacı kuruluş arasındaki işbirliği modeli ve teknolojik yenilik.",
+      "required_fields": [
+        {
+          "key": "sanayi_ihtiyaci_ve_teknoloji",
+          "label": "Sanayi Kuruluşunun İhtiyacı ve Ar-Ge Niteliği",
+          "description": "Sanayi ortağının çözmek istediği teknik problemi ve akademiden alınacak bilginin projedeki rolünü açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "akademik_ortak_ve_metodoloji",
+          "label": "Üniversite/Araştırma Grubu Yetkinliği ve Yöntem",
+          "description": "Proje yürütücüsü akademisyenin uzmanlığını ve uygulanacak Ar-Ge yöntemini detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "ticarilesme_ve_paylasim_butcesi",
+      "title": "Ticaretleşme Potansiyeli ve Bütçe Paylaşımı (Bölüm B)",
+      "description": "Proje çıktısının sanayide uygulanması, lisanslama ve maliyet paylaşım planı.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "ticarilesme_ve_hisse_planı",
+          "label": "Ürün/Hizmet Satış Projeksiyonu ve Fikri Hak Paylaşımı",
+          "description": "Proje sonucunda ortaya çıkacak ürünün sanayi ortağı tarafından pazarlanması ve FMR paylaşım esaslarını belirtiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Üniversite-Sanayi İşbirliği Sözleşmesi / Protokolü",
+    "Akademik Yürütücü Özgeçmişi ve AVESİS Dökümü",
+    "Sanayi Ortağı Ticaret Sicil Gazetesi ve Mali Tablolar",
+    "Proje Bütçe Formları ve Proforma Faturalar"
+  ]
+}

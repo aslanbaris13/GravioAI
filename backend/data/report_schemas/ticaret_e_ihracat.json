@@ -1,0 +1,51 @@
+{
+  "key": "ticaret_e_ihracat",
+  "program_name": "Ticaret Bakanlığı E-İhracat Destekleri",
+  "institution": "Ticaret Bakanlığı",
+  "match_keywords": ["e-ihracat", "e ihracat", "ticaret bakanlığı e-ihracat"],
+  "summary": "Şirketlerin sınır ötesi e-ticaret (B2C/B2B) kapasitelerini artırmaya yönelik dijital pazaryeri entegrasyonu, dijital reklam ve depolama harcamalarının desteklenmesi.",
+  "sections": [
+    {
+      "id": "e_ihracat_stratejisi",
+      "title": "E-İhracat Stratejisi ve Dijital Pazaryerleri (Bölüm A)",
+      "description": "Açılınacak küresel pazaryerleri (Amazon, Etsy, Allegro vb.) ve dijital pazarlama altyapısı.",
+      "required_fields": [
+        {
+          "key": "hedef_pazaryerleri_ve_urunler",
+          "label": "Hedef Küresel Pazaryerleri ve Ürün Gamı",
+          "description": "E-ihracat yapılacak dijital platformları ve satışı hedeflenen ürün gruplarını açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "dijital_reklam_ve_pazarlama_plani",
+          "label": "Dijital Reklam ve Arama Motoru Pazarlaması Planı",
+          "description": "Tıklama başı reklam (PPC), sosyal medya ve fenomen pazarlaması stratejilerinizi detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "lojistik_ve_entegrasyon",
+      "title": "Lojistik, Depolama ve Entegrasyon Altyapısı (Bölüm B)",
+      "description": "Yurt dışı depolama (FBA/3PL), sipariş karşılama ve yazılım entegrasyonları.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "yurt_disi_depolama_ve_lojistik",
+          "label": "Yurt Dışı Depo ve Lojistik Hizmet Alımı",
+          "description": "Kullanılacak fulfillment/depo merkezleri ve lojistik entegrasyon çözümlerini yazınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "E-İhracat Yararlanıcı Statü Belgesi",
+    "Yurt Dışı Pazaryeri Mağaza Onay Belgeleri",
+    "Dijital Reklam Harcama Faturaları",
+    "Vergi Levhası ve Şirket Resmi Evrakları"
+  ]
+}
