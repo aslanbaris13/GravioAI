@@ -34,6 +34,9 @@ export default function Sidebar({
   onNavApplications,
   onNavProfile,
   onNavHome,
+  onNavLogin,
+  onSignOut,
+  userEmail,
   collapsed,
   onCollapse,
   profile,
@@ -51,6 +54,9 @@ export default function Sidebar({
   onNavApplications: () => void;
   onNavProfile: () => void;
   onNavHome: () => void;
+  onNavLogin: () => void;
+  onSignOut: () => void;
+  userEmail: string | null;
   profile: BackendUserProfile | null;
 }) {
   const pathname = usePathname();
@@ -266,6 +272,54 @@ export default function Sidebar({
           <div style={{ fontSize: 10.5, color: "var(--on-dark-muted)" }}>{meta}</div>
         </div>
       </button>
+
+      {/* Hesap satırı — girişliyse e-posta + çıkış, değilse giriş bağlantısı. */}
+      <div
+        style={{
+          borderTop: "1px solid rgba(255,255,255,.08)",
+          marginTop: 8,
+          paddingTop: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+          {userEmail ? (
+            <>
+              <div
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  fontSize: 11,
+                  color: "var(--on-dark-muted)",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+                title={userEmail}
+              >
+                {userEmail}
+              </div>
+              <button
+                onClick={onSignOut}
+                title="Çıkış yap"
+                aria-label="Çıkış yap"
+                style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, fontWeight: 700, color: "var(--terracotta-400)", flexShrink: 0 }}
+              >
+                <Ms name="logout" size={16} />
+                Çıkış
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onNavLogin}
+              style={{ display: "flex", alignItems: "center", gap: 7, width: "100%", fontSize: 12.5, fontWeight: 700, color: "var(--on-dark)", padding: "4px 2px" }}
+            >
+              <Ms name="login" size={17} />
+              Giriş yap
+            </button>
+          )}
+      </div>
     </aside>
   );
 }

@@ -37,6 +37,7 @@ import type {
   ConversationTurn,
 } from "@/lib/api";
 import { getSessionId } from "@/lib/session";
+import { getSupabase } from "@/lib/supabase";
 import {
   adaptApplicationDraft,
   adaptProgram,
@@ -129,6 +130,10 @@ interface AppState {
   ensureProgram: (id: string) => Promise<Program | null>;
   applyProgram: (id: string) => Promise<void>;
 
+  /** Girişli kullanıcının e-postası; anonimse null. */
+  userEmail: string | null;
+  signOut: () => Promise<void>;
+
   goToChat: () => void;
   goToOnboarding: () => void;
   goToMatches: () => void;
@@ -175,6 +180,21 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [applyLoading, setApplyLoading] = useState(false);
   const [trackedApplications, setTrackedApplications] = useState<BackendApplicationRecord[]>([]);
   const [ingestionRuns, setIngestionRuns] = useState<BackendIngestionRun[]>([]);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  /** Supabase oturumunu dinler. Yapılandırma yoksa (anahtarlar henüz yok)
+   *  hiçbir şey yapmaz — uygulama anonim çalışmaya devam eder. */
+  useEffect(() => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => {
+      setUserEmail(data.session?.user.email ?? null);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserEmail(session?.user.email ?? null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   const idRef = useRef(1);
   const nextId = () => String(idRef.current++);
@@ -464,6 +484,27 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     router.push("/onboarding");
   }
 
+  /** Çıkış — oturumu kapatır ve kullanıcıya ait TÜM yerel state'i sıfırlar.
+   *  Bu temizlik olmazsa aynı tarayıcıda giriş yapan bir sonraki kişi,
+   *  öncekinin profilini, eşleşmelerini ve başvurularını görür. */
+  async function signOut() {
+    const supabase = getSupabase();
+    if (supabase) await supabase.auth.signOut();
+
+    setUserEmail(null);
+    setMessages([]);
+    setTyping(false);
+    setInput("");
+    setFollowups([]);
+    setCurrentProfile(null);
+    setApiPrograms([]);
+    setBrowsedPrograms([]);
+    setApplicationDraft(null);
+    setDocs([]);
+    setTrackedApplications([]);
+    router.push("/");
+  }
+
   function goToMatches() {
     router.push("/matches");
   }
@@ -674,6 +715,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     resolveProgram,
     ensureProgram,
     applyProgram,
+    userEmail,
+    signOut,
     goToChat,
     goToOnboarding,
     goToMatches,
