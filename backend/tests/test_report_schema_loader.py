@@ -7,7 +7,7 @@ from data.report_schema_loader import (
 
 def test_loads_both_bootcamp_schemas():
     keys = {s.key for s in load_report_schemas()}
-    assert keys == {"tubitak_1507", "tubitak_1501"}
+    assert keys == {"tubitak_1507", "tubitak_1501", "tubitak_1711", "tubitak_1831"}
 
 
 def test_get_report_schema_by_key():
