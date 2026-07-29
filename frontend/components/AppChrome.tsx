@@ -88,6 +88,7 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
         open={sidebarOpen}
         collapsed={sidebarCollapsed}
         profile={currentProfile}
+        onNavHome={() => go("/")}
         onCollapse={() => setSidebarCollapsed(true)}
         onNewChat={() => {
           onNewChat();

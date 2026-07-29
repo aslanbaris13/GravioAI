@@ -33,6 +33,7 @@ export default function Sidebar({
   onNavMatches,
   onNavApplications,
   onNavProfile,
+  onNavHome,
   collapsed,
   onCollapse,
   profile,
@@ -49,6 +50,7 @@ export default function Sidebar({
   onNavMatches: () => void;
   onNavApplications: () => void;
   onNavProfile: () => void;
+  onNavHome: () => void;
   profile: BackendUserProfile | null;
 }) {
   const pathname = usePathname();
@@ -88,13 +90,22 @@ export default function Sidebar({
     >
       {/* Ana sayfayla aynı marka işareti — jenerik ikon yerine logo. */}
       <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "6px 8px 16px" }}>
-        <img src="/brand/gravio-mark.png" alt="" style={{ width: 34, height: "auto", flexShrink: 0 }} />
-        <div style={{ lineHeight: 1.05, minWidth: 0 }}>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 700, color: "#fff", letterSpacing: "-.02em" }}>
-            GravioAI
+        {/* Logo ana sayfaya döner. Daraltma düğmesi kardeş olarak kalıyor —
+            buton içine buton yuvalanamaz. */}
+        <button
+          onClick={onNavHome}
+          aria-label="Ana sayfaya git"
+          title="Ana sayfa"
+          style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0, padding: 0, textAlign: "left" }}
+        >
+          <img src="/brand/gravio-mark.png" alt="" style={{ width: 34, height: "auto", flexShrink: 0 }} />
+          <div style={{ lineHeight: 1.05, minWidth: 0 }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 700, color: "#fff", letterSpacing: "-.02em" }}>
+              GravioAI
+            </div>
+            <div style={{ fontSize: 10.5, color: "var(--on-dark-faint)", fontWeight: 500, marginTop: 2 }}>Fırsat asistanı</div>
           </div>
-          <div style={{ fontSize: 10.5, color: "var(--on-dark-faint)", fontWeight: 500, marginTop: 2 }}>Fırsat asistanı</div>
-        </div>
+        </button>
         {/* Daraltma yalnızca masaüstünde anlamlı — mobilde panel zaten
             off-canvas ve hamburger/backdrop ile kapanıyor (bkz. globals.css). */}
         {onCollapse && (
