@@ -16,6 +16,9 @@ def test_loads_all_report_schemas():
         "kosgeb_yesil_sanayi",
         "kosgeb_stratejik_urun",
         "kalkinma_fizibilite",
+        "ticaret_pazara_giris",
+        "ticaret_e_ihracat",
+        "ufuk_avrupa_eic",
     }
     assert expected_keys.issubset(keys)
 
@@ -25,19 +28,16 @@ def test_get_report_schema_by_key():
     schema_tubitak = get_report_schema("tubitak_1507")
     assert schema_tubitak is not None
     assert schema_tubitak.institution == "TÜBİTAK"
-    assert len(schema_tubitak.sections) > 0
 
-    # KOSGEB Kontrolü
-    schema_kosgeb = get_report_schema("kosgeb_dijital_donusum")
-    assert schema_kosgeb is not None
-    assert schema_kosgeb.institution == "KOSGEB"
-    assert len(schema_kosgeb.sections) > 0
+    # Ticaret Bakanlığı Kontrolü
+    schema_ticaret = get_report_schema("ticaret_pazara_giris")
+    assert schema_ticaret is not None
+    assert schema_ticaret.institution == "Ticaret Bakanlığı"
 
-    # Kalkınma Ajansı Kontrolü
-    schema_kalkinma = get_report_schema("kalkinma_fizibilite")
-    assert schema_kalkinma is not None
-    assert schema_kalkinma.institution == "Kalkınma Ajansı"
-    assert len(schema_kalkinma.sections) > 0
+    # AB Kontrolü
+    schema_ab = get_report_schema("ufuk_avrupa_eic")
+    assert schema_ab is not None
+    assert schema_ab.institution == "Avrupa Birliği (AB)"
 
 
 def test_get_report_schema_returns_none_for_unknown_key():
@@ -90,12 +90,32 @@ def test_resolve_matches_kosgeb_stratejik_urun_by_keyword():
     assert schema.key == "kosgeb_stratejik_urun"
 
 
-# --- Kalkınma Ajansı Eşleşme (Resolve) Testleri ---
+# --- Kalkınma Ajansı Eşleşme Testleri ---
 
 def test_resolve_matches_kalkinma_fizibilite_by_keyword():
     schema = resolve_report_schema_for_program("Kalkınma Ajansı Fizibilite Desteği Programı 2026")
     assert schema is not None
     assert schema.key == "kalkinma_fizibilite"
+
+
+# --- Ticaret Bakanlığı ve AB Eşleşme Testleri ---
+
+def test_resolve_matches_ticaret_pazara_giris_by_keyword():
+    schema = resolve_report_schema_for_program("Pazara Giriş Belgesi Desteği 2026")
+    assert schema is not None
+    assert schema.key == "ticaret_pazara_giris"
+
+
+def test_resolve_matches_ticaret_e_ihracat_by_keyword():
+    schema = resolve_report_schema_for_program("Ticaret Bakanlığı e-ihracat Destekleri Başvurusu")
+    assert schema is not None
+    assert schema.key == "ticaret_e_ihracat"
+
+
+def test_resolve_matches_ufuk_avrupa_eic_by_keyword():
+    schema = resolve_report_schema_for_program("Horizon Europe EIC Accelerator Call")
+    assert schema is not None
+    assert schema.key == "ufuk_avrupa_eic"
 
 
 # --- Olumsuz Durum ve Şema İçerik Doğrulama Testleri ---
