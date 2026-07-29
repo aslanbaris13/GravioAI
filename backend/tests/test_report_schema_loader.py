@@ -107,7 +107,7 @@ def test_resolve_matches_ticaret_pazara_giris_by_keyword():
 
 
 def test_resolve_matches_ticaret_e_ihracat_by_keyword():
-    schema = resolve_report_schema_for_program("Ticaret Bakanlığı E-İhracat Destekleri Başvurusu")
+    schema = resolve_report_schema_for_program("Ticaret Bakanlığı e-ihracat Destekleri Başvurusu")
     assert schema is not None
     assert schema.key == "ticaret_e_ihracat"
 
