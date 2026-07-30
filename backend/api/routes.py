@@ -23,6 +23,7 @@ from agents import (
 from core.embedder import get_embedding_client
 from core.llm import LLMClient, LLMMessage, get_llm_client
 from core.pptx_export import build_presentation_pptx
+from core.auth import current_user_id
 from core.rate_limit import enforce_llm_rate_limit
 from data import repo, report_schema_loader
 from models import (
@@ -183,20 +184,24 @@ class ApplicationCreateRequest(BaseModel):
 
 
 @router.post("/applications", response_model=ApplicationRecord, response_model_by_alias=False)
-async def start_application(body: ApplicationCreateRequest) -> ApplicationRecord:
+async def start_application(
+    body: ApplicationCreateRequest, user_id: str | None = Depends(current_user_id)
+) -> ApplicationRecord:
     """Bir programa başvuru sürecini başlatır — Panelim/Başvurularım'daki durum
     takibi kaydı (`/application` ile karıştırılmamalı; o LLM ile plan/belge
     taslağı üretir, bu ise `applications` tablosunda kalıcı bir kayıt açar).
     Aynı program için tekrar çağrılırsa mevcut kaydı döner (upsert)."""
     return await run_in_threadpool(
-        repo.create_application, body.session_id, body.program_id, body.program_name
+        repo.create_application, body.session_id, body.program_id, body.program_name, user_id
     )
 
 
 @router.get("/applications", response_model=list[ApplicationRecord], response_model_by_alias=False)
-async def get_applications(session_id: str) -> list[ApplicationRecord]:
-    """Bir oturumun tüm başvuru takibi kayıtlarını getirir."""
-    return await run_in_threadpool(repo.list_applications, session_id)
+async def get_applications(
+    session_id: str, user_id: str | None = Depends(current_user_id)
+) -> list[ApplicationRecord]:
+    """Başvuru takibi kayıtlarını getirir (girişliyse hesap üzerinden)."""
+    return await run_in_threadpool(repo.list_applications, session_id, user_id)
 
 
 class ApplicationUpdateRequest(BaseModel):
@@ -206,14 +211,18 @@ class ApplicationUpdateRequest(BaseModel):
 
 
 @router.patch("/applications/{application_id}", response_model=ApplicationRecord, response_model_by_alias=False)
-async def patch_application(application_id: str, body: ApplicationUpdateRequest) -> ApplicationRecord:
+async def patch_application(
+    application_id: str,
+    body: ApplicationUpdateRequest,
+    user_id: str | None = Depends(current_user_id),
+) -> ApplicationRecord:
     """Bir başvuru kaydının durumunu/notunu/hatırlatmasını günceller.
 
     Yalnızca istekte açıkça gönderilen alanlar güncellenir (`exclude_unset`) —
     yoksa gönderilmeyen bir alan `None` sanılıp yanlışlıkla temizlenebilir.
     """
     fields = body.model_dump(exclude_unset=True, exclude_none=True, mode="json")
-    updated = await run_in_threadpool(repo.update_application, application_id, fields)
+    updated = await run_in_threadpool(repo.update_application, application_id, fields, user_id)
     if updated is None:
         raise HTTPException(status_code=404, detail="Başvuru kaydı bulunamadı")
     return updated
@@ -261,16 +270,20 @@ async def assist_stream(body: AssistRequest) -> StreamingResponse:
 
 
 @router.get("/session/{session_id}", response_model=SessionState, response_model_by_alias=False)
-async def read_session(session_id: str) -> SessionState:
+async def read_session(
+    session_id: str, user_id: str | None = Depends(current_user_id)
+) -> SessionState:
     """Bir oturumun kayıtlı profil + eşleşmelerini getirir; hiç kayıt yoksa boş durum döner."""
-    state = await run_in_threadpool(repo.get_session, session_id)
+    state = await run_in_threadpool(repo.get_session, session_id, user_id)
     return state or SessionState()
 
 
 @router.put("/session/{session_id}")
-async def write_session(session_id: str, body: SessionState) -> dict:
+async def write_session(
+    session_id: str, body: SessionState, user_id: str | None = Depends(current_user_id)
+) -> dict:
     """Bir oturumun profil + eşleşmelerini kaydeder (üzerine yazar)."""
-    await run_in_threadpool(repo.save_session, session_id, body)
+    await run_in_threadpool(repo.save_session, session_id, body, user_id)
     return {"status": "ok"}
 
 
@@ -391,9 +404,11 @@ async def generate_presentation(body: GeneratePresentationRequest) -> GeneratedP
     response_model=list[PresentationRecord],
     response_model_by_alias=False,
 )
-async def get_presentations(session_id: str) -> list[PresentationRecord]:
-    """Bir oturumun daha önce ürettiği tüm sunumları getirir (Geçmiş Sunumlarım)."""
-    return await run_in_threadpool(repo.list_presentations, session_id)
+async def get_presentations(
+    session_id: str, user_id: str | None = Depends(current_user_id)
+) -> list[PresentationRecord]:
+    """Daha önce üretilmiş sunumları getirir (girişliyse hesap üzerinden)."""
+    return await run_in_threadpool(repo.list_presentations, session_id, user_id)
 
 
 @router.post("/presentations/export-pptx")
