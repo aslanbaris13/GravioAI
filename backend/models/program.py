@@ -27,7 +27,7 @@ class SupportType(str, Enum):
 class ApplicationStatus(str, Enum):
     ACIK = "Açık"
     KAPALI = "Kapalı"
-    SUREKLI = "Sürekli",
+    SUREKLI = "Sürekli"
     BELIRTILMEMIS = "Belirtilmemiş"
 
 
