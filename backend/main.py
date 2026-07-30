@@ -12,16 +12,20 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from api.routes import router
 from core.config import get_settings
+from data.repo import NotOwnerError
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
+
+logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
@@ -40,6 +44,17 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api")
+
+
+@app.exception_handler(NotOwnerError)
+async def not_owner_handler(_request: Request, exc: NotOwnerError) -> JSONResponse:
+    """Başka bir kullanıcıya ait kayda erişim → 403.
+
+    Veri katmanı (data/repo.py) HTTP'den habersiz kalsın diye alan hatası
+    fırlatıyor; HTTP'ye çeviriyi burada tek noktada yapıyoruz.
+    """
+    logger.info("yetkisiz_erisim: %s", exc)
+    return JSONResponse(status_code=403, content={"detail": "Bu kayda erişim yetkiniz yok"})
 
 
 @app.get("/health")

@@ -1,0 +1,51 @@
+{
+  "key": "kosgeb_isletme_gelistirme",
+  "program_name": "KOSGEB İşletme Geliştirme Destek Programı",
+  "institution": "KOSGEB",
+  "match_keywords": ["işletme geliştirme", "isletme gelistirme", "kosgeb işletme geliştirme", "yurt dışı gezisi desteği"],
+  "summary": "KOBİ'lerin rekabet güçlerini ve nitelikli iş gücü paylarını artırmak, yurt dışı pazarlara açılmalarını ve belgelendirme süreçlerini desteklemek.",
+  "sections": [
+    {
+      "id": "isletme_nitelik_ve_faaliyet",
+      "title": "İşletme Mevcut Yapısı ve Hizmet Alım İhtiyacı (Bölüm A)",
+      "description": "Firma profili, destek alınacak hizmet alanları (test, belgelendirme, nitelikli eleman).",
+      "required_fields": [
+        {
+          "key": "destek_alınacak_hizmet_kalemleri",
+          "label": "Destek Talep Edilen Hizmet ve Belgelendirme Alanları",
+          "description": "Fuar katılımı, yurt dışı iş gezisi, nitelikli eleman istihdamı veya test-belgelendirme ihtiyaçlarınızı yazınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "isletme_rekabet_stratejisi",
+          "label": "İşletmenin Gelişim Hedefleri ve Pazar Genişleme Planı",
+          "description": "Bu desteklerin firmanın hizmet/ürün kalitesine ve pazar payına yapacağı katkıyı açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "hizmet_ve_personel_bütcesi",
+      "title": "Hizmet Alımı ve İstihdam Bütçesi (Bölüm B)",
+      "description": "Alınacak danışmanlık, test/belge masrafları ve personel giderleri.",
+      "char_limit": 3000,
+      "required_fields": [
+        {
+          "key": "hizmet_kalemleri_detayi",
+          "label": "Hizmet Verici Kurumlar ve Tahmini Bütçe",
+          "description": "Hizmet alınacak akredite laboratuvarlar, danışmanlık firmaları ve yeni istihdam edilecek personelin niteliklerini listeleyiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "KOSGEB KOBİ Beyannamesi",
+    "Nitelikli Eleman Lisans/Önlisans Diplomaları ve SGK İşe Giriş Belgeleri",
+    "Test / Belgelendirme Başvuru veya Fatura Evrakları",
+    "Fuar Katılım Sözleşmesi veya İş Gezisi Programı"
+  ]
+}

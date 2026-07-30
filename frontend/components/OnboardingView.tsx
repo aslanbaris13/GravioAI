@@ -10,6 +10,7 @@
  */
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Ms from "./Ms";
 import { ApiError, parseProfileDocument } from "@/lib/api";
 import type { BackendUserProfile } from "@/lib/api";
@@ -170,6 +171,7 @@ export default function OnboardingView({
   onComplete: (profile: BackendUserProfile) => void;
   onSkip: () => void;
 }) {
+  const router = useRouter();
   const [stepIndex, setStepIndex] = useState(0);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [docUpload, setDocUpload] = useState<{ status: "idle" | "loading" | "success" | "error"; message?: string }>({
@@ -248,7 +250,14 @@ export default function OnboardingView({
           padding: "34px 30px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {/* Sidebar'daki logoyla aynı davranış: ana sayfaya döner. Onboarding'de
+            sidebar olmadığı için tek çıkış noktası bu. */}
+        <button
+          onClick={() => router.push("/")}
+          aria-label="Ana sayfaya git"
+          title="Ana sayfa"
+          style={{ display: "flex", alignItems: "center", gap: 12, padding: 0, textAlign: "left" }}
+        >
           <img src="/brand/gravio-mark.png" alt="" style={{ width: 40, height: "auto", flexShrink: 0 }} />
           <div style={{ lineHeight: 1.05 }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 19, fontWeight: 700, color: "#fff", letterSpacing: "-.02em" }}>
@@ -256,7 +265,7 @@ export default function OnboardingView({
             </div>
             <div style={{ fontSize: 11, color: "var(--on-dark-faint)", fontWeight: 500, marginTop: 2 }}>Fırsat asistanı</div>
           </div>
-        </div>
+        </button>
 
         <h1 style={{ fontSize: 24, fontWeight: 700, color: "#fff", lineHeight: 1.3, letterSpacing: "-.01em", margin: "44px 0 10px" }}>
           Yüzeyin altındaki fırsatı çıkaralım.
@@ -386,29 +395,81 @@ export default function OnboardingView({
                 <h2 style={{ fontSize: 28, fontWeight: 700, color: "var(--ink-900)", margin: "0 0 12px", letterSpacing: "-.015em", lineHeight: 1.25 }}>
                   Hoş geldin! İşletmeni tanıyalım.
                 </h2>
-                <p style={{ fontSize: 15.5, color: "var(--ink-600)", lineHeight: 1.65, margin: "0 0 10px", maxWidth: 520 }}>
-                  Yaklaşık bir dakikanı alacak birkaç soruyla profilini çıkaracağız.
-                  Ne kadar çok bilgi verirsen, eşleşmeler o kadar isabetli olur.
+                <p style={{ fontSize: 15.5, color: "var(--ink-600)", lineHeight: 1.65, margin: "0 0 28px", maxWidth: 540 }}>
+                  Elinde bir CV ya da şirket dokümanı varsa yükle — sektör, şehir,
+                  ekip gibi bilgileri oradan okuyup formu senin yerine dolduralım.
+                  İstersen bilgileri kendin de girebilirsin.
                 </p>
-                <p style={{ fontSize: 13.5, color: "var(--ink-400)", lineHeight: 1.6, margin: "0 0 34px", maxWidth: 520 }}>
-                  Form doldurmayı sevmiyorsan atlayabilirsin — sohbet ekranında
-                  işletmeni kendi cümlelerinle anlatman da yeterli.
-                </p>
-                <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
+
+                {/* Belge yükleme en başta: dokümanda alanların çoğu zaten var,
+                    önce okuyup sonraki adımları ön-doldurmak kullanıcıyı aynı
+                    bilgiyi iki kez yazmaktan kurtarıyor. */}
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 14,
+                    padding: "20px 22px",
+                    borderRadius: 16,
+                    border: "1.5px dashed var(--terracotta-600)",
+                    background: "var(--terracotta-100)",
+                    cursor: docUpload.status === "loading" ? "default" : "pointer",
+                    maxWidth: 540,
+                  }}
+                >
+                  <Ms
+                    name={docUpload.status === "loading" ? "hourglass_top" : "upload_file"}
+                    size={26}
+                    color="var(--terracotta-700)"
+                  />
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "var(--ink-900)" }}>
+                      {docUpload.status === "loading" ? "Belge okunuyor…" : "Belge yükle"}
+                    </div>
+                    <div style={{ fontSize: 12.5, color: "var(--ink-600)", marginTop: 2 }}>
+                      CV veya şirket dokümanı · PDF, DOCX, TXT
+                    </div>
+                  </div>
+                  <input
+                    type="file"
+                    accept=".pdf,.docx,.txt"
+                    onChange={handleDocumentUpload}
+                    disabled={docUpload.status === "loading"}
+                    style={{ display: "none" }}
+                  />
+                </label>
+
+                {docUpload.status === "success" && (
+                  <p style={{ fontSize: 13, color: "var(--success-700)", margin: "10px 0 0", maxWidth: 540 }}>
+                    {docUpload.message} Sonraki adımlarda kontrol edip düzeltebilirsin.
+                  </p>
+                )}
+                {docUpload.status === "error" && (
+                  <p style={{ fontSize: 13, color: "var(--danger-700)", margin: "10px 0 0", maxWidth: 540 }}>
+                    {docUpload.message}
+                  </p>
+                )}
+
+                <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap", marginTop: 24 }}>
+                  {/* Belge okunduysa birincil eylem "devam", okunmadıysa
+                      "bilgileri kendim gireyim" — ikisi de aynı adıma gider. */}
                   <button
                     onClick={next}
                     style={{
-                      padding: "15px 44px",
+                      padding: "15px 40px",
                       borderRadius: 13,
-                      border: "none",
-                      background: "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))",
-                      color: "#fff",
+                      border: docUpload.status === "success" ? "none" : "1.5px solid var(--border-subtle)",
+                      background:
+                        docUpload.status === "success"
+                          ? "linear-gradient(160deg,var(--terracotta-600),var(--terracotta-700))"
+                          : "var(--surface-strong)",
+                      color: docUpload.status === "success" ? "#fff" : "var(--ink-900)",
                       fontSize: 15.5,
                       fontWeight: 700,
-                      boxShadow: "0 8px 20px rgba(168,80,46,.28)",
+                      boxShadow: docUpload.status === "success" ? "var(--shadow-cta)" : "none",
                     }}
                   >
-                    Başlayalım
+                    {docUpload.status === "success" ? "Devam et" : "Bilgilerimi kendim gireyim"}
                   </button>
                   <button
                     onClick={onSkip}
@@ -639,40 +700,6 @@ export default function OnboardingView({
                   }
                   style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6, fontFamily: "inherit" }}
                 />
-
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14 }}>
-                  <label
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 7,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: "var(--ink-600)",
-                      cursor: docUpload.status === "loading" ? "default" : "pointer",
-                      padding: "9px 15px",
-                      border: "1.5px solid var(--border-subtle)",
-                      borderRadius: 10,
-                      background: "var(--surface)",
-                    }}
-                  >
-                    <Ms name={docUpload.status === "loading" ? "hourglass_top" : "upload_file"} size={16} color="var(--ink-600)" />
-                    {docUpload.status === "loading" ? "Okunuyor…" : "CV/şirket dokümanı yükle (PDF/DOCX)"}
-                    <input
-                      type="file"
-                      accept=".pdf,.docx,.txt"
-                      onChange={handleDocumentUpload}
-                      disabled={docUpload.status === "loading"}
-                      style={{ display: "none" }}
-                    />
-                  </label>
-                </div>
-                {docUpload.status === "success" && (
-                  <p style={{ fontSize: 12.5, color: "var(--success-700)", marginTop: 8 }}>{docUpload.message}</p>
-                )}
-                {docUpload.status === "error" && (
-                  <p style={{ fontSize: 12.5, color: "var(--danger-700)", marginTop: 8 }}>{docUpload.message}</p>
-                )}
 
                 <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 14, padding: "12px 14px", background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 11 }}>
                   <Ms name="tips_and_updates" size={17} color="var(--terracotta-700)" style={{ marginTop: 1, flexShrink: 0 }} />

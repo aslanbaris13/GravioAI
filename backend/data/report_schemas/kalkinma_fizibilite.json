@@ -1,0 +1,58 @@
+{
+  "key": "kalkinma_fizibilite",
+  "program_name": "Kalkınma Ajansı Fizibilite Desteği Programı",
+  "institution": "Kalkınma Ajansı",
+  "match_keywords": ["fizibilite desteği", "fizibilite destegi", "kalkınma ajansı fizibilite"],
+  "summary": "Bölgenin kalkınması ve rekabet gücü açısından kritik önem taşıyan yatırım projelerinin fizibilite çalışmalarına ve ön hazırlık süreçlerine sağlanan doğrudan finansal destek.",
+  "sections": [
+    {
+      "id": "bolgesel_etki_ve_gerekce",
+      "title": "Bölgesel Öncelikler ve Yatırım Gerekçesi (Bölüm A)",
+      "description": "Yatırımın bölge ekonomisine, istihdamına ve kalkınma planlarına sağlayacağı katkı.",
+      "required_fields": [
+        {
+          "key": "yatirim_konusu_ve_gerekce",
+          "label": "Yatırım Konusu ve Bölgesel Kalkınma Gerekçesi",
+          "description": "Planlanan yatırımın bölgesel potansiyelini, ekonomik gerekçesini ve kalkınma planlarıyla uyumunu açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "hedef_kitle_ve_paydaslar",
+          "label": "Hedef Kitle ve Bölgesel Paydaşlar",
+          "description": "Fizibilite çalışması sonucunda doğrudan ve dolaylı etkilenecek paydaşları belirtiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "fizibilite_calismasi_kapsami",
+      "title": "Fizibilite Analizi ve Metodoloji Planı (Bölüm B)",
+      "description": "Hazırlanacak fizibilite raporunun teknik, finansal, hukuki ve çevresel analiz adımları.",
+      "char_limit": 4000,
+      "required_fields": [
+        {
+          "key": "pazar_ve_teknik_analiz",
+          "label": "Pazar, Teknik ve Finansal Analiz Kapsamı",
+          "description": "Fizibilite sürecinde yapılacak pazar araştırması, lokasyon seçimi, maliyet-fayda analizi ve finansal modelleme detaylarını yazınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "danismanlik_ve_yol_haritasi",
+          "label": "Hizmet Alımı ve Çalışma Takvimi",
+          "description": "Fizibilite raporunu hazırlayacak uzman/danışman ekibi ve iş planı takvimini özetleyiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Kurum/Firma Resmi Yetki Belgeleri",
+    "Fizibilite Hazırlama Hizmet Alımı Şartnamesi",
+    "Danışmanlık/Uzmanlık Teklifleri (Proforma)",
+    "Bölgesel Etki Pre-Fizibilite Özeti"
+  ]
+}

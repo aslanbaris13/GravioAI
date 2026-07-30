@@ -21,9 +21,13 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
     toastText,
     currentProfile,
     trackedApplications,
+    userEmail,
+    signOut,
   } = useAppState();
 
-  if (pathname === "/onboarding" || pathname === "/") {
+  // Kendi tam sayfa düzeni olan rotalar sidebar kabuğunu almaz.
+  const STANDALONE = ["/", "/onboarding", "/giris", "/kayit", "/sifre-sifirla"];
+  if (STANDALONE.includes(pathname) || pathname.startsWith("/auth/")) {
     return <>{children}</>;
   }
 
@@ -88,6 +92,10 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
         open={sidebarOpen}
         collapsed={sidebarCollapsed}
         profile={currentProfile}
+        onNavHome={() => go("/")}
+        onNavLogin={() => go("/giris")}
+        onSignOut={signOut}
+        userEmail={userEmail}
         onCollapse={() => setSidebarCollapsed(true)}
         onNewChat={() => {
           onNewChat();

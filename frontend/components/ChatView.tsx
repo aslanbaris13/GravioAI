@@ -478,7 +478,9 @@ function AssistantAvatar() {
     <img
       src="/brand/gravio-mark.png"
       alt=""
-      style={{ width: 28, height: "auto", flexShrink: 0, marginTop: 1 }}
+      // alignSelf şart: flex öğeleri varsayılanda satır yüksekliğine esner,
+      // uzun mesajlarda logo balonla birlikte dikey olarak geriliyordu.
+      style={{ width: 28, height: "auto", flexShrink: 0, alignSelf: "flex-start", marginTop: 1 }}
     />
   );
 }

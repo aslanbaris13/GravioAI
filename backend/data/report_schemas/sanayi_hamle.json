@@ -1,0 +1,51 @@
+{
+  "key": "sanayi_hamle",
+  "program_name": "Sanayi ve Teknoloji Bakanlığı Teknoloji Odaklı Sanayi Hamlesi Programı",
+  "institution": "Sanayi ve Teknoloji Bakanlığı",
+  "match_keywords": ["sanayi hamlesi", "hamle programı", "teknoloji odaklı sanayi hamlesi", "öncelikli ürün listesi"],
+  "summary": "Türkiye'de orta-yüksek ve yüksek teknoloji seviyeli sektörlerdeki katma değerli ürünlerin yerli imkanlarla üretilmesini hedefleyen stratejik yatırım desteği.",
+  "sections": [
+    {
+      "id": "yerlilestirme_ve_stratejik_onem",
+      "title": "Ürün Stratejik Önemi ve Yerlileştirme Potansiyeli (Bölüm A)",
+      "description": "Öncelikli Ürün Listesi'ndeki yer alma gerekçesi ve cari açığı azaltma potansiyeli.",
+      "required_fields": [
+        {
+          "key": "yerli_uretim_gerekcesi",
+          "label": "Ürünün Stratejik Önemi ve İthalat Bağımlılığına Katkısı",
+          "description": "Geliştirilecek/üretilecek ürünün Türkiye'nin ithalat ikamesi ve teknolojik bağımsızlığı açısından önemini açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "teknolojik_seviye_ve_patents",
+          "label": "Teknoloji Seviyesi ve Fikri Mülkiyet (IPR)",
+          "description": "Ürünün orta-yüksek veya yüksek teknoloji sınıfındaki konumunu ve patent/lisans durumunu yazınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "yatirim_lokasyonu_ve_butce",
+      "title": "Stratejik Yatırım Tesisi ve Bütçe Planı (Bölüm B)",
+      "description": "Üretim tesisinin fiziki altyapısı, makine parkuru ve finansman modeli.",
+      "char_limit": 4000,
+      "required_fields": [
+        {
+          "key": "büyük_olcekli_yatirim_kalemleri",
+          "label": "Fabrika/Tesis Altyapısı ve Makine-Teçhizat Bütçesi",
+          "description": "Kurulacak seri üretim hattı, özelleştirilmiş donanımlar ve yatırım finansman modelini detaylandırınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Öncelikli Ürün Listesi Eşleşme Belgesi",
+    "Stratejik Yatırım Pre-Fizibilite Raporu",
+    "ÇED Onay / Muafiyet Belgesi",
+    "Son 3 Yıla Ait YMM Onaylı Mali Tablolar"
+  ]
+}

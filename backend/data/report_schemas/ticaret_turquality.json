@@ -1,0 +1,51 @@
+{
+  "key": "ticaret_turquality",
+  "program_name": "Ticaret Bakanlığı Turquality ve Markalaşma Destek Programı",
+  "institution": "Ticaret Bakanlığı",
+  "match_keywords": ["turquality", "markalaşma desteği", "markalasma destegi", "turquality programı", "dünya markası"],
+  "summary": "Türk markalarının uluslararası pazarlarda küresel birer oyuncu haline gelmesi amacıyla pazarlama, patent, birim kiralama, danışmanlık ve tanıtım harcamalarının desteklenmesi.",
+  "sections": [
+    {
+      "id": "marka_stratejisi_ve_nitelik",
+      "title": "Uluslararası Marka Stratejisi ve Kurumsal Altyapı (Bölüm A)",
+      "description": "Firmanın marka tescilleri, küresel pazarlama vizyonu ve kurumsallaşma seviyesi.",
+      "required_fields": [
+        {
+          "key": "global_marka_vizyonu",
+          "label": "Uluslararası Markalaşma Stratejisi ve Pazarlama Vizyonu",
+          "description": "Hedef yurt dışı pazarlarda markanızın konumlandırılması, rakip analizi ve tutundurma stratejilerinizi açıklayınız.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        },
+        {
+          "key": "kurumsal_nitelik_ve_patentler",
+          "label": "Yurt Dışı Marka Tescilleri ve Yönetim Yetkinliği",
+          "description": "Hedef ülkelerdeki marka tescillerinizi, kalite belgelerinizi ve kurumsal yönetim altyapınızı özetleyiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    },
+    {
+      "id": "yurt_disi_operasyon_ve_butce",
+      "title": "Yurt Dışı Birim, Tanıtım ve Danışmanlık Bütçesi (Bölüm B)",
+      "description": "Yurt dışı mağaza/ofis kiralama, reklam-tanıtım ve yönetim danışmanlığı giderleri.",
+      "char_limit": 4000,
+      "required_fields": [
+        {
+          "key": "turquality_harcama_planı",
+          "label": "Tanıtım, Mağaza/Ofis ve Danışmanlık Harcama Detayları",
+          "description": "Açılacak yurt dışı birimler, küresel reklam kampanyaları ve alınacak stratejik danışmanlık bütçesini listeleyiniz.",
+          "long_text": true,
+          "prefillable_from_profile": null
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "Yurt Dışı Marka Tescil Belgeleri",
+    "YMM Onaylı Uluslararası Satış ve Ciro Tablosu",
+    "Stratejik İş Planı ve Gelişim Yol Haritası (Turquality Ön İnceleme Raporu)",
+    "Hedef Ülke Mağaza/Ofis Kira Sözleşmeleri ve Tanıtım Fatura Örnekleri"
+  ]
+}

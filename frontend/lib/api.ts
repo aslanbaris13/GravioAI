@@ -5,6 +5,8 @@
  * okunur, hata yönetimi merkezi ApiError sınıfıyla sağlanır.
  */
 
+import { getSupabase } from "@/lib/supabase";
+
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
 /** API isteği başarısız olduğunda fırlatılır. */
@@ -18,13 +20,31 @@ export class ApiError extends Error {
   }
 }
 
+/** Girişli kullanıcının erişim token'ı — yoksa null (anonim istek).
+ *  Backend token'ı doğrulayana kadar bu başlık zararsızca yok sayılır. */
+async function authHeader(): Promise<Record<string, string>> {
+  const supabase = getSupabase();
+  if (!supabase) return {};
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const url = `${BASE}/api${path}`;
   let res: Response;
   try {
     res = await fetch(url, {
-      headers: { "Content-Type": "application/json" },
       ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...(await authHeader()),
+        ...(init?.headers as Record<string, string> | undefined),
+      },
     });
   } catch {
     throw new ApiError(0, "Sunucuya ulaşılamıyor. Backend çalışıyor mu?");
@@ -243,7 +263,7 @@ export async function assistStream(
   try {
     res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(await authHeader()) },
       body: JSON.stringify({ message, history: history ?? [], session_id: sessionId ?? null }),
     });
   } catch {
@@ -290,7 +310,8 @@ export async function parseProfileDocument(file: File): Promise<BackendUserProfi
 
   let res: Response;
   try {
-    res = await fetch(url, { method: "POST", body: formData });
+    // Content-Type bilerek verilmiyor: multipart sınırını tarayıcı belirler.
+    res = await fetch(url, { method: "POST", body: formData, headers: await authHeader() });
   } catch {
     throw new ApiError(0, "Sunucuya ulaşılamıyor. Backend çalışıyor mu?");
   }
