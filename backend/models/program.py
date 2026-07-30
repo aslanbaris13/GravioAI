@@ -27,7 +27,8 @@ class SupportType(str, Enum):
 class ApplicationStatus(str, Enum):
     ACIK = "Açık"
     KAPALI = "Kapalı"
-    SUREKLI = "Sürekli"
+    SUREKLI = "Sürekli",
+    BELIRTILMEMIS = "Belirtilmemiş"
 
 
 class Currency(str, Enum):
@@ -207,6 +208,23 @@ class ExtractedSupportInfo(BaseModel):
         """'TL' yazımını standart 'TRY' koduna çevirir."""
         if isinstance(v, str) and v.strip().upper() == "TL":
             return "TRY"
+        return v
+    
+    @field_validator("application_status", mode="before")
+    @classmethod
+    def _normalize_application_status(cls, v):
+        """LLM'in ürettiği tanınmayan/serbest metin değerleri (örn. açıklama
+        cümleleri) enum'ın kabul ettiği sabit bir 'Belirtilmemiş' değerine çevirir.
+        Geçerli değerler enum'ın kendisinden türetilir, burada elle tekrar
+        yazılmaz (tek doğruluk kaynağı ApplicationStatus enum'ıdır)."""
+        if not isinstance(v, str):
+            return v
+
+        gecerli_degerler = [uye.value for uye in ApplicationStatus]
+
+        if v.strip() not in gecerli_degerler:
+            return ApplicationStatus.BELIRTILMEMIS.value
+
         return v
 
     @field_validator("amount_min", "amount_max", mode="before")
