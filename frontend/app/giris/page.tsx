@@ -7,7 +7,10 @@ import { getSupabase, isAuthConfigured } from "@/lib/supabase";
 /** Callback rotasından gelen hata kodlarının okunabilir karşılıkları. */
 const CALLBACK_ERRORS: Record<string, string> = {
   baglanti: "Doğrulama bağlantısı geçersiz görünüyor. Bağlantıyı tekrar iste.",
-  dogrulama: "Bağlantının süresi dolmuş ya da daha önce kullanılmış. Yeni bir bağlantı iste.",
+  dogrulama:
+    "Doğrulama bağlantısı kullanılamadı — süresi dolmuş, daha önce açılmış ya da " +
+    "farklı bir tarayıcıda başlatılmış olabilir. Hesabın yine de doğrulanmış olabilir: " +
+    "önce aşağıdan giriş yapmayı dene.",
 };
 
 export default function GirisPage() {
