@@ -33,6 +33,10 @@ export default function Sidebar({
   onNavMatches,
   onNavApplications,
   onNavProfile,
+  onNavHome,
+  onNavLogin,
+  onSignOut,
+  userEmail,
   collapsed,
   onCollapse,
   profile,
@@ -49,6 +53,10 @@ export default function Sidebar({
   onNavMatches: () => void;
   onNavApplications: () => void;
   onNavProfile: () => void;
+  onNavHome: () => void;
+  onNavLogin: () => void;
+  onSignOut: () => void;
+  userEmail: string | null;
   profile: BackendUserProfile | null;
 }) {
   const pathname = usePathname();
@@ -88,13 +96,22 @@ export default function Sidebar({
     >
       {/* Ana sayfayla aynı marka işareti — jenerik ikon yerine logo. */}
       <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "6px 8px 16px" }}>
-        <img src="/brand/gravio-mark.png" alt="" style={{ width: 34, height: "auto", flexShrink: 0 }} />
-        <div style={{ lineHeight: 1.05, minWidth: 0 }}>
-          <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 700, color: "#fff", letterSpacing: "-.02em" }}>
-            GravioAI
+        {/* Logo ana sayfaya döner. Daraltma düğmesi kardeş olarak kalıyor —
+            buton içine buton yuvalanamaz. */}
+        <button
+          onClick={onNavHome}
+          aria-label="Ana sayfaya git"
+          title="Ana sayfa"
+          style={{ display: "flex", alignItems: "center", gap: 11, minWidth: 0, padding: 0, textAlign: "left" }}
+        >
+          <img src="/brand/gravio-mark.png" alt="" style={{ width: 34, height: "auto", flexShrink: 0 }} />
+          <div style={{ lineHeight: 1.05, minWidth: 0 }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 700, color: "#fff", letterSpacing: "-.02em" }}>
+              GravioAI
+            </div>
+            <div style={{ fontSize: 10.5, color: "var(--on-dark-faint)", fontWeight: 500, marginTop: 2 }}>Fırsat asistanı</div>
           </div>
-          <div style={{ fontSize: 10.5, color: "var(--on-dark-faint)", fontWeight: 500, marginTop: 2 }}>Fırsat asistanı</div>
-        </div>
+        </button>
         {/* Daraltma yalnızca masaüstünde anlamlı — mobilde panel zaten
             off-canvas ve hamburger/backdrop ile kapanıyor (bkz. globals.css). */}
         {onCollapse && (
@@ -255,6 +272,54 @@ export default function Sidebar({
           <div style={{ fontSize: 10.5, color: "var(--on-dark-muted)" }}>{meta}</div>
         </div>
       </button>
+
+      {/* Hesap satırı — girişliyse e-posta + çıkış, değilse giriş bağlantısı. */}
+      <div
+        style={{
+          borderTop: "1px solid rgba(255,255,255,.08)",
+          marginTop: 8,
+          paddingTop: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+          {userEmail ? (
+            <>
+              <div
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  fontSize: 11,
+                  color: "var(--on-dark-muted)",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+                title={userEmail}
+              >
+                {userEmail}
+              </div>
+              <button
+                onClick={onSignOut}
+                title="Çıkış yap"
+                aria-label="Çıkış yap"
+                style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11.5, fontWeight: 700, color: "var(--terracotta-400)", flexShrink: 0 }}
+              >
+                <Ms name="logout" size={16} />
+                Çıkış
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onNavLogin}
+              style={{ display: "flex", alignItems: "center", gap: 7, width: "100%", fontSize: 12.5, fontWeight: 700, color: "var(--on-dark)", padding: "4px 2px" }}
+            >
+              <Ms name="login" size={17} />
+              Giriş yap
+            </button>
+          )}
+      </div>
     </aside>
   );
 }

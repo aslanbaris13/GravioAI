@@ -222,18 +222,75 @@ def match_programs(
     return [p for r in (resp.data or []) if (p := _from_row_safe(r)) is not None]
 
 
-def save_session(session_id: str, state: SessionState) -> None:
+class NotOwnerError(Exception):
+    """İstenen kayıt başka bir kullanıcıya ait. routes.py bunu 403'e çevirir."""
+
+
+def claim_session_records(session_id: str, user_id: str) -> None:
+    """`session_id`'ye ait ANONİM kayıtları bu kullanıcıya bağlar.
+
+    Kullanıcı anonimken sohbet edip profil çıkarmış, sonra giriş yapmış
+    olabilir; o veriyi kaybetmemek için giriş sonrası ilk erişimde sahiplenilir.
+
+    `is_("user_id", "null")` filtresi kritik: yalnızca sahipsiz kayıtlar
+    devralınabilir. Aksi halde başkasının `session_id`'sini bilen biri, giriş
+    yapıp o kaydı kendine geçirebilirdi.
+    """
+    for table in (_SESSIONS, _APPLICATIONS, _PRESENTATIONS):
+        try:
+            (
+                _client()
+                .table(table)
+                .update({"user_id": user_id})
+                .eq("session_id", session_id)
+                .is_("user_id", "null")
+                .execute()
+            )
+        except Exception:
+            logger.warning("claim_failed table=%s session_id=%s", table, session_id, exc_info=True)
+
+
+def _owned_session_id(user_id: str) -> str | None:
+    """Kullanıcının kendi oturum kaydının session_id'si — başka bir cihazdan
+    girildiğinde (yerel session_id farklıyken) veriyi bulmayı sağlar."""
+    resp = (
+        _client()
+        .table(_SESSIONS)
+        .select("session_id")
+        .eq("user_id", user_id)
+        .order("updated_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    data = resp.data or []
+    return data[0]["session_id"] if data else None
+
+
+def save_session(session_id: str, state: SessionState, user_id: str | None = None) -> None:
     """Bir oturumun profil + eşleşmelerini kaydeder (üzerine yazar)."""
     row = {
         "session_id": session_id,
         "profile": state.profile.model_dump(mode="json"),
         "matches": [m.model_dump(mode="json") for m in state.matches],
     }
+    if user_id:
+        row["user_id"] = user_id
     _client().table(_SESSIONS).upsert(row, on_conflict="session_id").execute()
 
 
-def get_session(session_id: str) -> SessionState | None:
-    """Bir oturumun kayıtlı profil + eşleşmelerini getirir; hiç yoksa None döner."""
+def get_session(session_id: str, user_id: str | None = None) -> SessionState | None:
+    """Bir oturumun kayıtlı profil + eşleşmelerini getirir; hiç yoksa None döner.
+
+    Girişli kullanıcıda: elindeki anonim kayıt önce sahiplenilir, sonra
+    kullanıcının kendi kaydı aranır — böylece farklı bir cihazdan girildiğinde
+    (yerel `session_id` başka olsa da) profil geri gelir.
+
+    Anonim kullanıcıda: kayıt bir hesaba bağlanmışsa erişim reddedilir.
+    """
+    if user_id:
+        claim_session_records(session_id, user_id)
+        session_id = _owned_session_id(user_id) or session_id
+
     resp = (
         _client()
         .table(_SESSIONS)
@@ -246,6 +303,9 @@ def get_session(session_id: str) -> SessionState | None:
     if not data:
         return None
     row = data[0]
+    owner = row.get("user_id")
+    if owner and owner != user_id:
+        raise NotOwnerError(session_id)
     matches = [
         ProgramMatch.model_validate({**m, "program": {**m["program"], "embedding": None}})
         for m in (row.get("matches") or [])
@@ -253,7 +313,9 @@ def get_session(session_id: str) -> SessionState | None:
     return SessionState(profile=row.get("profile") or {}, matches=matches)
 
 
-def create_application(session_id: str, program_id: str, program_name: str) -> ApplicationRecord:
+def create_application(
+    session_id: str, program_id: str, program_name: str, user_id: str | None = None
+) -> ApplicationRecord:
     """Bir oturumun bir programa başvuru sürecini başlatır ('taslak' durumunda).
 
     `applications` tablosunda `(session_id, program_id)` üzerinde unique kısıt
@@ -261,6 +323,8 @@ def create_application(session_id: str, program_id: str, program_name: str) -> A
     sonrası tekrar tıklama) hata vermek yerine mevcut kaydı döner (upsert).
     """
     row = {"session_id": session_id, "program_id": program_id, "program_name": program_name}
+    if user_id:
+        row["user_id"] = user_id
     resp = (
         _client()
         .table(_APPLICATIONS)
@@ -283,20 +347,26 @@ def create_application(session_id: str, program_id: str, program_name: str) -> A
     return ApplicationRecord.model_validate(existing.data[0])
 
 
-def list_applications(session_id: str) -> list[ApplicationRecord]:
-    """Bir oturumun tüm başvuru kayıtlarını (en yeni önce) getirir."""
-    resp = (
-        _client()
-        .table(_APPLICATIONS)
-        .select("*")
-        .eq("session_id", session_id)
-        .order("created_at", desc=True)
-        .execute()
-    )
+def list_applications(session_id: str, user_id: str | None = None) -> list[ApplicationRecord]:
+    """Başvuru kayıtlarını (en yeni önce) getirir.
+
+    Girişli kullanıcıda oturum yerine HESAP üzerinden listelenir: farklı
+    cihazlardan başlatılmış başvurular da tek listede toplanır.
+    """
+    query = _client().table(_APPLICATIONS).select("*")
+    if user_id:
+        claim_session_records(session_id, user_id)
+        query = query.eq("user_id", user_id)
+    else:
+        # Anonim: yalnızca sahipsiz kayıtlar görülebilir.
+        query = query.eq("session_id", session_id).is_("user_id", "null")
+    resp = query.order("created_at", desc=True).execute()
     return [ApplicationRecord.model_validate(r) for r in (resp.data or [])]
 
 
-def update_application(application_id: str, fields: dict) -> ApplicationRecord | None:
+def update_application(
+    application_id: str, fields: dict, user_id: str | None = None
+) -> ApplicationRecord | None:
     """Bir başvuru kaydının durum/not/hatırlatma alanlarını günceller.
 
     `fields` yalnızca istemcinin gönderdiği (JSON'da açıkça belirtilmiş)
@@ -305,13 +375,29 @@ def update_application(application_id: str, fields: dict) -> ApplicationRecord |
     """
     if not fields:
         return None
+
+    # Bu uç nokta yalnızca application_id alıyor — sahiplik kontrolü olmadan
+    # id'yi bilen herkes başkasının başvurusunu güncelleyebilirdi.
+    current = _client().table(_APPLICATIONS).select("user_id").eq("id", application_id).limit(1).execute()
+    rows = current.data or []
+    if not rows:
+        return None
+    owner = rows[0].get("user_id")
+    if owner != user_id:
+        # Sahipli kayda yabancı erişimi de, anonim kayda girişli erişimi de
+        # reddediyoruz; ikincisi ancak devralma sonrası mümkün olmalı.
+        raise NotOwnerError(application_id)
+
     resp = _client().table(_APPLICATIONS).update(fields).eq("id", application_id).execute()
     data = resp.data or []
     return ApplicationRecord.model_validate(data[0]) if data else None
 
 
 def save_presentation(
-    session_id: str, company_name: str, presentation: GeneratedPresentation
+    session_id: str,
+    company_name: str,
+    presentation: GeneratedPresentation,
+    user_id: str | None = None,
 ) -> PresentationRecord:
     """Üretilen bir sunumu arşive kaydeder ('Geçmiş Sunumlarım')."""
     row = {
@@ -321,18 +407,22 @@ def save_presentation(
         "company_name": company_name,
         "slides": [s.model_dump(mode="json") for s in presentation.slides],
     }
+    if user_id:
+        row["user_id"] = user_id
     resp = _client().table(_PRESENTATIONS).insert(row).execute()
     return PresentationRecord.model_validate(resp.data[0])
 
 
-def list_presentations(session_id: str) -> list[PresentationRecord]:
-    """Bir oturumun daha önce ürettiği tüm sunumları (en yeni önce) getirir."""
-    resp = (
-        _client()
-        .table(_PRESENTATIONS)
-        .select("*")
-        .eq("session_id", session_id)
-        .order("created_at", desc=True)
-        .execute()
-    )
+def list_presentations(session_id: str, user_id: str | None = None) -> list[PresentationRecord]:
+    """Daha önce üretilmiş sunumları (en yeni önce) getirir.
+
+    Girişli kullanıcıda hesap üzerinden listelenir (bkz. list_applications).
+    """
+    query = _client().table(_PRESENTATIONS).select("*")
+    if user_id:
+        claim_session_records(session_id, user_id)
+        query = query.eq("user_id", user_id)
+    else:
+        query = query.eq("session_id", session_id).is_("user_id", "null")
+    resp = query.order("created_at", desc=True).execute()
     return [PresentationRecord.model_validate(r) for r in (resp.data or [])]

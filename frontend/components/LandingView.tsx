@@ -460,6 +460,12 @@ export default function LandingView() {
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <button
+            onClick={() => router.push("/giris")}
+            style={{ fontSize: 13.5, fontWeight: 700, color: "#fff", padding: "10px 16px" }}
+          >
+            Giriş yap
+          </button>
+          <button
             onClick={goOnboarding}
             style={{
               fontSize: 13.5,
