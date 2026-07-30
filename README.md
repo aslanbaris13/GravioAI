@@ -452,7 +452,7 @@ Bu sprint sonunda proje, kullanıcı profilini analiz edebilen, uygun destek pro
 |---------|----------|
 | **Sprint Tarihi** | **20 Temmuz 2026 – 2 Ağustos 2026** |
 | **Sprint Teması** | **Uçtan uca akışın tamamlanması, canlıya alma ve teslim** |
-| **Sprint Amacı** | Uçtan uca akışın tamamlanması · canlıya alma · cilalama · 3 dk tanıtım videosu · teslim |
+| **Sprint Amacı** | Projede geliştirilen tüm modüllerin uçtan uca entegrasyonunu tamamlamak, kullanıcı deneyimini iyileştirmek, sistemin fonksiyonel ve entegrasyon testlerini gerçekleştirerek hataları gidermek ve proje teslimi için gerekli dokümantasyon, demo senaryoları, tanıtım videosu ve canlı sunum hazırlıklarını tamamlamak. |
 
 </details>
 
@@ -467,16 +467,10 @@ Bu sprint sonunda proje, kullanıcı profilini analiz edebilen, uygun destek pro
 |--------|------:|
 | **Sprint Süresi** | 14 Gün |
 | **Takım Kapasitesi** | 4 Kişi (%100) |
-| **Toplam Work Item** | Belirlenecek |
-| **Planlanan Story Point** | Belirlenecek |
-| **Tamamlanan Story Point** | Başlamadı |
+| **Toplam Work Item** | 10 |
+| **Planlanan Story Point** | 63 |
+| **Tamamlanan Story Point** | 63 |
 
-### Tamamlanan Story Point'lerin Bireysel Dağılımı
-
-- **Barış:** 0 SP
-- **Ferhat:** 0 SP
-- **Hatice:** 0 SP
-- **Sena:** 0 SP
 
 </details>
 
@@ -487,18 +481,38 @@ Bu sprint sonunda proje, kullanıcı profilini analiz edebilen, uygun destek pro
 
 <br>
 
-> Sprint backlog aşağıda gösterilmektedir. *(Sprint başladığında güncellenecektir)*
+> Sprint backlog aşağıda gösterilmektedir.
+<img width="727" height="822" alt="Ekran görüntüsü 2026-07-29 173317" src="https://github.com/user-attachments/assets/d23b3b21-f1af-4923-ac9d-54b7c4eb114b" />
+
+
+<img width="723" height="742" alt="Ekran görüntüsü 2026-07-29 173349" src="https://github.com/user-attachments/assets/e680a69d-14f8-4dc8-88c1-10aa4cc24b95" />
+
+<img width="733" height="445" alt="Ekran görüntüsü 2026-07-29 173443" src="https://github.com/user-attachments/assets/5335132d-06b2-4c55-936e-9cb05b8eb536" />
+<img width="720" height="507" alt="Ekran görüntüsü 2026-07-29 173415" src="https://github.com/user-attachments/assets/70e8a1ef-14d2-4471-9b79-3b3aac4d86df" />
+
+<img width="736" height="492" alt="Ekran görüntüsü 2026-07-29 173456" src="https://github.com/user-attachments/assets/d180d645-bbde-4ae1-a4df-4698c612ed3e" />
+
 
 </details>
 
 ---
 
 <details>
-<summary>🤝 <strong>Sprint Toplantıları</strong></summary>
+<summary>🤝 <strong>Sprint Toplantıları/Daily Scrum</strong></summary>
 
 <br>
 
-> Sprint süresince gerçekleştirilecek toplantı notları ve Jira linkleri bu bölüme eklenecektir.
+> Sprint süresince 2 toplantı gerçekleştirilmiş olup  toplantı notları ve Jira linkleri bu bölüme eklenecektir.
+
+> toplantı dökümanlarının linki: https://hatiicenurolgun.atlassian.net/wiki/spaces/SCRUM/pages/15368193/GravioAI+Sprint+3+Toplant+lar?atlOrigin=eyJpIjoiZDA1ZDA4NmQ1MWNkNDE2NmJjNGIwNTcwNzZiMmQ0YjIiLCJwIjoiaiJ9
+>
+<img width="1245" height="786" alt="Ekran görüntüsü 2026-07-30 121602" src="https://github.com/user-attachments/assets/6f754670-b7e5-4af0-9f68-e7f6863655cc" />
+
+<img width="1262" height="777" alt="Ekran görüntüsü 2026-07-30 121854" src="https://github.com/user-attachments/assets/27e1463a-8e19-470f-bbfe-85de49ad374a" />
+
+
+
+<img width="1255" height="782" alt="Ekran görüntüsü 2026-07-30 121654" src="https://github.com/user-attachments/assets/e1381790-538f-4b13-9352-927f741e09ea" />
 
 </details>
 
