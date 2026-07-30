@@ -1,5 +1,5 @@
 """Rapor gereksinim şemaları — başvuru raporu üretmeden önce kullanıcının
-"neyle karşılaşacağını" görebilmesi ve Rapor Yazma Ajanı'nın (Faz C2) hangi
+"neyle karşılaşacağını" görebilmesi ve Rapor Yazma Ajanı'nın hangi
 bölümleri, hangi zorunlu alanlarla üreteceğini bilmesi için.
 
 Program başına bir şema; şemalar backend/data/report_schemas/*.json
