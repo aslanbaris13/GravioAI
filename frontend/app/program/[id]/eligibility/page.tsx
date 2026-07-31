@@ -1,13 +1,13 @@
 "use client";
-import { useParams } from "next/navigation";
 import EligibilityView from "@/components/EligibilityView";
 import ProgramLoading from "@/components/ProgramLoading";
 import ProgramNotFound from "@/components/ProgramNotFound";
 import { useAppState } from "@/lib/AppStateContext";
 import { useProgram } from "@/lib/useProgram";
+import { useProgramId } from "@/lib/useProgramId";
 
 export default function ProgramEligibilityPage() {
-  const { id } = useParams<{ id: string }>();
+  const id = useProgramId();
   const { goToMatches, goToProgram, applyProgram } = useAppState();
   const { program, state } = useProgram(id);
 

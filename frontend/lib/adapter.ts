@@ -74,7 +74,14 @@ export function formatAmount(
   max: number | null | undefined,
   currency: string | null | undefined,
 ): { hasAmount: boolean; amountText: string; amountSub: string; curCode: string } {
-  if (min == null && max == null) {
+  // Kaynak veride tutarı bilinmeyen alanlar 0 olarak geliyor (23 programın
+  // 19'unda amount_min = 0). Sıfır bir destek tutarı anlamsız olduğu için
+  // "bilgi yok" sayılır; aksi halde ekranda "0 ₺" ya da "0 – 10 M" gibi
+  // yanıltıcı değerler çıkıyordu.
+  const minV = min || null;
+  const maxV = max || null;
+
+  if (minV == null && maxV == null) {
     return { hasAmount: false, amountText: "Belirtilmemiş", amountSub: "", curCode: "" };
   }
 
@@ -87,13 +94,17 @@ export function formatAmount(
         : n.toLocaleString("tr-TR");
 
   let amountText: string;
-  if (min != null && max != null && min !== max) {
-    amountText = `${fmt(min)} – ${fmt(max)}`;
+  let amountSub = "";
+  if (minV != null && maxV != null && minV !== maxV) {
+    amountText = `${fmt(minV)} – ${fmt(maxV)}`;
   } else {
-    amountText = `${fmt((min ?? max)!)}`;
+    amountText = `${fmt((minV ?? maxV)!)}`;
+    // Yalnızca üst sınır biliniyorsa bunu belirt: "10 M ₺" tek başına
+    // sabit bir tutar sanılabilir, oysa tavan değer.
+    if (minV == null && maxV != null) amountSub = "kadar";
   }
 
-  return { hasAmount: true, amountText, amountSub: "", curCode: cur };
+  return { hasAmount: true, amountText, amountSub, curCode: cur };
 }
 
 /* ------------------------------------------------------------------ */

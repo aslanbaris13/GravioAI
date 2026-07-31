@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 import Ms from "@/components/Ms";
 import ProgramLoading from "@/components/ProgramLoading";
 import ProgramNotFound from "@/components/ProgramNotFound";
@@ -8,12 +7,13 @@ import { resolveReportSchema, generateReport, exportReportDocx, ApiError } from 
 import type { BackendReportSchema, BackendGeneratedReport, ReportFieldValues } from "@/lib/api";
 import { useAppState } from "@/lib/AppStateContext";
 import { useProgram } from "@/lib/useProgram";
+import { useProgramId } from "@/lib/useProgramId";
 
 type LoadState = "loading" | "found" | "not-found" | "error";
 type SubmitState = "idle" | "submitting" | "done" | "error";
 
 export default function ProgramReportGeneratePage() {
-  const { id } = useParams<{ id: string }>();
+  const id = useProgramId();
   const { goToMatches, goToReport, currentProfile } = useAppState();
   const { program, state: programState } = useProgram(id);
 
