@@ -1,10 +1,10 @@
 "use client";
-import { useParams } from "next/navigation";
 import ApplicationView from "@/components/ApplicationView";
 import { useAppState } from "@/lib/AppStateContext";
+import { useProgramId } from "@/lib/useProgramId";
 
 export default function ProgramApplicationPage() {
-  const { id } = useParams<{ id: string }>();
+  const id = useProgramId();
   const {
     docs,
     applicationDraft,

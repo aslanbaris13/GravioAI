@@ -6,6 +6,7 @@ import ChatWidget from "./ChatWidget";
 import { getPrograms } from "@/lib/api";
 import type { BackendSupportProgram } from "@/lib/api";
 import { formatAmount } from "@/lib/adapter";
+import { useAppState } from "@/lib/AppStateContext";
 
 const HERO_SLIDES = [
   {
@@ -423,6 +424,9 @@ function ProgramsGrid() {
 
 export default function LandingView() {
   const router = useRouter();
+  const { userEmail } = useAppState();
+  // Kullanıcı adı = e-postanın @ öncesi kısmı.
+  const userName = userEmail ? userEmail.split("@")[0] : "";
   const goOnboarding = () => router.push("/onboarding");
 
   return (
@@ -459,12 +463,50 @@ export default function LandingView() {
         </nav>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button
-            onClick={() => router.push("/giris")}
-            style={{ fontSize: 13.5, fontWeight: 700, color: "#fff", padding: "10px 16px" }}
-          >
-            Giriş yap
-          </button>
+          {/* Ana sayfa da oturum durumunu yansıtır: girişliyken "Giriş yap"
+              göstermek, kullanıcıya çıkış yapmış gibi hissettiriyordu. */}
+          {userEmail ? (
+            <button
+              onClick={() => router.push("/panel")}
+              title={userEmail}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 13.5,
+                fontWeight: 700,
+                color: "#fff",
+                padding: "8px 14px",
+                borderRadius: 999,
+                border: "1px solid rgba(255,255,255,.22)",
+              }}
+            >
+              <span
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: "50%",
+                  background: "var(--teal-700)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}
+              >
+                {userName.slice(0, 1).toUpperCase()}
+              </span>
+              {userName}
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push("/giris")}
+              style={{ fontSize: 13.5, fontWeight: 700, color: "#fff", padding: "10px 16px" }}
+            >
+              Giriş yap
+            </button>
+          )}
           <button
             onClick={goOnboarding}
             style={{
