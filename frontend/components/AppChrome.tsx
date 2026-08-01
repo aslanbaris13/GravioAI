@@ -23,6 +23,9 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
     trackedApplications,
     userEmail,
     signOut,
+    threads,
+    activeThreadId,
+    openThread,
   } = useAppState();
 
   // Kendi tam sayfa düzeni olan rotalar sidebar kabuğunu almaz.
@@ -105,6 +108,12 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
         onNavMatches={() => go("/matches")}
         onNavApplications={() => go("/applications")}
         onNavProfile={() => go("/panel")}
+        threads={threads}
+        activeThreadId={activeThreadId}
+        onOpenThread={(id) => {
+          void openThread(id);
+          go("/chat");
+        }}
       />
       <main style={{ flex: 1, minWidth: 0, position: "relative" }}>{children}</main>
       </div>
