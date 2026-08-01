@@ -20,12 +20,16 @@ export default function GirisPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // `?hata=` parametresi useSearchParams yerine burada okunuyor: o hook
-  // sayfayı Suspense sınırına zorluyor ve statik ön-render boş kalıyordu
+  // `?hata=` ve `?sonra=` parametreleri useSearchParams yerine burada okunuyor:
+  // o hook sayfayı Suspense sınırına zorluyor ve statik ön-render boş kalıyordu
   // (doğrudan /giris'e gelen kullanıcı bir an boş ekran görüyordu).
+  const [nextPath, setNextPath] = useState<string | null>(null);
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get("hata");
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("hata");
     if (code && CALLBACK_ERRORS[code]) setError(CALLBACK_ERRORS[code]);
+    const sonra = params.get("sonra");
+    if (sonra && sonra.startsWith("/")) setNextPath(sonra);
   }, []);
 
   async function onSubmit(e: React.FormEvent) {
@@ -50,7 +54,7 @@ export default function GirisPage() {
       );
       return;
     }
-    router.push("/chat");
+    router.push(nextPath ?? "/chat");
     router.refresh();
   }
 

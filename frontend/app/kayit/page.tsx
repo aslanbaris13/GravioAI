@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AuthShell, { AuthNotice, authButtonStyle, authInputStyle, authLabelStyle } from "@/components/AuthShell";
 import { getSupabase, isAuthConfigured } from "@/lib/supabase";
@@ -14,6 +14,14 @@ export default function KayitPage() {
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [nextPath, setNextPath] = useState<string | null>(null);
+
+  // `giris` sayfasındaki ile aynı desen: doğrudan bu sayfaya gelen kullanıcıyı
+  // boş ekranla karşılamamak için useSearchParams yerine effect içinde okunur.
+  useEffect(() => {
+    const sonra = new URLSearchParams(window.location.search).get("sonra");
+    if (sonra && sonra.startsWith("/")) setNextPath(sonra);
+  }, []);
 
   const canSubmit = email.trim() !== "" && password.length >= MIN_PASSWORD && consent && !busy;
 
@@ -43,7 +51,7 @@ export default function KayitPage() {
     // E-posta doğrulaması açıksa oturum gelmez, kullanıcı maili beklemeli.
     // Kapalıysa oturum doğrudan açılır ve sohbete geçilir.
     if (data.session) {
-      router.push("/chat");
+      router.push(nextPath ?? "/chat");
       router.refresh();
     } else {
       setSent(true);
