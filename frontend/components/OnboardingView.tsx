@@ -167,13 +167,19 @@ function StepHeading({ title, sub }: { title: string; sub: string }) {
 export default function OnboardingView({
   onComplete,
   onSkip,
+  initialProfile = null,
 }: {
   onComplete: (profile: BackendUserProfile) => void;
   onSkip: () => void;
+  /** Panelim'den "Profili düzenle" ile gelindiğinde mevcut profil — formu
+   *  boştan doldurtmak yerine önceden girilenleri gösterir. */
+  initialProfile?: BackendUserProfile | null;
 }) {
   const router = useRouter();
   const [stepIndex, setStepIndex] = useState(0);
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [form, setForm] = useState<FormState>(() =>
+    initialProfile ? applyParsedProfile(EMPTY_FORM, initialProfile) : EMPTY_FORM,
+  );
   const [docUpload, setDocUpload] = useState<{ status: "idle" | "loading" | "success" | "error"; message?: string }>({
     status: "idle",
   });
