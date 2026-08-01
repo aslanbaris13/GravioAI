@@ -240,6 +240,20 @@ export async function assist(
   });
 }
 
+/**
+ * Anasayfadaki sohbet widget'ının tanıtım asistanı — GravioAI'nin ne olduğu/
+ * nasıl çalıştığı hakkındaki soruları yanıtlar. `/assist`'ten farkı: profil
+ * çıkarımı/program eşleştirmesi yapmaz, sabit bir "GravioAI hakkında" bilgiye
+ * dayanır (bkz. backend `GRAVIOAI_ASSISTANT_SYSTEM_PROMPT`).
+ */
+export async function chatWithGravioAI(message: string, history: ConversationTurn[]): Promise<string> {
+  const res = await apiFetch<{ reply: string }>("/chat", {
+    method: "POST",
+    body: JSON.stringify({ message, history }),
+  });
+  return res.reply;
+}
+
 /** `/assist/stream`'in yaydığı olay türleri — bkz. backend `Orchestrator.run_stream`. */
 export type AssistStreamEvent =
   | { type: "meta"; profile: BackendUserProfile; matches: BackendProgramMatch[] }

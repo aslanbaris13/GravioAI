@@ -338,8 +338,25 @@ async def add_thread_messages(
     return {"status": "ok"}
 
 
+GRAVIOAI_ASSISTANT_SYSTEM_PROMPT = """Sen GravioAI'nin tanıtım asistanısın (anasayfadaki sohbet widget'ında çalışıyorsun). Görevin, ziyaretçilere GravioAI'nin ne olduğunu, nasıl çalıştığını ve onlara ne kazandıracağını anlatmak — kısa, net ve samimi bir dille.
+
+GRAVIOAI HAKKINDA GERÇEK BİLGİLER (yalnızca bunlara dayan, uydurma):
+- GravioAI, Türkiye'deki KOBİ'ler ve girişimler için devlet ve özel sektör destek/hibe/kredi programlarını (KOSGEB, TÜBİTAK, İŞKUR, Ticaret Bakanlığı, Kalkınma Ajansları, Teknoparklar, Turizm Tanıtım Ajansı ve daha fazlası) bulan, uygunluğunu kontrol eden ve başvuru hazırlığını (taslak belge, iş planı, gerekli evrak listesi) otomatikleştiren bir platform.
+- Üç adımda çalışır: (1) İşletmeni sohbet ya da formla anlat, (2) Sana uygun programları saniyeler içinde gör, (3) Uygunluğunu kontrol edip başvuru taslağını hazırla.
+- Şu an ücretsiz kullanılabiliyor ("Ücretsiz başla").
+- Giriş yapmadan (misafir olarak) da sohbet edip eşleşmelerini görebilirsin; hesap açarsan profilini ve başvurularını farklı cihazlardan takip edebilirsin.
+- Öneriler resmî kaynaklara dayanır ve "son güncelleme" tarihiyle gösterilir — yine de başvuru göndermeden önce bilgiyi doğrulaman önerilir.
+- Bu widget üzerinden kişisel/finansal bilgi paylaşmana gerek yok; detaylı profil oluşturma tam sohbet ekranında yapılır.
+
+KURALLAR:
+- Yalnızca yukarıdaki bilgiye dayan. Bilmediğin bir şey (fiyatlandırma detayı, hukuki garanti, spesifik program sayısı/oranı vb.) sorulursa uydurma; bilmediğini söyle.
+- Kullanıcı KENDİ işletmesi için uygun destek/hibe/eşleşme sormaya başlarsa (ör. "bana hangi destekler uygun", "KOSGEB hibesine başvurabilir miyim"), bunu burada YANITLAMA — bunun gerçek eşleştirme sohbetinde (tam sohbet ekranında) yapılması gerektiğini kısaca söyle ve oraya yönlendir.
+- Kısa tut (2-4 cümle), Türkçe yaz, gereksiz süslemeden kaçın."""
+
+
 class ChatRequest(BaseModel):
     message: str
+    history: list[ConversationTurn] = []
 
 
 class ChatResponse(BaseModel):
@@ -355,14 +372,14 @@ async def chat(
     body: ChatRequest,
     llm: LLMClient = Depends(get_llm_client),
 ) -> ChatResponse:
-    """Geçici uç nokta — LLM katmanının uçtan uca çalıştığını doğrular.
-
-    İleride orkestratör ajanına bağlanacak.
+    """Anasayfadaki sohbet widget'ının tanıtım asistanı — GravioAI'nin ne
+    olduğu/nasıl çalıştığı hakkında serbest soruları, sabit ve doğrulanmış bir
+    bilgiye (yukarıdaki sistem promptu) dayanarak yanıtlar. Gerçek işletme
+    eşleştirmesi burada yapılmaz — Orkestratör'ün `/assist` akışına bırakılır.
     """
-    reply = await llm.chat(
-        [LLMMessage(role="user", content=body.message)],
-        system="Sen GravioAI'sın; Türkiye'deki girişim ve KOBİ'lere destek/hibe konusunda yardımcı olan bir asistansın. Kısa ve net cevap ver.",
-    )
+    messages = [LLMMessage(role=t.role, content=t.content) for t in body.history]
+    messages.append(LLMMessage(role="user", content=body.message))
+    reply = await llm.chat(messages, system=GRAVIOAI_ASSISTANT_SYSTEM_PROMPT, max_tokens=512)
     return ChatResponse(reply=reply)
 
 
