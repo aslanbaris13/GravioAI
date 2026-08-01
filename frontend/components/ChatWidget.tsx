@@ -19,8 +19,9 @@ interface WidgetMessage {
 const DEFAULT_POS = { right: 28, bottom: 28 };
 
 /**
- * Sağ altta duran destek widget'ı — sayfa yüklendiğinde otomatik açık
- * gelir (kullanıcı tıklamak zorunda kalmaz). Başlık şeridi bilerek açık
+ * Sağ altta duran destek widget'ı — kapalı (rozet halinde) başlar; sayfa
+ * yüklenir yüklenmez paneli açıp hero'nun büyük kısmını kapatmasın diye.
+ * Kullanıcı rozete tıklayınca panel açılır. Başlık şeridi bilerek açık
  * turuncu/terracotta tonunda: koyu teal zemin logodaki roket markasını
  * gölgede bırakıyordu, açık zeminde marka rengi çok daha net okunuyor.
  *
@@ -29,7 +30,7 @@ const DEFAULT_POS = { right: 28, bottom: 28 };
  * sayılmaz (4px eşik) — böylece kapalı rozete tıklamak hâlâ paneli açar.
  */
 export default function ChatWidget() {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [pos, setPos] = useState(DEFAULT_POS);
   const [dragging, setDragging] = useState(false);

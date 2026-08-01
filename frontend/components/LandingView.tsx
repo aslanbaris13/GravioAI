@@ -122,6 +122,8 @@ function HeroCarousel({ onCta }: { onCta: (target: string) => void }) {
   }, [paused]);
 
   const slide = HERO_SLIDES[index];
+  const goPrev = () => setIndex((i) => (i - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+  const goNext = () => setIndex((i) => (i + 1) % HERO_SLIDES.length);
 
   return (
     <section
@@ -174,8 +176,53 @@ function HeroCarousel({ onCta }: { onCta: (target: string) => void }) {
             width={1600}
             height={893}
             fetchPriority="high"
-            style={{ width: "100%", height: "auto", display: "block", animation: "heroFadeIn .5s ease" }}
+            style={{ width: "100%", height: "auto", display: "block", animation: "heroFadeIn .5s ease forwards" }}
           />
+
+          {/* İleri/geri okları — noktalar fark edilmeyebiliyordu, sonraki/önceki
+              slayta geçiş burada daha belirgin bir kontrolle de yapılabiliyor. */}
+          <button
+            onClick={goPrev}
+            aria-label="Önceki slayt"
+            className="hero-nav-btn"
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: 14,
+              transform: "translateY(-50%)",
+              width: 38,
+              height: 38,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,.88)",
+              boxShadow: "0 4px 14px rgba(22,48,46,.22)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Ms name="chevron_left" size={22} color="var(--ink-900)" />
+          </button>
+          <button
+            onClick={goNext}
+            aria-label="Sonraki slayt"
+            className="hero-nav-btn"
+            style={{
+              position: "absolute",
+              top: "50%",
+              right: 14,
+              transform: "translateY(-50%)",
+              width: 38,
+              height: 38,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,.88)",
+              boxShadow: "0 4px 14px rgba(22,48,46,.22)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Ms name="chevron_right" size={22} color="var(--ink-900)" />
+          </button>
         </div>
 
         <button
