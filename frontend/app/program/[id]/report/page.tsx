@@ -78,7 +78,7 @@ export default function ProgramReportPage() {
         {state === "not-found" && (
           <InfoCard
             icon="construction"
-            text="Bu program için henüz hazır bir rapor gereksinim şablonu yok. Şu an yalnızca TÜBİTAK 1507 ve 1501 için hazır — ekibimiz diğer programları da ekliyor."
+            text="Bu program için henüz hazır bir rapor gereksinim şablonu yok — ekibimiz programları eklemeye devam ediyor."
           />
         )}
 

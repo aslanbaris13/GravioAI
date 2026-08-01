@@ -7,10 +7,14 @@ export default function EligibilityView({
   program,
   onBack,
   onPrimaryAction,
+  primaryActionLoading = false,
 }: {
   program: Program;
   onBack: () => void;
   onPrimaryAction: () => void;
+  /** Başvuru taslağı arka planda hazırlanırken buton bir tepki vermiyormuş
+   *  gibi görünmesin diye devre dışı bırakılır ve yükleniyor durumu gösterilir. */
+  primaryActionLoading?: boolean;
 }) {
   const { state, score } = program.elig;
   const cta = eligCta(state, program.conditions);
@@ -96,6 +100,7 @@ export default function EligibilityView({
 
         <button
           onClick={onPrimaryAction}
+          disabled={primaryActionLoading}
           style={{
             display: "flex",
             alignItems: "center",
@@ -110,10 +115,30 @@ export default function EligibilityView({
             fontSize: 14.5,
             fontWeight: 700,
             boxShadow: "0 8px 20px rgba(168,80,46,.28)",
+            opacity: primaryActionLoading ? 0.7 : 1,
+            cursor: primaryActionLoading ? "default" : "pointer",
           }}
         >
-          {cta.btn}
-          <Ms name="arrow_forward" size={19} />
+          {primaryActionLoading ? (
+            <>
+              <div
+                style={{
+                  width: 16,
+                  height: 16,
+                  border: "2px solid #fff",
+                  borderTopColor: "transparent",
+                  borderRadius: "50%",
+                  animation: "spin 0.8s linear infinite",
+                }}
+              />
+              Hazırlanıyor…
+            </>
+          ) : (
+            <>
+              {cta.btn}
+              <Ms name="arrow_forward" size={19} />
+            </>
+          )}
         </button>
       </div>
     </section>

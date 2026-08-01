@@ -32,6 +32,9 @@ from models import (
     ApplicationTrackingStatus,
     AssistResult,
     Category,
+    ChatThreadMessage,
+    ChatThreadMessageCreate,
+    ChatThreadSummary,
     ConversationTurn,
     EligibilityResult,
     GeneratedPresentation,
@@ -287,8 +290,73 @@ async def write_session(
     return {"status": "ok"}
 
 
+class ThreadCreateRequest(BaseModel):
+    session_id: str
+
+
+@router.post("/threads", response_model=ChatThreadSummary, response_model_by_alias=False)
+async def create_thread(
+    body: ThreadCreateRequest, user_id: str | None = Depends(current_user_id)
+) -> ChatThreadSummary:
+    """Yeni bir sohbet thread'i açar (kenar çubuğundaki sohbet geçmişi).
+    "Yeni sohbet" tıklanınca değil, kullanıcı ilk mesajını gönderince
+    çağrılır — böylece hiç kullanılmayan boş sohbetler geçmişi doldurmaz."""
+    return await run_in_threadpool(repo.create_thread, body.session_id, user_id)
+
+
+@router.get("/threads", response_model=list[ChatThreadSummary], response_model_by_alias=False)
+async def get_threads(
+    session_id: str, user_id: str | None = Depends(current_user_id)
+) -> list[ChatThreadSummary]:
+    """Sohbet geçmişini getirir (girişliyse hesap üzerinden)."""
+    return await run_in_threadpool(repo.list_threads, session_id, user_id)
+
+
+@router.get("/threads/{thread_id}/messages", response_model=list[ChatThreadMessage], response_model_by_alias=False)
+async def get_thread_messages(
+    thread_id: str, session_id: str, user_id: str | None = Depends(current_user_id)
+) -> list[ChatThreadMessage]:
+    """Bir thread'in tüm mesajlarını getirir — sohbete geri dönüldüğünde ekranı
+    doldurmak için. Başka bir oturuma/kullanıcıya ait thread'e erişim boş liste döner."""
+    return await run_in_threadpool(repo.get_thread_messages, thread_id, session_id, user_id)
+
+
+@router.post("/threads/{thread_id}/messages")
+async def add_thread_messages(
+    thread_id: str,
+    session_id: str,
+    body: list[ChatThreadMessageCreate],
+    user_id: str | None = Depends(current_user_id),
+) -> dict:
+    """Bir thread'e bir sohbet turunun mesaj(lar)ını ekler. Frontend, akış
+    (stream) bittikten sonra o turda oluşan mesajları burada toplu kaydeder —
+    her token için değil, tur başına bir çağrı."""
+    messages = [{"role": m.role, "data": m.data} for m in body]
+    ok = await run_in_threadpool(repo.append_thread_messages, thread_id, session_id, messages, user_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Sohbet kaydı bulunamadı")
+    return {"status": "ok"}
+
+
+GRAVIOAI_ASSISTANT_SYSTEM_PROMPT = """Sen GravioAI'nin tanıtım asistanısın (anasayfadaki sohbet widget'ında çalışıyorsun). Görevin, ziyaretçilere GravioAI'nin ne olduğunu, nasıl çalıştığını ve onlara ne kazandıracağını anlatmak — kısa, net ve samimi bir dille.
+
+GRAVIOAI HAKKINDA GERÇEK BİLGİLER (yalnızca bunlara dayan, uydurma):
+- GravioAI, Türkiye'deki KOBİ'ler ve girişimler için devlet ve özel sektör destek/hibe/kredi programlarını (KOSGEB, TÜBİTAK, İŞKUR, Ticaret Bakanlığı, Kalkınma Ajansları, Teknoparklar, Turizm Tanıtım Ajansı ve daha fazlası) bulan, uygunluğunu kontrol eden ve başvuru hazırlığını (taslak belge, iş planı, gerekli evrak listesi) otomatikleştiren bir platform.
+- Üç adımda çalışır: (1) İşletmeni sohbet ya da formla anlat, (2) Sana uygun programları saniyeler içinde gör, (3) Uygunluğunu kontrol edip başvuru taslağını hazırla.
+- Şu an ücretsiz kullanılabiliyor ("Ücretsiz başla").
+- Giriş yapmadan (misafir olarak) da sohbet edip eşleşmelerini görebilirsin; hesap açarsan profilini ve başvurularını farklı cihazlardan takip edebilirsin.
+- Öneriler resmî kaynaklara dayanır ve "son güncelleme" tarihiyle gösterilir — yine de başvuru göndermeden önce bilgiyi doğrulaman önerilir.
+- Bu widget üzerinden kişisel/finansal bilgi paylaşmana gerek yok; detaylı profil oluşturma tam sohbet ekranında yapılır.
+
+KURALLAR:
+- Yalnızca yukarıdaki bilgiye dayan. Bilmediğin bir şey (fiyatlandırma detayı, hukuki garanti, spesifik program sayısı/oranı vb.) sorulursa uydurma; bilmediğini söyle.
+- Kullanıcı KENDİ işletmesi için uygun destek/hibe/eşleşme sormaya başlarsa (ör. "bana hangi destekler uygun", "KOSGEB hibesine başvurabilir miyim"), bunu burada YANITLAMA — bunun gerçek eşleştirme sohbetinde (tam sohbet ekranında) yapılması gerektiğini kısaca söyle ve oraya yönlendir.
+- Kısa tut (2-4 cümle), Türkçe yaz, gereksiz süslemeden kaçın."""
+
+
 class ChatRequest(BaseModel):
     message: str
+    history: list[ConversationTurn] = []
 
 
 class ChatResponse(BaseModel):
@@ -304,14 +372,14 @@ async def chat(
     body: ChatRequest,
     llm: LLMClient = Depends(get_llm_client),
 ) -> ChatResponse:
-    """Geçici uç nokta — LLM katmanının uçtan uca çalıştığını doğrular.
-
-    İleride orkestratör ajanına bağlanacak.
+    """Anasayfadaki sohbet widget'ının tanıtım asistanı — GravioAI'nin ne
+    olduğu/nasıl çalıştığı hakkında serbest soruları, sabit ve doğrulanmış bir
+    bilgiye (yukarıdaki sistem promptu) dayanarak yanıtlar. Gerçek işletme
+    eşleştirmesi burada yapılmaz — Orkestratör'ün `/assist` akışına bırakılır.
     """
-    reply = await llm.chat(
-        [LLMMessage(role="user", content=body.message)],
-        system="Sen GravioAI'sın; Türkiye'deki girişim ve KOBİ'lere destek/hibe konusunda yardımcı olan bir asistansın. Kısa ve net cevap ver.",
-    )
+    messages = [LLMMessage(role=t.role, content=t.content) for t in body.history]
+    messages.append(LLMMessage(role="user", content=body.message))
+    reply = await llm.chat(messages, system=GRAVIOAI_ASSISTANT_SYSTEM_PROMPT, max_tokens=512)
     return ChatResponse(reply=reply)
 
 

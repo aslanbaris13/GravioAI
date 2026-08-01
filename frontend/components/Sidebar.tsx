@@ -2,8 +2,8 @@
 import type { CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import Ms from "./Ms";
-import { profileInitials } from "@/lib/adapter";
-import type { BackendUserProfile } from "@/lib/api";
+import { formatRelativeTime, profileInitials } from "@/lib/adapter";
+import type { BackendChatThreadSummary, BackendUserProfile } from "@/lib/api";
 
 function navStyle(active: boolean): CSSProperties {
   const base: CSSProperties = {
@@ -40,6 +40,9 @@ export default function Sidebar({
   collapsed,
   onCollapse,
   profile,
+  threads,
+  activeThreadId,
+  onOpenThread,
 }: {
   matchCount: number;
   applicationCount: number;
@@ -58,6 +61,9 @@ export default function Sidebar({
   onSignOut: () => void;
   userEmail: string | null;
   profile: BackendUserProfile | null;
+  threads: BackendChatThreadSummary[];
+  activeThreadId: string | null;
+  onOpenThread: (threadId: string) => void;
 }) {
   const pathname = usePathname();
   const chatActive = pathname === "/chat";
@@ -157,6 +163,58 @@ export default function Sidebar({
         <Ms name="add" size={19} />
         Yeni sohbet
       </button>
+
+      {threads.length > 0 && (
+        <>
+          <div
+            style={{
+              fontSize: 10.5,
+              fontWeight: 600,
+              color: "var(--on-dark-faint)",
+              textTransform: "uppercase",
+              letterSpacing: ".07em",
+              padding: "6px 10px 4px",
+            }}
+          >
+            Sohbetlerim
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, maxHeight: 168, overflowY: "auto", marginBottom: 4 }}>
+            {threads.map((t) => {
+              const active = t.id === activeThreadId;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => onOpenThread(t.id)}
+                  title={t.title ?? "Yeni sohbet"}
+                  style={{
+                    ...navStyle(active),
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: 1,
+                    padding: "8px 13px",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "100%",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      fontSize: 13,
+                    }}
+                  >
+                    {t.title ?? "Yeni sohbet"}
+                  </span>
+                  <span style={{ fontSize: 10.5, fontWeight: 500, color: "var(--on-dark-faint)" }}>
+                    {formatRelativeTime(t.updated_at)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       <div
         style={{

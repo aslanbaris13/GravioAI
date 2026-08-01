@@ -12,6 +12,7 @@ import type {
   ApplicationTrackingStatus,
   BackendApplicationRecord,
   BackendIngestionRun,
+  BackendPresentationRecord,
   BackendUserProfile,
 } from "@/lib/api";
 import type { Program } from "@/lib/types";
@@ -41,6 +42,10 @@ const PROFILE_FIELD_LABELS: { key: keyof BackendUserProfile; label: string }[] =
   { key: "goals", label: "Hedefler" },
 ];
 
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+}
+
 function isFieldMissing(profile: BackendUserProfile, key: keyof BackendUserProfile): boolean {
   const value = profile[key];
   if (Array.isArray(value)) return value.length === 0;
@@ -52,21 +57,25 @@ export default function DashboardView({
   programs,
   applications,
   ingestionRuns,
+  presentations,
   onOpenProgram,
   onGoToChat,
   onGoToOnboarding,
   onGoToApplications,
   onNewPresentation,
+  onDownloadPresentation,
 }: {
   profile: BackendUserProfile | null;
   programs: Program[];
   applications: BackendApplicationRecord[];
   ingestionRuns?: BackendIngestionRun[];
+  presentations?: BackendPresentationRecord[];
   onOpenProgram: (id: string) => void;
   onGoToChat?: () => void;
   onGoToOnboarding?: () => void;
   onGoToApplications?: () => void;
   onNewPresentation?: () => void;
+  onDownloadPresentation?: (record: BackendPresentationRecord) => void;
 }) {
   // Profil hiç çıkarılmamışsa panelin gösterecek verisi yok — kullanıcıyı boş
   // kartlarla baş başa bırakmak yerine iki yoldan birini seçtiriyoruz.
@@ -357,9 +366,20 @@ export default function DashboardView({
             "profil yok" demek gereksiz tekrar oluyordu. */}
         {hasProfile && (
           <>
-            <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-600)", textTransform: "uppercase", letterSpacing: ".05em", marginTop: 28 }}>
-              İşletme profili
-            </h2>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28 }}>
+              <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-600)", textTransform: "uppercase", letterSpacing: ".05em", margin: 0 }}>
+                İşletme profili
+              </h2>
+              {onGoToOnboarding && (
+                <button
+                  onClick={onGoToOnboarding}
+                  style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 700, color: "var(--terracotta-700)" }}
+                >
+                  <Ms name="edit" size={14} />
+                  Profili düzenle
+                </button>
+              )}
+            </div>
             {chips.length > 0 ? (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
                 {chips.map((ch) => (
@@ -467,6 +487,55 @@ export default function DashboardView({
                 Yaklaşan bir son tarih yok.
               </div>
             )}
+          </>
+        )}
+
+        {presentations && presentations.length > 0 && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28 }}>
+              <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--ink-600)", textTransform: "uppercase", letterSpacing: ".05em", margin: 0 }}>
+                Sunumlarım
+              </h2>
+              {onNewPresentation && (
+                <button onClick={onNewPresentation} style={{ fontSize: 12, fontWeight: 700, color: "var(--terracotta-700)" }}>
+                  Tümünü gör
+                </button>
+              )}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
+              {presentations.slice(0, 3).map((p) => (
+                <div
+                  key={p.id}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: 12, padding: "12px 14px",
+                  }}
+                >
+                  <Ms name="slideshow" size={20} color="var(--terracotta-700)" style={{ flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: "var(--ink-900)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {p.title}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: "var(--ink-400)", marginTop: 1 }}>
+                      {p.slides.length + 1} slayt · {formatDate(p.created_at)}
+                    </div>
+                  </div>
+                  {onDownloadPresentation && (
+                    <button
+                      onClick={() => onDownloadPresentation(p)}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
+                        fontSize: 12.5, fontWeight: 700, color: "var(--terracotta-700)",
+                        padding: "7px 12px", borderRadius: 9, border: "1px solid var(--terracotta-100)", background: "var(--terracotta-100)",
+                      }}
+                    >
+                      <Ms name="download" size={15} />
+                      İndir
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </>
         )}
 

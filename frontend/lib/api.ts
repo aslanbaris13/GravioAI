@@ -240,6 +240,20 @@ export async function assist(
   });
 }
 
+/**
+ * Anasayfadaki sohbet widget'ının tanıtım asistanı — GravioAI'nin ne olduğu/
+ * nasıl çalıştığı hakkındaki soruları yanıtlar. `/assist`'ten farkı: profil
+ * çıkarımı/program eşleştirmesi yapmaz, sabit bir "GravioAI hakkında" bilgiye
+ * dayanır (bkz. backend `GRAVIOAI_ASSISTANT_SYSTEM_PROMPT`).
+ */
+export async function chatWithGravioAI(message: string, history: ConversationTurn[]): Promise<string> {
+  const res = await apiFetch<{ reply: string }>("/chat", {
+    method: "POST",
+    body: JSON.stringify({ message, history }),
+  });
+  return res.reply;
+}
+
 /** `/assist/stream`'in yaydığı olay türleri — bkz. backend `Orchestrator.run_stream`. */
 export type AssistStreamEvent =
   | { type: "meta"; profile: BackendUserProfile; matches: BackendProgramMatch[] }
@@ -442,6 +456,56 @@ export async function saveSession(
     method: "PUT",
     body: JSON.stringify(state),
   });
+}
+
+/** Kenar çubuğundaki sohbet geçmişi listesi için — mesajları içermez. */
+export interface BackendChatThreadSummary {
+  id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** `data` bilinçli olarak opak — şekli frontend'in `ChatMessageDraft` tipine ait. */
+export interface BackendChatThreadMessage {
+  role: string;
+  data: Record<string, unknown>;
+  created_at?: string;
+}
+
+/** Yeni bir sohbet thread'i açar. */
+export async function createThread(sessionId: string): Promise<BackendChatThreadSummary> {
+  return apiFetch<BackendChatThreadSummary>("/threads", {
+    method: "POST",
+    body: JSON.stringify({ session_id: sessionId }),
+  });
+}
+
+/** Bir oturumun sohbet geçmişini (en son güncellenen önce) getirir. */
+export async function listThreads(sessionId: string): Promise<BackendChatThreadSummary[]> {
+  return apiFetch<BackendChatThreadSummary[]>(`/threads?session_id=${encodeURIComponent(sessionId)}`);
+}
+
+/** Bir thread'in tüm mesajlarını (eskiden yeniye) getirir. */
+export async function getThreadMessages(
+  threadId: string,
+  sessionId: string,
+): Promise<BackendChatThreadMessage[]> {
+  return apiFetch<BackendChatThreadMessage[]>(
+    `/threads/${encodeURIComponent(threadId)}/messages?session_id=${encodeURIComponent(sessionId)}`,
+  );
+}
+
+/** Bir thread'e bir sohbet turunun mesaj(lar)ını ekler. */
+export async function appendThreadMessages(
+  threadId: string,
+  sessionId: string,
+  messages: { role: string; data: Record<string, unknown> }[],
+): Promise<void> {
+  await apiFetch<{ status: string }>(
+    `/threads/${encodeURIComponent(threadId)}/messages?session_id=${encodeURIComponent(sessionId)}`,
+    { method: "POST", body: JSON.stringify(messages) },
+  );
 }
 
 /**
