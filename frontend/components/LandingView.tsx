@@ -460,6 +460,7 @@ export default function LandingView() {
         <nav className="landing-nav-links" style={{ display: "flex", alignItems: "center", gap: 28 }}>
           <a href="#programlar" style={{ fontSize: 13.5, fontWeight: 700, color: "#fff", borderBottom: "2px solid var(--terracotta-600)", paddingBottom: 2 }}>Programlar</a>
           <a href="#nasil-calisir" style={{ fontSize: 13.5, fontWeight: 600, color: "var(--on-dark-muted)" }}>Nasıl çalışır</a>
+          <a href="/gelecek" style={{ fontSize: 13.5, fontWeight: 600, color: "var(--on-dark-muted)" }}>Gelecek</a>
         </nav>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

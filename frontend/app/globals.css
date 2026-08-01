@@ -448,6 +448,46 @@ textarea {
 }
 
 /* ------------------------------------------------------------------ */
+/* Yol haritası sayfası (/gelecek)                                      */
+/* ------------------------------------------------------------------ */
+
+/* Hero'da dönen kelime — aşağıdan belirip yerine oturur. */
+@keyframes wordSwap {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Kategori kartları: fareyle üzerine gelince hafifçe yükselir.
+   Satır içi stillerle :hover yazılamadığı için burada. */
+.roadmap-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.roadmap-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-raised);
+}
+
+.roadmap-card-live:hover {
+  border-color: var(--teal-700);
+}
+
+.roadmap-card-soon:hover {
+  border-color: var(--terracotta-600);
+}
+
+/* Filtre segmenti */
+.roadmap-filter-btn {
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+/* ------------------------------------------------------------------ */
 /* Etkileşim geri bildirimi                                             */
 /* Stiller satır içi yazıldığı için :hover/:focus JSX'ten verilemiyor;  */
 /* bu yüzden merkezi olarak burada tanımlanıyor.                        */

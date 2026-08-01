@@ -29,7 +29,7 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
   } = useAppState();
 
   // Kendi tam sayfa düzeni olan rotalar sidebar kabuğunu almaz.
-  const STANDALONE = ["/", "/onboarding", "/giris", "/kayit", "/sifre-sifirla"];
+  const STANDALONE = ["/", "/gelecek", "/onboarding", "/giris", "/kayit", "/sifre-sifirla"];
   if (STANDALONE.includes(pathname) || pathname.startsWith("/auth/")) {
     return <>{children}</>;
   }
