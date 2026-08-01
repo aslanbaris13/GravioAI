@@ -71,6 +71,16 @@ const NEXT_CAPABILITIES: { title: string; desc: string; icon: string }[] = [
     desc: "Başvuru sürecini ekip arkadaşın veya danışmanınla birlikte yürütebilmek.",
     icon: "group",
   },
+  {
+    title: "Yatırımcı ve network eşleştirmesi",
+    desc: "Profiline uygun melek yatırımcı, VC ve iş ortaklığı fırsatlarını, destek programlarıyla aynı motorla eşleştirelim.",
+    icon: "handshake",
+  },
+  {
+    title: "Etkinlik ve yarışma eşleştirmesi",
+    desc: "TEKNOFEST, hackathon'lar, hızlandırıcı çağrıları — profiline uygun olanları proaktif olarak önerelim.",
+    icon: "emoji_events",
+  },
 ];
 
 /** Hero'da sırayla görünen ifadeler. Kategoriler tek tek geçer, en sonda
@@ -279,14 +289,16 @@ export default function GelecekPage() {
           <div style={{ fontSize: 15, fontWeight: 700, color: "var(--teal-700)", letterSpacing: ".02em", marginBottom: 26 }}>
             Bugün neredeyiz
           </div>
-          {/* Dördü aynı anda değil, sırayla belirir — akışın adım adım
+          {/* Hepsi aynı anda değil, sırayla belirir — akışın adım adım
               ilerlediğini hissettiriyor. */}
-          <div ref={todayRef} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 28 }} className="how-grid">
+          <div ref={todayRef} style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 28 }} className="how-grid">
             {[
               { icon: "account_balance", t: "3 kurum", d: "KOSGEB, TÜBİTAK, Kalkınma Ajansları" },
               { icon: "manage_search", t: "Anlamsal eşleştirme", d: "Anahtar kelime değil, anlam tabanlı arama" },
               { icon: "fact_check", t: "Koşul koşul uygunluk", d: "Neyi karşılıyorsun, ne eksik" },
               { icon: "description", t: "Başvuru hazırlığı", d: "Evrak listesi ve iş planı taslağı" },
+              { icon: "summarize", t: "Rapor yazımı", d: "Resmi başvuru raporu, bölüm bölüm otomatik yazılıyor" },
+              { icon: "slideshow", t: "Sunum hazırlığı", d: "Yatırımcı/müşteri sunumu, profiline özel üretilip PPTX olarak iniyor" },
             ].map((x, i) => (
               <div
                 key={x.t}
@@ -439,7 +451,11 @@ export default function GelecekPage() {
       {/* ---------------- Yeni yetenekler ---------------- */}
       <section style={{ padding: "0 32px 72px" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-          <SectionTitle eyebrow="Yakında" title="Kapsam dışında neler geliyor" />
+          <SectionTitle
+            eyebrow="Yakında"
+            title="Kapsam dışında neler geliyor"
+            sub="Hedefimiz yalnızca destek programı bulmak değil — şirketleri yatırımcıyla, etkinlikle ve doğru insanlarla buluşturan bir büyüme ortağı olmak."
+          />
           <div className="how-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 18 }}>
             {NEXT_CAPABILITIES.map((x) => (
               <div
