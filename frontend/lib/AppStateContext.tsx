@@ -62,10 +62,6 @@ import type {
 
 const TOAST_MS = 2200;
 
-/** Ana sayfadaki ChatWidget'ın yazdığı ilk mesajı /chat'e taşıdığı anahtar.
- *  Tek kaynak olsun diye ChatWidget da bunu import eder. */
-export const WIDGET_DRAFT_KEY = "gravioai_widget_draft";
-
 /** Uygunluk değerlendirmesi yapılamadığında kullanılan nötr yer tutucu —
  *  "uygun değilsin" demez, "henüz bakılmadı" der (bkz. ensureProgram). */
 const UNEVALUATED_ELIGIBILITY: BackendEligibilityResult = {
@@ -131,7 +127,6 @@ interface AppState {
   onOnboardingComplete: (profile: BackendUserProfile) => void;
   onOnboardingSkip: () => void;
   onSend: () => Promise<void>;
-  consumeWidgetDraft: () => void;
   onFollowup: (key: string) => void;
   onSuggestion: (key: string) => void;
   onCtaAction: (action: "go-matches" | "apply-bigg") => void;
@@ -519,26 +514,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, typing]);
 
-  /** Ana sayfadaki ChatWidget, kullanıcının yazdığı ilk mesajı localStorage'a
-   *  bırakıp /chat'e yönlendirir. Sohbet ekranı açılınca o mesaj burada
-   *  tüketilip gerçek bir tura dönüştürülür — yoksa kullanıcı yazdığı soruyu
-   *  kaybedip boş bir sohbete düşüyordu. */
-  function consumeWidgetDraft() {
-    let draft: string | null = null;
-    try {
-      draft = window.localStorage.getItem(WIDGET_DRAFT_KEY);
-      if (draft) window.localStorage.removeItem(WIDGET_DRAFT_KEY);
-    } catch {
-      return; // depolama kapalıysa taslak da yoktur
-    }
-    const text = draft?.trim();
-    if (!text || typing) return;
-    const history = buildHistory(messages);
-    // onSuggestion ile aynı gerekçe: StrictMode'un çift render'ında isteği
-    // ikiye katlamamak için ağ çağrısı bir tur ertelenir.
-    setTimeout(() => void sendMessage(text, history), 50);
-  }
-
   function onFollowup(key: string) {
     if (key === "apply" && apiPrograms.length > 0) {
       applyProgram(apiPrograms[0].id);
@@ -802,7 +777,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     onOnboardingComplete,
     onOnboardingSkip,
     onSend,
-    consumeWidgetDraft,
     onFollowup,
     onSuggestion,
     onCtaAction,

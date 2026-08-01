@@ -2,13 +2,19 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Ms from "./Ms";
-import { WIDGET_DRAFT_KEY } from "@/lib/AppStateContext";
+import { chatWithGravioAI } from "@/lib/api";
+import type { ConversationTurn } from "@/lib/api";
 
-const SUGGESTIONS = [
-  "Hangi destekler bana uygun?",
-  "KOSGEB hibesine nasıl başvururum?",
-  "Hibe oranları nasıl hesaplanıyor?",
-];
+/** GravioAI'nin ne olduğu/nasıl çalıştığı hakkında — gerçek işletme
+ *  eşleştirmesi (kişiye özel destek önerisi) burada değil, "Gerçek
+ *  sohbete geç" ile ulaşılan tam /chat ekranında yapılır. */
+const SUGGESTIONS = ["GravioAI ne işe yarar?", "Nasıl çalışır?", "Ücretsiz mi?"];
+
+interface WidgetMessage {
+  id: number;
+  role: "user" | "assistant";
+  text: string;
+}
 
 const DEFAULT_POS = { right: 28, bottom: 28 };
 
@@ -27,19 +33,35 @@ export default function ChatWidget() {
   const [value, setValue] = useState("");
   const [pos, setPos] = useState(DEFAULT_POS);
   const [dragging, setDragging] = useState(false);
+  const [messages, setMessages] = useState<WidgetMessage[]>([]);
+  const [sending, setSending] = useState(false);
   const dragRef = useRef<{ startX: number; startY: number; startRight: number; startBottom: number; moved: boolean } | null>(null);
+  const idRef = useRef(1);
   const router = useRouter();
 
-  const goToChat = (message?: string) => {
-    if (message) {
-      try {
-        window.localStorage.setItem(WIDGET_DRAFT_KEY, message);
-      } catch {
-        /* depolama kapalıysa sorun değil, mesajsız da yönlendirir */
-      }
+  /** Gerçek eşleştirme sohbetine geçer — bu widget artık kişiye özel destek
+   *  önerisi yapmıyor, yalnızca GravioAI hakkında soruları yanıtlıyor. */
+  const goToRealChat = () => router.push("/chat");
+
+  async function ask(text: string) {
+    const trimmed = text.trim();
+    if (!trimmed || sending) return;
+    const history: ConversationTurn[] = messages.map((m) => ({ role: m.role, content: m.text }));
+    setMessages((prev) => [...prev, { id: idRef.current++, role: "user", text: trimmed }]);
+    setValue("");
+    setSending(true);
+    try {
+      const reply = await chatWithGravioAI(trimmed, history);
+      setMessages((prev) => [...prev, { id: idRef.current++, role: "assistant", text: reply }]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { id: idRef.current++, role: "assistant", text: "Şu an yanıt veremiyorum, az sonra tekrar dener misin?" },
+      ]);
+    } finally {
+      setSending(false);
     }
-    router.push("/chat");
-  };
+  }
 
   const onDragPointerDown = (e: React.PointerEvent) => {
     // Yalnızca birincil düğme (sol tık / tek dokunuş) sürüklemeyi başlatsın.
@@ -209,8 +231,8 @@ export default function ChatWidget() {
             lineHeight: 1.55,
           }}
         >
-          Hoş geldin! Hangi devlet ya da özel sektör desteklerine uygun olduğunu
-          birlikte bulalım.
+          Hoş geldin! GravioAI&apos;nin ne olduğunu, nasıl çalıştığını ve sana ne
+          kazandıracağını merak ediyorsan sorabilirsin.
         </div>
         <div
           style={{
@@ -223,45 +245,101 @@ export default function ChatWidget() {
           }}
         >
           Güvenliğin için kişisel/finansal bilgilerini bu widget üzerinden
-          paylaşmana gerek yok — detaylı profil oluşturma adımı ayrı bir ekranda.
+          paylaşmana gerek yok — kendi işletmen için destek eşleştirmesi
+          &ldquo;Gerçek sohbete geç&rdquo; ile ulaştığın tam ekranda yapılır.
         </div>
 
-        <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-400)", margin: "8px 0 2px" }}>
-          Sorabileceğin konular
-        </div>
-        {SUGGESTIONS.map((s) => (
-          <button
-            key={s}
-            onClick={() => goToChat(s)}
+        {messages.length === 0 && (
+          <>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-400)", margin: "8px 0 2px" }}>
+              Sorabileceğin konular
+            </div>
+            {SUGGESTIONS.map((s) => (
+              <button
+                key={s}
+                onClick={() => void ask(s)}
+                style={{
+                  textAlign: "left",
+                  padding: "13px 16px",
+                  borderRadius: 13,
+                  border: "1px solid var(--border-subtle)",
+                  background: "var(--surface)",
+                  fontSize: 14,
+                  color: "var(--ink-900)",
+                  fontWeight: 500,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 9,
+                }}
+              >
+                <Ms name="chat_bubble" size={16} color="var(--terracotta-600)" />
+                {s}
+              </button>
+            ))}
+          </>
+        )}
+
+        {messages.map((m) => (
+          <div
+            key={m.id}
             style={{
-              textAlign: "left",
-              padding: "13px 16px",
-              borderRadius: 13,
-              border: "1px solid var(--border-subtle)",
-              background: "var(--surface)",
+              alignSelf: m.role === "user" ? "flex-end" : "flex-start",
+              maxWidth: "88%",
+              background: m.role === "user" ? "var(--terracotta-600)" : "var(--sand-200)",
+              color: m.role === "user" ? "#fff" : "var(--ink-900)",
+              borderRadius: m.role === "user" ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
+              padding: "12px 15px",
               fontSize: 14,
-              color: "var(--ink-900)",
-              fontWeight: 500,
-              display: "flex",
-              alignItems: "center",
-              gap: 9,
+              lineHeight: 1.55,
+              whiteSpace: "pre-wrap",
             }}
           >
-            <Ms name="chat_bubble" size={16} color="var(--terracotta-600)" />
-            {s}
-          </button>
+            {m.text}
+          </div>
         ))}
+        {sending && (
+          <div style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: 7, color: "var(--ink-400)", fontSize: 13 }}>
+            <div
+              style={{
+                width: 14,
+                height: 14,
+                border: "2px solid var(--ink-400)",
+                borderTopColor: "transparent",
+                borderRadius: "50%",
+                animation: "spin 0.8s linear infinite",
+              }}
+            />
+            Yazıyor…
+          </div>
+        )}
 
-        <div style={{ fontSize: 12.5, color: "var(--ink-400)", marginTop: 4 }}>
-          Daha fazlası için aşağıya kendi sorunu yazabilirsin.
-        </div>
+        <button
+          onClick={goToRealChat}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            marginTop: "auto",
+            padding: "12px 16px",
+            borderRadius: 13,
+            border: "1.5px dashed var(--terracotta-600)",
+            background: "var(--terracotta-100)",
+            color: "var(--terracotta-700)",
+            fontSize: 13.5,
+            fontWeight: 700,
+          }}
+        >
+          <Ms name="rocket_launch" size={17} />
+          İşletmen için gerçek eşleştirme — sohbete geç
+        </button>
       </div>
 
       {/* Giriş */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (value.trim()) goToChat(value.trim());
+          void ask(value);
         }}
         style={{
           flexShrink: 0,
@@ -277,6 +355,7 @@ export default function ChatWidget() {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Mesajınızı buraya yazınız"
+          disabled={sending}
           style={{
             flex: 1,
             border: "1px solid var(--border-subtle)",
@@ -290,11 +369,13 @@ export default function ChatWidget() {
         <button
           type="submit"
           aria-label="Gönder"
+          disabled={sending || !value.trim()}
           style={{
             width: 42,
             height: 42,
             borderRadius: "50%",
             background: "var(--terracotta-600)",
+            opacity: sending || !value.trim() ? 0.5 : 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
