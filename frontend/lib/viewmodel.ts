@@ -199,7 +199,7 @@ export function eligHeadline(state: EligState, conditions: Condition[]): string 
  *  ikon + etiket taşır (renkli zemin üstünde renkli etiket okunmuyordu). */
 export const CONDITION_STYLE = {
   met: { icon: "check_circle", col: "var(--success-700)", bg: "var(--surface)", bd: "var(--success-200)", tag: "Karşılandı", tagBg: "var(--success-100)", tagFg: "var(--success-700)" },
-  action: { icon: "bolt", col: "var(--teal-700)", bg: "var(--surface)", bd: "var(--teal-200)", tag: "Hazır", tagBg: "var(--teal-100)", tagFg: "var(--teal-700)" },
+  action: { icon: "bolt", col: "var(--teal-700)", bg: "var(--surface)", bd: "var(--teal-200)", tag: "Aksiyon gerekli", tagBg: "var(--teal-100)", tagFg: "var(--teal-700)" },
   unmet: { icon: "pending", col: "var(--warn-700)", bg: "var(--surface)", bd: "var(--warn-200)", tag: "Eksik", tagBg: "var(--warn-100)", tagFg: "var(--warn-700)" },
 } as const;
 

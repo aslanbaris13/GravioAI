@@ -12,7 +12,7 @@ import { useProgramId } from "@/lib/useProgramId";
 export default function ProgramEligibilityPage() {
   const id = useProgramId();
   const router = useRouter();
-  const { goToMatches, goToProgram, applyProgram, userEmail } = useAppState();
+  const { goToMatches, goToProgram, applyProgram, applyLoading, userEmail } = useAppState();
   const { program, state } = useProgram(id);
 
   // Uygunluk kontrolü profil verisi gerektirdiği için girişli kullanıcıya
@@ -32,6 +32,7 @@ export default function ProgramEligibilityPage() {
       program={program}
       onBack={() => goToProgram(id)}
       onPrimaryAction={() => applyProgram(id)}
+      primaryActionLoading={applyLoading}
     />
   );
 }
