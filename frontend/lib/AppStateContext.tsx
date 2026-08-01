@@ -298,15 +298,18 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setMessages((prev) => prev.filter((m) => !(m.role === "assistant" && m.kind === "loading")));
   }
 
+  /** Yeni sohbet yalnızca konuşma metnini sıfırlar — işletme profili ve
+   *  eşleşmeler (Eşleşmelerim, Panelim) korunur. Önceden profil de
+   *  sıfırlanıp backend'e boş profil olarak kaydediliyordu; bu da yeni bir
+   *  sohbete başlamanın önceden bulunan eşleşmeleri de silmesine yol
+   *  açıyordu — ChatGPT/Claude gibi araçlarda "yeni sohbet" hesabı/geçmiş
+   *  verileri silmez, sadece o anki konuşmayı sıfırlar. */
   function onNewChat() {
     setMessages([]);
     setTyping(false);
     setInput("");
     setFollowups([]);
-    setCurrentProfile(null);
-    setApiPrograms([]);
     setApplicationDraft(null);
-    saveSession(getSessionId(), { profile: EMPTY_PROFILE, matches: [] }).catch(() => {});
   }
 
   function onOnboardingComplete(profile: BackendUserProfile) {
