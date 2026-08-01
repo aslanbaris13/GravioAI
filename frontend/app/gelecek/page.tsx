@@ -81,6 +81,11 @@ const NEXT_CAPABILITIES: { title: string; desc: string; icon: string }[] = [
     desc: "TEKNOFEST, hackathon'lar, hızlandırıcı çağrıları — profiline uygun olanları proaktif olarak önerelim.",
     icon: "emoji_events",
   },
+  {
+    title: "Uzman ve mentor eşleştirmesi",
+    desc: "Hukuk, KVKK ve B2B fiyatlama gibi konularda, tam ihtiyacına uygun uzman ve mentorlarla eşleşelim.",
+    icon: "support_agent",
+  },
 ];
 
 /** Hero'da sırayla görünen ifadeler. Kategoriler tek tek geçer, en sonda
