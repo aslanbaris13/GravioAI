@@ -1,11 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Ms from "@/components/Ms";
 import ProgramLoading from "@/components/ProgramLoading";
 import ProgramNotFound from "@/components/ProgramNotFound";
 import { resolveReportSchema } from "@/lib/api";
 import type { BackendReportSchema } from "@/lib/api";
 import { useAppState } from "@/lib/AppStateContext";
+import { isAuthConfigured } from "@/lib/supabase";
 import { useProgram } from "@/lib/useProgram";
 import { useProgramId } from "@/lib/useProgramId";
 
@@ -13,13 +15,22 @@ type LoadState = "loading" | "found" | "not-found" | "error";
 
 export default function ProgramReportPage() {
   const id = useProgramId();
-  const { goToMatches, goToProgram, goToReportGenerate, currentProfile } = useAppState();
+  const router = useRouter();
+  const { goToMatches, goToProgram, goToReportGenerate, currentProfile, userEmail } = useAppState();
   const { program, state: programState } = useProgram(id);
+
+  // Rapor gereksinimleri profile göre önceden dolduruluyor — anonim
+  // ziyaretçi buraya link/URL ile gelirse giriş sayfasına yönlendirilir.
+  const authRequired = isAuthConfigured && !userEmail;
+  useEffect(() => {
+    if (authRequired) router.replace(`/giris?sonra=${encodeURIComponent(`/program/${id}/report`)}`);
+  }, [authRequired, id, router]);
 
   const [schema, setSchema] = useState<BackendReportSchema | null>(null);
   const [state, setState] = useState<LoadState>("loading");
 
   useEffect(() => {
+    if (authRequired) return;
     if (!program) return;
     let cancelled = false;
     setState("loading");
@@ -38,6 +49,7 @@ export default function ProgramReportPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, program]);
 
+  if (authRequired) return <ProgramLoading />;
   if (programState === "loading") return <ProgramLoading />;
   if (!program) return <ProgramNotFound onBack={goToMatches} />;
 
