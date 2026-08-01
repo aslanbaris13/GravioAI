@@ -32,6 +32,9 @@ from models import (
     ApplicationTrackingStatus,
     AssistResult,
     Category,
+    ChatThreadMessage,
+    ChatThreadMessageCreate,
+    ChatThreadSummary,
     ConversationTurn,
     EligibilityResult,
     GeneratedPresentation,
@@ -284,6 +287,54 @@ async def write_session(
 ) -> dict:
     """Bir oturumun profil + eşleşmelerini kaydeder (üzerine yazar)."""
     await run_in_threadpool(repo.save_session, session_id, body, user_id)
+    return {"status": "ok"}
+
+
+class ThreadCreateRequest(BaseModel):
+    session_id: str
+
+
+@router.post("/threads", response_model=ChatThreadSummary, response_model_by_alias=False)
+async def create_thread(
+    body: ThreadCreateRequest, user_id: str | None = Depends(current_user_id)
+) -> ChatThreadSummary:
+    """Yeni bir sohbet thread'i açar (kenar çubuğundaki sohbet geçmişi).
+    "Yeni sohbet" tıklanınca değil, kullanıcı ilk mesajını gönderince
+    çağrılır — böylece hiç kullanılmayan boş sohbetler geçmişi doldurmaz."""
+    return await run_in_threadpool(repo.create_thread, body.session_id, user_id)
+
+
+@router.get("/threads", response_model=list[ChatThreadSummary], response_model_by_alias=False)
+async def get_threads(
+    session_id: str, user_id: str | None = Depends(current_user_id)
+) -> list[ChatThreadSummary]:
+    """Sohbet geçmişini getirir (girişliyse hesap üzerinden)."""
+    return await run_in_threadpool(repo.list_threads, session_id, user_id)
+
+
+@router.get("/threads/{thread_id}/messages", response_model=list[ChatThreadMessage], response_model_by_alias=False)
+async def get_thread_messages(
+    thread_id: str, session_id: str, user_id: str | None = Depends(current_user_id)
+) -> list[ChatThreadMessage]:
+    """Bir thread'in tüm mesajlarını getirir — sohbete geri dönüldüğünde ekranı
+    doldurmak için. Başka bir oturuma/kullanıcıya ait thread'e erişim boş liste döner."""
+    return await run_in_threadpool(repo.get_thread_messages, thread_id, session_id, user_id)
+
+
+@router.post("/threads/{thread_id}/messages")
+async def add_thread_messages(
+    thread_id: str,
+    session_id: str,
+    body: list[ChatThreadMessageCreate],
+    user_id: str | None = Depends(current_user_id),
+) -> dict:
+    """Bir thread'e bir sohbet turunun mesaj(lar)ını ekler. Frontend, akış
+    (stream) bittikten sonra o turda oluşan mesajları burada toplu kaydeder —
+    her token için değil, tur başına bir çağrı."""
+    messages = [{"role": m.role, "data": m.data} for m in body]
+    ok = await run_in_threadpool(repo.append_thread_messages, thread_id, session_id, messages, user_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Sohbet kaydı bulunamadı")
     return {"status": "ok"}
 
 

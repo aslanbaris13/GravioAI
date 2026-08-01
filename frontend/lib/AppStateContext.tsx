@@ -16,13 +16,17 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import {
+  appendThreadMessages,
   assistStream,
+  createThread,
   evaluateEligibility,
   fetchApplicationDraft,
   fetchSession,
   getProgram,
+  getThreadMessages,
   listApplicationTracking,
   listIngestionRuns,
+  listThreads,
   saveSession,
   startApplicationTracking,
   updateApplicationTracking,
@@ -31,6 +35,7 @@ import type {
   ApplicationTrackingStatus,
   AssistStreamEvent,
   BackendApplicationRecord,
+  BackendChatThreadSummary,
   BackendEligibilityResult,
   BackendIngestionRun,
   BackendUserProfile,
@@ -115,6 +120,13 @@ interface AppState {
     fields: { status?: ApplicationTrackingStatus; note?: string; reminder_date?: string },
   ) => Promise<void>;
 
+  /** Kenar çubuğundaki sohbet geçmişi — en son güncellenen önce. */
+  threads: BackendChatThreadSummary[];
+  /** Şu an açık olan thread; hiç mesaj gönderilmemiş yeni bir sohbette null. */
+  activeThreadId: string | null;
+  /** Geçmişten bir sohbeti açar — mesajlarını backend'den çekip ekranı doldurur. */
+  openThread: (threadId: string) => Promise<void>;
+
   onNewChat: () => void;
   onOnboardingComplete: (profile: BackendUserProfile) => void;
   onOnboardingSkip: () => void;
@@ -181,6 +193,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [trackedApplications, setTrackedApplications] = useState<BackendApplicationRecord[]>([]);
   const [ingestionRuns, setIngestionRuns] = useState<BackendIngestionRun[]>([]);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [threads, setThreads] = useState<BackendChatThreadSummary[]>([]);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
 
   /** Supabase oturumunu dinler. Yapılandırma yoksa (anahtarlar henüz yok)
    *  hiçbir şey yapmaz — uygulama anonim çalışmaya devam eder. */
@@ -243,6 +257,39 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refreshApplications();
   }, [refreshApplications]);
+
+  const refreshThreads = useCallback(async () => {
+    const sessionId = getSessionId();
+    if (!sessionId) return;
+    try {
+      setThreads(await listThreads(sessionId));
+    } catch {
+      // Sessizce yoksay — kenar çubuğu geçmişsiz devam eder
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshThreads();
+  }, [refreshThreads]);
+
+  /** Geçmişten bir sohbeti açar: mesajlarını çeker, ekrandaki konuşmayı
+   *  onlarla değiştirir. Kayıtlı mesajlarda `id`/`delay` yok — burada üretilir. */
+  async function openThread(threadId: string) {
+    const sessionId = getSessionId();
+    if (!sessionId) return;
+    try {
+      const records = await getThreadMessages(threadId, sessionId);
+      const loaded = records.map(
+        (r) => ({ ...r.data, role: r.role, id: nextId() }) as ChatMessage,
+      );
+      setMessages(loaded);
+      setActiveThreadId(threadId);
+      setFollowups([]);
+      setTyping(false);
+    } catch {
+      // Sessizce yoksay — kullanıcı sohbet listesinden tekrar deneyebilir
+    }
+  }
 
   /** Panelde "veri ne zaman güncellendi" göstermek için — oturumdan bağımsız,
    *  uygulama açılışında bir kez çekilir. */
@@ -310,6 +357,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setInput("");
     setFollowups([]);
     setApplicationDraft(null);
+    setActiveThreadId(null);
   }
 
   function onOnboardingComplete(profile: BackendUserProfile) {
@@ -348,14 +396,34 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setFollowups([]);
     setTyping(true);
 
+    const sessionId = getSessionId();
+    // İlk mesajda thread henüz yoksa burada açılır — "Yeni sohbet" tıklanınca
+    // değil, gerçekten kullanılınca: böylece kenar çubuğu hiç yazılmamış boş
+    // sohbetlerle dolmaz. Oluşturma başarısız olursa sohbet geçmişsiz devam
+    // eder, asıl asistan akışını bloklamaz.
+    const threadIdPromise: Promise<string | null> = (async () => {
+      if (!sessionId) return null;
+      if (activeThreadId) return activeThreadId;
+      try {
+        const created = await createThread(sessionId);
+        setActiveThreadId(created.id);
+        return created.id;
+      } catch {
+        return null;
+      }
+    })();
+
     let streamingMessageId: string | null = null;
     let sawAnyContent = false;
     let lastPrograms: Program[] = [];
+    let finalProfile: BackendUserProfile | null = null;
+    let finalReplyText = "";
 
     function onEvent(event: AssistStreamEvent) {
       if (event.type === "meta") {
         const { profile, programs } = adaptSessionState({ profile: event.profile, matches: event.matches });
         lastPrograms = programs;
+        finalProfile = profile;
         setCurrentProfile((prev) => mergeProfile(prev, profile));
         setApiPrograms((prev) => {
           const existingIds = new Set(prev.map((p) => p.id));
@@ -372,6 +440,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         replaceLastWith(responses);
       } else if (event.type === "token") {
         sawAnyContent = true;
+        finalReplyText += event.text;
         if (streamingMessageId === null) {
           const id = nextId();
           streamingMessageId = id;
@@ -409,7 +478,29 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      await assistStream(text, history, getSessionId(), onEvent);
+      await assistStream(text, history, sessionId, onEvent);
+
+      // Turu, tek bir istekte thread'e kaydet — akış sırasında token başına
+      // değil, tur bitince: sohbet geçmişi ekranı bloklamaz, ağı boğmaz.
+      const threadId = await threadIdPromise;
+      if (threadId && sessionId) {
+        const assistantMessages: { role: string; data: Record<string, unknown> }[] = [];
+        const chips = finalProfile ? profileToChips(finalProfile) : [];
+        if (chips.length > 0) assistantMessages.push({ role: "assistant", data: { kind: "profile", chips } });
+        if (lastPrograms.length > 0) {
+          assistantMessages.push({
+            role: "assistant",
+            data: { kind: "cards", programIds: lastPrograms.map((p) => p.id) },
+          });
+        }
+        if (finalReplyText) assistantMessages.push({ role: "assistant", data: { kind: "text", text: finalReplyText } });
+        appendThreadMessages(threadId, sessionId, [
+          { role: "user", data: { text } },
+          ...assistantMessages,
+        ])
+          .then(() => refreshThreads())
+          .catch(() => {});
+      }
     } catch (err: unknown) {
       removeLastLoading();
       const msg = err instanceof Error ? err.message : "Beklenmeyen bir hata oluştu.";
@@ -704,6 +795,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     refreshApplications,
     ingestionRuns,
     updateApplicationRecord,
+    threads,
+    activeThreadId,
+    openThread,
     onNewChat,
     onOnboardingComplete,
     onOnboardingSkip,

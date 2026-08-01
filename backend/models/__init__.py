@@ -21,6 +21,7 @@ from .report import GeneratedReport, GeneratedReportSection
 from .report_schema import ReportSchema, ReportSection, RequiredField
 from .session import SessionState
 from .taxonomy import Category
+from .thread import ChatThreadMessage, ChatThreadMessageCreate, ChatThreadSummary
 
 __all__ = [
     "Category",
@@ -56,4 +57,7 @@ __all__ = [
     "PresentationSlide",
     "PresentationSlideSpec",
     "PRESENTATION_SKELETON",
+    "ChatThreadSummary",
+    "ChatThreadMessage",
+    "ChatThreadMessageCreate",
 ]

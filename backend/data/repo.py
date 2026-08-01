@@ -20,6 +20,7 @@ from models.application import ApplicationRecord
 from models.ingestion import IngestionRun
 from models.presentation import GeneratedPresentation, PresentationRecord
 from models.session import SessionState
+from models.thread import ChatThreadSummary
 
 _TABLE = "programs"
 logger = logging.getLogger(__name__)
@@ -30,6 +31,10 @@ _SESSIONS = "user_sessions"
 _PRESENTATIONS = "presentations"
 _APPLICATIONS = "applications"
 _INGESTION_RUNS = "ingestion_runs"
+_THREADS = "chat_threads"
+_THREAD_MESSAGES = "chat_messages"
+
+_THREAD_TITLE_MAX_LEN = 48
 
 @lru_cache
 def _client() -> Client:
@@ -236,7 +241,7 @@ def claim_session_records(session_id: str, user_id: str) -> None:
     devralınabilir. Aksi halde başkasının `session_id`'sini bilen biri, giriş
     yapıp o kaydı kendine geçirebilirdi.
     """
-    for table in (_SESSIONS, _APPLICATIONS, _PRESENTATIONS):
+    for table in (_SESSIONS, _APPLICATIONS, _PRESENTATIONS, _THREADS):
         try:
             (
                 _client()
@@ -426,3 +431,85 @@ def list_presentations(session_id: str, user_id: str | None = None) -> list[Pres
         query = query.eq("session_id", session_id).is_("user_id", "null")
     resp = query.order("created_at", desc=True).execute()
     return [PresentationRecord.model_validate(r) for r in (resp.data or [])]
+
+
+def create_thread(session_id: str, user_id: str | None = None) -> ChatThreadSummary:
+    """Yeni bir sohbet thread'i açar — başlık ilk kullanıcı mesajı gelince
+    `set_thread_title_if_untitled` ile doldurulur, burada boş başlar."""
+    row = {"session_id": session_id}
+    if user_id:
+        row["user_id"] = user_id
+    resp = _client().table(_THREADS).insert(row).execute()
+    return ChatThreadSummary.model_validate(resp.data[0])
+
+
+def list_threads(session_id: str, user_id: str | None = None) -> list[ChatThreadSummary]:
+    """Sohbet geçmişini (en son güncellenen önce) getirir.
+
+    Girişli kullanıcıda hesap üzerinden listelenir (bkz. list_applications).
+    """
+    query = _client().table(_THREADS).select("id,title,created_at,updated_at")
+    if user_id:
+        claim_session_records(session_id, user_id)
+        query = query.eq("user_id", user_id)
+    else:
+        query = query.eq("session_id", session_id).is_("user_id", "null")
+    resp = query.order("updated_at", desc=True).execute()
+    return [ChatThreadSummary.model_validate(r) for r in (resp.data or [])]
+
+
+def _thread_belongs_to(thread_id: str, session_id: str, user_id: str | None) -> bool:
+    """Bir mesaj isteğinin, başkasının thread'ine yazmadığını/okumadığını
+    doğrular — `thread_id` tahmin edilebilir bir UUID olsa da sahiplik
+    kontrolü olmadan başka bir oturumun sohbetine mesaj eklenebilirdi."""
+    resp = _client().table(_THREADS).select("session_id,user_id").eq("id", thread_id).limit(1).execute()
+    data = resp.data or []
+    if not data:
+        return False
+    row = data[0]
+    if user_id:
+        return row.get("user_id") == user_id
+    return row.get("session_id") == session_id and not row.get("user_id")
+
+
+def get_thread_messages(thread_id: str, session_id: str, user_id: str | None = None) -> list[dict]:
+    """Bir thread'in tüm mesajlarını (eskiden yeniye) getirir."""
+    if not _thread_belongs_to(thread_id, session_id, user_id):
+        return []
+    resp = (
+        _client()
+        .table(_THREAD_MESSAGES)
+        .select("role,data,created_at")
+        .eq("thread_id", thread_id)
+        .order("created_at")
+        .execute()
+    )
+    return resp.data or []
+
+
+def append_thread_messages(
+    thread_id: str, session_id: str, messages: list[dict], user_id: str | None = None
+) -> bool:
+    """Bir thread'e bir veya daha fazla mesaj ekler ve `updated_at`'i günceller.
+
+    İlk kullanıcı mesajı geldiğinde, thread henüz başlıksızsa (yeni açılmış),
+    o mesajın metninden kısa bir başlık türetilip aynı anda kaydedilir —
+    kenar çubuğundaki liste "Yeni sohbet" gibi anlamsız girişlerle dolmasın.
+    """
+    if not _thread_belongs_to(thread_id, session_id, user_id):
+        return False
+    rows = [{"thread_id": thread_id, "role": m["role"], "data": m["data"]} for m in messages]
+    if rows:
+        _client().table(_THREAD_MESSAGES).insert(rows).execute()
+
+    update = {"updated_at": datetime.now(timezone.utc).isoformat()}
+    first_user_text = next(
+        (m["data"].get("text") for m in messages if m["role"] == "user" and m["data"].get("text")), None
+    )
+    if first_user_text:
+        existing = _client().table(_THREADS).select("title").eq("id", thread_id).limit(1).execute()
+        if existing.data and not existing.data[0].get("title"):
+            title = first_user_text.strip()[:_THREAD_TITLE_MAX_LEN]
+            update["title"] = title
+    _client().table(_THREADS).update(update).eq("id", thread_id).execute()
+    return True

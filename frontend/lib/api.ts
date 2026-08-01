@@ -444,6 +444,56 @@ export async function saveSession(
   });
 }
 
+/** Kenar çubuğundaki sohbet geçmişi listesi için — mesajları içermez. */
+export interface BackendChatThreadSummary {
+  id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** `data` bilinçli olarak opak — şekli frontend'in `ChatMessageDraft` tipine ait. */
+export interface BackendChatThreadMessage {
+  role: string;
+  data: Record<string, unknown>;
+  created_at?: string;
+}
+
+/** Yeni bir sohbet thread'i açar. */
+export async function createThread(sessionId: string): Promise<BackendChatThreadSummary> {
+  return apiFetch<BackendChatThreadSummary>("/threads", {
+    method: "POST",
+    body: JSON.stringify({ session_id: sessionId }),
+  });
+}
+
+/** Bir oturumun sohbet geçmişini (en son güncellenen önce) getirir. */
+export async function listThreads(sessionId: string): Promise<BackendChatThreadSummary[]> {
+  return apiFetch<BackendChatThreadSummary[]>(`/threads?session_id=${encodeURIComponent(sessionId)}`);
+}
+
+/** Bir thread'in tüm mesajlarını (eskiden yeniye) getirir. */
+export async function getThreadMessages(
+  threadId: string,
+  sessionId: string,
+): Promise<BackendChatThreadMessage[]> {
+  return apiFetch<BackendChatThreadMessage[]>(
+    `/threads/${encodeURIComponent(threadId)}/messages?session_id=${encodeURIComponent(sessionId)}`,
+  );
+}
+
+/** Bir thread'e bir sohbet turunun mesaj(lar)ını ekler. */
+export async function appendThreadMessages(
+  threadId: string,
+  sessionId: string,
+  messages: { role: string; data: Record<string, unknown> }[],
+): Promise<void> {
+  await apiFetch<{ status: string }>(
+    `/threads/${encodeURIComponent(threadId)}/messages?session_id=${encodeURIComponent(sessionId)}`,
+    { method: "POST", body: JSON.stringify(messages) },
+  );
+}
+
 /**
  * Bir rapor şemasına göre, bölüm bölüm rapor içeriği üretir (Rapor Yazma Ajanı).
  */
