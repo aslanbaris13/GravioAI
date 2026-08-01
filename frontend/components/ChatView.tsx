@@ -125,7 +125,16 @@ export default function ChatView({
                     }}
                   >
                     <Ms name={s.icon} size={20} color="var(--terracotta-600)" style={{ marginTop: 1 }} />
-                    <span style={{ fontSize: 13.5, fontWeight: 500, lineHeight: 1.45, color: "var(--ink-900)" }}>{s.label}</span>
+                    <span>
+                      <span style={{ fontSize: 13.5, fontWeight: 500, lineHeight: 1.45, color: "var(--ink-900)" }}>{s.label}</span>
+                      {/* "profile" örneği birebir gönderilmiyor, yazı alanına doluyor —
+                          kullanıcı kendi bilgileriyle düzenlesin diye küçük bir ipucu. */}
+                      {s.key === "profile" && (
+                        <span style={{ display: "block", fontSize: 11, color: "var(--ink-400)", marginTop: 3 }}>
+                          Örnek — kendi bilgilerinle düzenle
+                        </span>
+                      )}
+                    </span>
                   </button>
                 ))}
               </div>

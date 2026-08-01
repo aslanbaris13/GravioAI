@@ -534,6 +534,17 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       all: "Yeni şirketim için tüm destekleri göster",
     };
     const label = labelMap[suggestionKey] ?? suggestionKey;
+
+    // "profile" chip'i diğerlerinden farklı: bir istek/soru değil, birebir
+    // birinci ağızdan bir işletme tanımı ("Düzce'de... 3 kişiyiz"). Doğrudan
+    // gönderilirse kullanıcının gerçek işletmesi ne olursa olsun bu sahte
+    // bilgi profiline çıkarılırdı — burada yalnızca YAZI ALANINI doldurup
+    // kendi bilgileriyle düzenlemesi için bırakıyoruz, otomatik göndermiyoruz.
+    if (suggestionKey === "profile") {
+      setInput(label);
+      return;
+    }
+
     setInput(label);
     setTimeout(() => {
       // Not: sendMessage() (gerçek ağ isteği) bilerek setTimeout ile
