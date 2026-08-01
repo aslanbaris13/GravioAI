@@ -174,7 +174,7 @@ function HeroCarousel({ onCta }: { onCta: (target: string) => void }) {
             width={1600}
             height={893}
             fetchPriority="high"
-            style={{ width: "100%", height: "auto", display: "block", animation: "heroFadeIn .5s ease" }}
+            style={{ width: "100%", height: "auto", display: "block", animation: "heroFadeIn .5s ease forwards" }}
           />
         </div>
 
