@@ -249,6 +249,15 @@ textarea {
     transform: none;
   }
 }
+
+/* Hero carousel ileri/geri okları. */
+.hero-nav-btn {
+  transition: background 0.16s ease, transform 0.16s ease;
+}
+.hero-nav-btn:hover {
+  background: #fff !important;
+  transform: translateY(-50%) scale(1.08);
+}
 ::-webkit-scrollbar {
   width: 11px;
   height: 11px;
