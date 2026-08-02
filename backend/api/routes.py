@@ -338,6 +338,37 @@ async def add_thread_messages(
     return {"status": "ok"}
 
 
+class ThreadRenameRequest(BaseModel):
+    session_id: str
+    title: str
+
+
+@router.patch("/threads/{thread_id}")
+async def rename_thread(
+    thread_id: str,
+    body: ThreadRenameRequest,
+    user_id: str | None = Depends(current_user_id),
+) -> dict:
+    """Bir thread'in başlığını kullanıcı isteğiyle değiştirir."""
+    ok = await run_in_threadpool(repo.rename_thread, thread_id, body.session_id, body.title, user_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Sohbet kaydı bulunamadı")
+    return {"status": "ok"}
+
+
+@router.delete("/threads/{thread_id}")
+async def delete_thread(
+    thread_id: str,
+    session_id: str,
+    user_id: str | None = Depends(current_user_id),
+) -> dict:
+    """Bir thread'i ve tüm mesajlarını siler."""
+    ok = await run_in_threadpool(repo.delete_thread, thread_id, session_id, user_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Sohbet kaydı bulunamadı")
+    return {"status": "ok"}
+
+
 GRAVIOAI_ASSISTANT_SYSTEM_PROMPT = """Sen GravioAI'nin tanıtım asistanısın (anasayfadaki sohbet widget'ında çalışıyorsun). Görevin, ziyaretçilere GravioAI'nin ne olduğunu, nasıl çalıştığını ve onlara ne kazandıracağını anlatmak — kısa, net ve samimi bir dille.
 
 GRAVIOAI HAKKINDA GERÇEK BİLGİLER (yalnızca bunlara dayan, uydurma):

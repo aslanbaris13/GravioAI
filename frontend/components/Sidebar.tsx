@@ -1,5 +1,5 @@
 "use client";
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import Ms from "./Ms";
 import { formatRelativeTime, profileInitials } from "@/lib/adapter";
@@ -43,6 +43,8 @@ export default function Sidebar({
   threads,
   activeThreadId,
   onOpenThread,
+  onRenameThread,
+  onDeleteThread,
 }: {
   matchCount: number;
   applicationCount: number;
@@ -64,8 +66,12 @@ export default function Sidebar({
   threads: BackendChatThreadSummary[];
   activeThreadId: string | null;
   onOpenThread: (threadId: string) => void;
+  onRenameThread: (threadId: string, title: string) => void;
+  onDeleteThread: (threadId: string) => void;
 }) {
   const pathname = usePathname();
+  const [editingThreadId, setEditingThreadId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
   const chatActive = pathname === "/chat";
   const matchActive = pathname.startsWith("/matches") || pathname.startsWith("/program");
   const applicationsActive = pathname.startsWith("/applications");
@@ -181,35 +187,100 @@ export default function Sidebar({
           <div style={{ display: "flex", flexDirection: "column", gap: 2, maxHeight: 168, overflowY: "auto", marginBottom: 4 }}>
             {threads.map((t) => {
               const active = t.id === activeThreadId;
+              const editing = editingThreadId === t.id;
+
+              if (editing) {
+                return (
+                  <div key={t.id} style={{ padding: "4px 13px" }}>
+                    <input
+                      autoFocus
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={() => {
+                        onRenameThread(t.id, editValue);
+                        setEditingThreadId(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          onRenameThread(t.id, editValue);
+                          setEditingThreadId(null);
+                        } else if (e.key === "Escape") {
+                          setEditingThreadId(null);
+                        }
+                      }}
+                      style={{
+                        width: "100%",
+                        fontSize: 13,
+                        padding: "6px 8px",
+                        borderRadius: 8,
+                        border: "1px solid var(--terracotta-600)",
+                        background: "rgba(255,255,255,.08)",
+                        color: "#fff",
+                      }}
+                    />
+                  </div>
+                );
+              }
+
               return (
-                <button
-                  key={t.id}
-                  onClick={() => onOpenThread(t.id)}
-                  title={t.title ?? "Yeni sohbet"}
-                  style={{
-                    ...navStyle(active),
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    gap: 1,
-                    padding: "8px 13px",
-                  }}
-                >
-                  <span
+                <div key={t.id} style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                  <button
+                    onClick={() => onOpenThread(t.id)}
+                    title={t.title ?? "Yeni sohbet"}
                     style={{
-                      width: "100%",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      fontSize: 13,
+                      ...navStyle(active),
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      gap: 1,
+                      padding: "8px 52px 8px 13px",
+                      flex: 1,
+                      minWidth: 0,
                     }}
                   >
-                    {t.title ?? "Yeni sohbet"}
-                  </span>
-                  <span style={{ fontSize: 10.5, fontWeight: 500, color: "var(--on-dark-faint)" }}>
-                    {formatRelativeTime(t.updated_at)}
-                  </span>
-                </button>
+                    <span
+                      style={{
+                        width: "100%",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        fontSize: 13,
+                      }}
+                    >
+                      {t.title ?? "Yeni sohbet"}
+                    </span>
+                    <span style={{ fontSize: 10.5, fontWeight: 500, color: "var(--on-dark-faint)" }}>
+                      {formatRelativeTime(t.updated_at)}
+                    </span>
+                  </button>
+                  <div style={{ position: "absolute", right: 6, display: "flex", gap: 1 }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditValue(t.title ?? "");
+                        setEditingThreadId(t.id);
+                      }}
+                      aria-label="Sohbeti yeniden adlandır"
+                      title="Yeniden adlandır"
+                      style={{ padding: 6, borderRadius: 7, color: "var(--on-dark-faint)", flexShrink: 0 }}
+                    >
+                      <Ms name="edit" size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`"${t.title ?? "Yeni sohbet"}" sohbetini silmek istediğine emin misin?`)) {
+                          onDeleteThread(t.id);
+                        }
+                      }}
+                      aria-label="Sohbeti sil"
+                      title="Sil"
+                      style={{ padding: 6, borderRadius: 7, color: "var(--on-dark-faint)", flexShrink: 0 }}
+                    >
+                      <Ms name="delete" size={14} />
+                    </button>
+                  </div>
+                </div>
               );
             })}
           </div>

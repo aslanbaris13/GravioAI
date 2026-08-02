@@ -19,6 +19,7 @@ import {
   appendThreadMessages,
   assistStream,
   createThread,
+  deleteThread as deleteThreadApi,
   evaluateEligibility,
   fetchApplicationDraft,
   fetchSession,
@@ -27,6 +28,7 @@ import {
   listApplicationTracking,
   listIngestionRuns,
   listThreads,
+  renameThread as renameThreadApi,
   saveSession,
   startApplicationTracking,
   updateApplicationTracking,
@@ -122,6 +124,10 @@ interface AppState {
   activeThreadId: string | null;
   /** Geçmişten bir sohbeti açar — mesajlarını backend'den çekip ekranı doldurur. */
   openThread: (threadId: string) => Promise<void>;
+  /** Bir thread'in başlığını değiştirir. */
+  renameThread: (threadId: string, title: string) => Promise<void>;
+  /** Bir thread'i siler. */
+  deleteThread: (threadId: string) => Promise<void>;
 
   onNewChat: () => void;
   onOnboardingComplete: (profile: BackendUserProfile) => void;
@@ -298,6 +304,37 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setTyping(false);
     } catch {
       // Sessizce yoksay — kullanıcı sohbet listesinden tekrar deneyebilir
+    }
+  }
+
+  /** Bir thread'in başlığını değiştirir (otomatik türetilen başlığın üzerine yazar). */
+  async function renameThread(threadId: string, title: string) {
+    const sessionId = getSessionId();
+    const trimmed = title.trim();
+    if (!sessionId || !trimmed) return;
+    try {
+      await renameThreadApi(threadId, sessionId, trimmed);
+      setThreads((prev) => prev.map((t) => (t.id === threadId ? { ...t, title: trimmed } : t)));
+    } catch {
+      // Sessizce yoksay — kullanıcı tekrar deneyebilir
+    }
+  }
+
+  /** Bir thread'i siler. Silinen thread o an açıksa ekranı yeni/boş bir
+   *  sohbet gibi sıfırlar — içeriği artık yok. */
+  async function deleteThread(threadId: string) {
+    const sessionId = getSessionId();
+    if (!sessionId) return;
+    try {
+      await deleteThreadApi(threadId, sessionId);
+      setThreads((prev) => prev.filter((t) => t.id !== threadId));
+      if (activeThreadId === threadId) {
+        setMessages([]);
+        setActiveThreadId(null);
+        setFollowups([]);
+      }
+    } catch {
+      // Sessizce yoksay — kullanıcı tekrar deneyebilir
     }
   }
 
@@ -799,6 +836,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     threads,
     activeThreadId,
     openThread,
+    renameThread,
+    deleteThread,
     onNewChat,
     onOnboardingComplete,
     onOnboardingSkip,

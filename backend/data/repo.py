@@ -513,3 +513,23 @@ def append_thread_messages(
             update["title"] = title
     _client().table(_THREADS).update(update).eq("id", thread_id).execute()
     return True
+
+
+def rename_thread(thread_id: str, session_id: str, title: str, user_id: str | None = None) -> bool:
+    """Bir thread'in başlığını kullanıcı isteğiyle değiştirir (otomatik
+    türetilen başlığın üzerine yazar)."""
+    if not _thread_belongs_to(thread_id, session_id, user_id):
+        return False
+    clean_title = title.strip()[:_THREAD_TITLE_MAX_LEN]
+    if not clean_title:
+        return False
+    _client().table(_THREADS).update({"title": clean_title}).eq("id", thread_id).execute()
+    return True
+
+
+def delete_thread(thread_id: str, session_id: str, user_id: str | None = None) -> bool:
+    """Bir thread'i (ve `chat_messages` kaydındaki tüm mesajlarını, cascade ile) siler."""
+    if not _thread_belongs_to(thread_id, session_id, user_id):
+        return False
+    _client().table(_THREADS).delete().eq("id", thread_id).execute()
+    return True
