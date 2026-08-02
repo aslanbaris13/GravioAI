@@ -1,8 +1,6 @@
+<img width="736" height="559" alt="gravio-logo-full" src="https://github.com/user-attachments/assets/b7fa2ad6-90be-40fb-b524-bdf51f5610de" />
 
-<!-- LOGO: ProjectManagement/assets/logo.png yükleyince aşağıdaki satırı aç -->
-<!-- <img src="ProjectManagement/assets/logo.png" alt="GravioAI" width="180" /> -->
-
-# 🤖 🚀 GravioAI
+# 🚀 GravioAI
 
 ### _Yüzeyin altındaki fırsatı çıkar_
 
@@ -48,6 +46,7 @@ Kullanıcı asistanla **konuşarak** profilini oluşturur. GravioAI ardından pr
 - ⏰ **Son tarih takibi** — kullanıcı profilini hatırlar, fırsatları proaktif bildirir
 - 🔗 **Kaynağa linkli cevaplar** — her öneri resmî kaynağa bağlanır
 - 🔌 **Modüler konektörler** — yeni program = yeni konektör (KOSGEB, TÜBİTAK, AWS…)
+- 🔒 **KVKK Uyumlu Yerel LLM (Gelecek Planı)** — İşletme verilerinin gizliliğini maksimum seviyede korumak amacıyla tamamen yerel (local) LLM modelleriyle çalışma altyapısı
 
 ## Hedef Kitle
 
@@ -58,7 +57,8 @@ Kullanıcı asistanla **konuşarak** profilini oluşturur. GravioAI ardından pr
 
 ## Product Backlog URL
 
-🔗 [GravioAI Product Backlog Board](https://haticenurolgun.atlassian.net/jira/software/projects/SCRUM/boards/1)
+🔗 GravioAI Proje Yönetim Board'u:
+(https://hatiicenurolgun.atlassian.net/jira/software/projects/SCRUM/summary)
 
 ## 🧠 Yapay Zekâ Mimarisi
 
@@ -66,7 +66,7 @@ GravioAI "tek bir LLM çağrısı" değil; bir **orkestratör** tarafından yön
 
 ```
                          ┌────────────────────────┐
-        Kullanıcı  ⇄     │  Orkestratör (Planner) │
+        Kullanıcı  ⇄    | Orkestratör (Planner)  │
                          │ niyet → alt ajan akışı │
                          └───────────┬────────────┘
             ┌────────┬───────┬───────┼───────┬────────┬────────┬───────┐
@@ -84,8 +84,8 @@ GravioAI "tek bir LLM çağrısı" değil; bir **orkestratör** tarafından yön
 | 🔍 **Eşleştirme Ajanı (RAG)** | Program DB üzerinde anlamsal arama yapar |
 | ✅ **Uygunluk Ajanı** | Program şartlarını profile karşı kural-bazlı + LLM ile değerlendirir |
 | 📝 **Başvuru Ajanı** | Form + iş planı taslağı ve belge listesi üretir |
-|📊 Rapor Yazıcı Ajanı |	Destek programları için detaylı gereksinim analizleri ve değerlendirme raporları oluşturur|
-|📽️ Sunum Yazıcı Ajanı |	Başvuru süreçleri için projelerin sunum taslaklarını hazırlar |
+|📊 **Rapor Yazıcı Ajanı** |	Destek programları için detaylı gereksinim analizleri ve değerlendirme raporları oluşturur|
+|📽️ **Sunum Yazıcı Ajanı** |	Başvuru süreçleri için projelerin sunum taslaklarını hazırlar |
 | 🧠 **Hafıza (Memory)** | Kullanıcı profilini saklar, proaktif bildirim sağlar |
 
 ## 🛠️ Teknoloji Yığını
@@ -509,7 +509,7 @@ Bu sprint sonunda proje, kullanıcı profilini analiz edebilen, uygun destek pro
 
 <br>
 
-> Sprint süresince 2 toplantı gerçekleştirilmiş olup  toplantı notları ve Jira linkleri bu bölüme eklenecektir.
+> Sprint süresince 3 toplantı gerçekleştirilmiş olup  toplantı notları ve Jira linkleri bu bölüme eklenecektir.
 
 > toplantı dökümanlarının linki: https://hatiicenurolgun.atlassian.net/wiki/spaces/SCRUM/pages/15368193/GravioAI+Sprint+3+Toplant+lar?atlOrigin=eyJpIjoiZDA1ZDA4NmQ1MWNkNDE2NmJjNGIwNTcwNzZiMmQ0YjIiLCJwIjoiaiJ9
 >
@@ -518,8 +518,12 @@ Bu sprint sonunda proje, kullanıcı profilini analiz edebilen, uygun destek pro
 <img width="1262" height="777" alt="Ekran görüntüsü 2026-07-30 121854" src="https://github.com/user-attachments/assets/27e1463a-8e19-470f-bbfe-85de49ad374a" />
 
 
-
 <img width="1255" height="782" alt="Ekran görüntüsü 2026-07-30 121654" src="https://github.com/user-attachments/assets/e1381790-538f-4b13-9352-927f741e09ea" />
+
+<img width="1280" height="802" alt="Ekran görüntüsü 2026-08-02 185558" src="https://github.com/user-attachments/assets/6bbc2857-32f8-4a76-8937-fb176200b5a3" />
+
+<img width="1277" height="865" alt="Ekran görüntüsü 2026-08-02 185631" src="https://github.com/user-attachments/assets/30fb9caa-9a3d-494e-af97-7dee34022903" />
+
 
 </details>
 
