@@ -555,19 +555,24 @@ export default function LandingView() {
               Giriş yap
             </button>
           )}
-          <button
-            onClick={goOnboarding}
-            style={{
-              fontSize: 13.5,
-              fontWeight: 700,
-              color: "#fff",
-              padding: "11px 20px",
-              borderRadius: 10,
-              background: "var(--terracotta-600)",
-            }}
-          >
-            Başla
-          </button>
+          {/* Girişli kullanıcı zaten hesabına dönebiliyor (soldaki avatar
+              düğmesi) — "Başla" yeniden onboarding'e sürükleyip gereksiz
+              tekrar hissi veriyordu. */}
+          {!userEmail && (
+            <button
+              onClick={goOnboarding}
+              style={{
+                fontSize: 13.5,
+                fontWeight: 700,
+                color: "#fff",
+                padding: "11px 20px",
+                borderRadius: 10,
+                background: "var(--terracotta-600)",
+              }}
+            >
+              Başla
+            </button>
+          )}
         </div>
       </header>
 

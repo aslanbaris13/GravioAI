@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Ms from "@/components/Ms";
+import { useAppState } from "@/lib/AppStateContext";
 
 /**
  * Yol haritası sayfası — ürünün nereye gittiğini anlatır.
@@ -200,6 +201,7 @@ function SectionTitle({ eyebrow, title, sub }: { eyebrow: string; title: string;
 
 export default function GelecekPage() {
   const router = useRouter();
+  const { userEmail } = useAppState();
   const [filter, setFilter] = useState<FilterKey>("all");
   const { ref: todayRef, inView: todayInView } = useInView<HTMLDivElement>();
   const { ref: catRef, inView: catInView } = useInView<HTMLDivElement>();
@@ -236,19 +238,57 @@ export default function GelecekPage() {
             GravioAI
           </span>
         </button>
-        <button
-          onClick={() => router.push("/onboarding")}
-          style={{
-            fontSize: 13.5,
-            fontWeight: 700,
-            color: "#fff",
-            padding: "11px 20px",
-            borderRadius: 10,
-            background: "var(--terracotta-600)",
-          }}
-        >
-          Başla
-        </button>
+        {/* Anasayfayla aynı kural: girişli kullanıcı zaten hesabına dönebiliyor,
+            "Başla" yeniden onboarding'e sürükleyip gereksiz tekrar hissi veriyordu. */}
+        {userEmail ? (
+          <button
+            onClick={() => router.push("/panel")}
+            title={userEmail}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 13.5,
+              fontWeight: 700,
+              color: "#fff",
+              padding: "8px 14px",
+              borderRadius: 999,
+              border: "1px solid rgba(255,255,255,.22)",
+            }}
+          >
+            <span
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: "50%",
+                background: "var(--teal-700)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 11,
+                fontWeight: 700,
+                flexShrink: 0,
+              }}
+            >
+              {userEmail.slice(0, 1).toUpperCase()}
+            </span>
+            {userEmail.split("@")[0]}
+          </button>
+        ) : (
+          <button
+            onClick={() => router.push("/onboarding")}
+            style={{
+              fontSize: 13.5,
+              fontWeight: 700,
+              color: "#fff",
+              padding: "11px 20px",
+              borderRadius: 10,
+              background: "var(--terracotta-600)",
+            }}
+          >
+            Başla
+          </button>
+        )}
       </header>
 
       {/* ---------------- Vizyon ---------------- */}
@@ -486,27 +526,54 @@ export default function GelecekPage() {
       {/* ---------------- Kapanış ---------------- */}
       <section style={{ padding: "64px 32px", background: "linear-gradient(165deg,var(--teal-900),var(--teal-800))", textAlign: "center" }}>
         <div style={{ maxWidth: 620, margin: "0 auto" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 700, color: "#fff", margin: "0 0 12px" }}>
-            Bugün çalışan kısmıyla başla
-          </h2>
-          <p style={{ fontSize: 14.5, color: "var(--on-dark-muted)", lineHeight: 1.65, margin: "0 0 24px" }}>
-            Yol haritasındakiler henüz yayında değil. Ama kamu destekleri bugün çalışıyor —
-            işletmeni anlat, sana uygun programları hemen gör.
-          </p>
-          <button
-            onClick={() => router.push("/giris")}
-            style={{
-              padding: "15px 36px",
-              borderRadius: 12,
-              background: "var(--terracotta-600)",
-              color: "#fff",
-              fontSize: 15.5,
-              fontWeight: 700,
-              boxShadow: "var(--shadow-cta)",
-            }}
-          >
-            Ücretsiz başla
-          </button>
+          {userEmail ? (
+            <>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 700, color: "#fff", margin: "0 0 12px" }}>
+                Sohbete devam et
+              </h2>
+              <p style={{ fontSize: 14.5, color: "var(--on-dark-muted)", lineHeight: 1.65, margin: "0 0 24px" }}>
+                Eşleşmelerin ve başvuruların panelinde seni bekliyor.
+              </p>
+              <button
+                onClick={() => router.push("/panel")}
+                style={{
+                  padding: "15px 36px",
+                  borderRadius: 12,
+                  background: "var(--terracotta-600)",
+                  color: "#fff",
+                  fontSize: 15.5,
+                  fontWeight: 700,
+                  boxShadow: "var(--shadow-cta)",
+                }}
+              >
+                Panelime git
+              </button>
+            </>
+          ) : (
+            <>
+              <h2 style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 700, color: "#fff", margin: "0 0 12px" }}>
+                Bugün çalışan kısmıyla başla
+              </h2>
+              <p style={{ fontSize: 14.5, color: "var(--on-dark-muted)", lineHeight: 1.65, margin: "0 0 24px" }}>
+                Yol haritasındakiler henüz yayında değil. Ama kamu destekleri bugün çalışıyor —
+                işletmeni anlat, sana uygun programları hemen gör.
+              </p>
+              <button
+                onClick={() => router.push("/giris")}
+                style={{
+                  padding: "15px 36px",
+                  borderRadius: 12,
+                  background: "var(--terracotta-600)",
+                  color: "#fff",
+                  fontSize: 15.5,
+                  fontWeight: 700,
+                  boxShadow: "var(--shadow-cta)",
+                }}
+              >
+                Ücretsiz başla
+              </button>
+            </>
+          )}
         </div>
       </section>
 
