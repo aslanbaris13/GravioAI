@@ -8,7 +8,7 @@
 
 ### _Yüzeyin altındaki fırsatı çıkar_
 
-[![Status](https://img.shields.io/badge/durum-geli%C5%9Ftiriliyor-yellow)]()
+[![Status](https://img.shields.io/badge/durum-tamamland%C4%B1-brightgreen)]()
 [![Bootcamp](https://img.shields.io/badge/YZTA-Bootcamp%202026-1f3a5f)]()
 [![Category](https://img.shields.io/badge/kategori-Yapay%20Zek%C3%A2%20%26%20Veri%20Bilimi-blueviolet)]()
 [![License](https://img.shields.io/badge/lisans-MIT-green)](LICENSE)
