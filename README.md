@@ -1,4 +1,6 @@
 
+<div align="center">
+
 <img width="736" height="559" alt="gravio-logo-full" src="https://github.com/user-attachments/assets/8ab4e5aa-1772-43ae-8a18-19f8b613420d" />
 
 
@@ -112,7 +114,7 @@ flowchart TB
 
 ## Product Backlog URL
 
-🔗 [GravioAI Product Backlog Board](https://haticenurolgun.atlassian.net/jira/software/projects/SCRUM/boards/1)
+🔗 [GravioAI Product Backlog Board](https://hatiicenurolgun.atlassian.net/jira/software/projects/SCRUM/boards/1/reports)
 
 
 ## Demo Video Linki
