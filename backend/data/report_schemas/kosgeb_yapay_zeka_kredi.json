@@ -1,0 +1,94 @@
+{
+  "key": "kosgeb_yapay_zeka_kredi",
+  "program_name": "KOSGEB Yapay Zeka Kredi Destek Programı",
+  "institution": "KOSGEB",
+  "summary": "KOBİ'lerin yapay zeka çözümleri geliştirmesi, mevcut süreçlerine yapay zeka entegrasyonu sağlaması, yüksek performanslı hesaplama donanımı ve yazılım altyapısı alımlarını destekleyen finansman ve kredi destek programıdır.",
+  "match_keywords": [
+    "kosgeb yapay zeka kredi",
+    "yapay zeka kredi desteği",
+    "kosgeb yz kredisi",
+    "yapay zeka finansman desteği",
+    "kosgeb yapay zeka",
+    "yz kredi desteği",
+    "kosgeb yz"
+  ],
+  "sections": [
+    {
+      "id": "sec_proje_ozeti",
+      "title": "1. Proje Özeti ve Yapay Zeka Odak Alanı",
+      "description": "Geliştirilecek veya entegre edilecek yapay zeka projesinin genel tanımı ve işletmeye sağlayacağı katma değer.",
+      "required_fields": [
+        {
+          "key": "proje_amaci_ve_ozeti",
+          "label": "Projenin Amacı ve Özeti",
+          "description": "Projenin temel amacı, çözmeyi hedeflediği problem ve yapay zeka teknolojisinin projede nasıl kullanılacağı.",
+          "long_text": true,
+          "char_limit": 4000
+        },
+        {
+          "key": "yz_odak_alani",
+          "label": "Yapay Zeka Kullanım Alanı",
+          "description": "Projenin yapay zeka disiplini (Örn: Doğal Dil İşleme (NLP), Bilgisayarlı Görü, Makine Öğrenmesi, Derin Öğrenme, Karar Destek Sistemleri vb.).",
+          "long_text": false,
+          "char_limit": 500
+        }
+      ]
+    },
+    {
+      "id": "sec_teknik_mimari",
+      "title": "2. Teknik Altyapı, Model Mimarisi ve Veri Yönetimi",
+      "description": "Projede kullanılacak yapay zeka algoritmaları, veri seti kaynakları ve altyapı gereksinimleri.",
+      "required_fields": [
+        {
+          "key": "model_mimari_detaylari",
+          "label": "Model ve Algoritma Mimarisi",
+          "description": "Kullanılacak YZ mimarisi, açık kaynak/yerli LLM veya özel eğitilecek modellerin teknik detayları.",
+          "long_text": true,
+          "char_limit": 3000
+        },
+        {
+          "key": "veri_seti_ve_guvenlik",
+          "label": "Veri Seti, Etik ve KVKK Uyum Süreçleri",
+          "description": "Modelin eğitilmesi/çalıştırılması için kullanılacak verilerin kaynağı, kalitesi, KVKK ve veri güvenliği standartları.",
+          "long_text": true,
+          "char_limit": 2500
+        }
+      ]
+    },
+    {
+      "id": "sec_butce_donanim",
+      "title": "3. Kredi ve Bütçe İhtiyaç Planı (Donanım / Yazılım / Bulut)",
+      "description": "Kredi desteği ile finanse edilecek sunucu, GPU, lisans, bulut çıkarım (inference) ve danışmanlık kalemleri.",
+      "required_fields": [
+        {
+          "key": "kredi_kullanim_kalemleri",
+          "label": "Kredi Bütçesi ve Harcama Kalemleri",
+          "description": "Destek kapsamında alınacak sunucu, GPU donanımı, yazılım lisansları ve bulut servis maliyetlerinin detaylı dökümü.",
+          "long_text": true,
+          "char_limit": 3000
+        }
+      ]
+    },
+    {
+      "id": "sec_ticari_potansiyel",
+      "title": "4. Ticarileşme ve Ekonomik Etki",
+      "description": "Projenin pazardaki potansiyeli, maliyet azaltma veya gelir artırma hedefleri.",
+      "required_fields": [
+        {
+          "key": "ticarilesme_ve_pazar_hedefleri",
+          "label": "Ticarileşme Potansiyeli ve Verimlilik Artışı",
+          "description": "Ürünün ticarileşme planı, hedeflenen müşteri kitlesi ve işletmenin rekabet gücüne sağlayacağı katkı.",
+          "long_text": true,
+          "char_limit": 2500
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "KOBİ Beyannamesi (Güncel)",
+    "İmza Sirküleri",
+    "Yapay Zeka Donanım / Sunucu / GPU Proforma Faturaları",
+    "Yazılım / Bulut Lisansı Fiyat Teklif Formları",
+    "Proje Teknik Ekip Özgeçmişleri"
+  ]
+}

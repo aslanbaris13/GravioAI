@@ -23,6 +23,7 @@ def test_loads_all_report_schemas():
         "kosgeb_kobi_gelisim",
         "kosgeb_isletme_gelistirme",
         "kosgeb_yalin_donusum",
+        "kosgeb_yapay_zeka_kredi",
         "kalkinma_fizibilite",
         "ticaret_pazara_giris",
         "ticaret_e_ihracat",
@@ -39,6 +40,10 @@ def test_get_report_schema_by_key():
     schema_yalin = get_report_schema("kosgeb_yalin_donusum")
     assert schema_yalin is not None
     assert schema_yalin.institution == "KOSGEB"
+
+    schema_yz = get_report_schema("kosgeb_yapay_zeka_kredi")
+    assert schema_yz is not None
+    assert schema_yz.institution == "KOSGEB"
 
     schema_turquality = get_report_schema("ticaret_turquality")
     assert schema_turquality is not None
@@ -145,6 +150,12 @@ def test_resolve_matches_kosgeb_yalin_donusum_by_keyword():
     schema = resolve_report_schema_for_program("KOSGEB Yalın Dönüşüm Model Fabrika Desteği")
     assert schema is not None
     assert schema.key == "kosgeb_yalin_donusum"
+
+
+def test_resolve_matches_kosgeb_yapay_zeka_kredi_by_keyword():
+    schema = resolve_report_schema_for_program("KOSGEB Yapay Zeka Kredi Destek Programı 2026")
+    assert schema is not None
+    assert schema.key == "kosgeb_yapay_zeka_kredi"
 
 
 # --- Kalkınma, Ticaret, AB, Sanayi, Hazine ve IPARD Eşleşme Testleri ---
