@@ -1,8 +1,8 @@
 
-<!-- LOGO: ProjectManagement/assets/logo.png yükleyince aşağıdaki satırı aç -->
-<!-- <img src="ProjectManagement/assets/logo.png" alt="GravioAI" width="180" /> -->
+<img width="736" height="559" alt="gravio-logo-full" src="https://github.com/user-attachments/assets/8ab4e5aa-1772-43ae-8a18-19f8b613420d" />
 
-# 🤖 🚀 GravioAI
+
+#  🚀 GravioAI
 
 ### _Yüzeyin altındaki fırsatı çıkar_
 
