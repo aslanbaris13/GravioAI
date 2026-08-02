@@ -208,7 +208,17 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const idRef = useRef(1);
   const nextId = () => String(idRef.current++);
 
-  /** Uygulama açılışında önceki oturumdan kalan profil + eşleşmeleri geri yükler. */
+  /** Önceki oturumdan kalan profil + eşleşmeleri geri yükler.
+   *
+   *  `userEmail`'e bağlı olarak yeniden çalışır — yalnızca uygulama açılışında
+   *  değil: giriş yapıldığında da tetiklenir. Bu olmadan, giriş anonim bir
+   *  sohbet ekranındayken yapılıyorsa (ör. /giris'ten sonra client-side
+   *  yönlendirme) hesaba ait gerçek profil/eşleşmeler hiç çekilmiyor, ekranda
+   *  boş/anonim durum kalıyordu — kullanıcı "çıkış yapıp tekrar girince
+   *  eşleşmelerim gidiyor" diye deneyimliyordu. `authHeader()` token'ı kendi
+   *  Supabase istemcisinden taze okuduğu için, bu ikinci koşu artık isteğe
+   *  doğru Authorization header'ını (ve dolayısıyla backend'de hesaba ait
+   *  kaydı) ekleyebiliyor. */
   useEffect(() => {
     const sessionId = getSessionId();
     if (!sessionId) return;
@@ -222,20 +232,25 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         setCurrentProfile(profile);
         setApiPrograms(programs);
 
-        const responses: ChatMessageDraft[] = [
-          { role: "assistant", kind: "note", text: "Önceki oturumundan devam ediyorsun." },
-        ];
-        if (chips.length > 0) responses.push({ role: "assistant", kind: "profile", chips });
-        if (programs.length > 0) {
-          responses.push({ role: "assistant", kind: "cards", programIds: programs.map((p) => p.id) });
-        }
-        replaceLastWith(responses);
+        // Sohbet ekranı zaten doluysa (bu oturumda konuşma başlamış),
+        // "önceki oturumdan devam" mesajını tekrar enjekte etme — yalnızca
+        // profil/eşleşmeleri sessizce günceller.
+        setMessages((prev) => {
+          if (prev.length > 0) return prev;
+          const responses: ChatMessageDraft[] = [
+            { role: "assistant", kind: "note", text: "Önceki oturumundan devam ediyorsun." },
+          ];
+          if (chips.length > 0) responses.push({ role: "assistant", kind: "profile", chips });
+          if (programs.length > 0) {
+            responses.push({ role: "assistant", kind: "cards", programIds: programs.map((p) => p.id) });
+          }
+          return responses.map((m, i) => ({ ...m, id: nextId(), delay: i * 90 }) as ChatMessage);
+        });
       })
       .catch(() => {
         // Oturum çekilemezse sessizce yeni bir sohbet gibi devam et
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [userEmail]);
 
   /** Başvurularım listesini backend'den yeniden çeker. */
   const refreshApplications = useCallback(async () => {
