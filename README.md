@@ -125,7 +125,7 @@ flowchart TB
 
 ## Demo Video Linki
 
-🔗 
+🔗 [https://youtu.be/30FYHLk4A-M](https://youtu.be/30FYHLk4A-M)
 
 
 
