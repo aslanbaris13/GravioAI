@@ -528,18 +528,18 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   function onSuggestion(suggestionKey: string) {
     const labelMap: Record<string, string> = {
-      profile: "Düzce'de yeni bir AI yazılım girişimi kurdum, 3 kişiyiz",
+      profile: "İşletmeni birkaç cümleyle tanıt: sektör, şehir, ekip büyüklüğü",
       cloud: "Bulut altyapısı için kredi arıyorum",
       arge: "Ar-Ge hibesine uygun muyum?",
       all: "Yeni şirketim için tüm destekleri göster",
     };
     const label = labelMap[suggestionKey] ?? suggestionKey;
 
-    // "profile" chip'i diğerlerinden farklı: bir istek/soru değil, birebir
-    // birinci ağızdan bir işletme tanımı ("Düzce'de... 3 kişiyiz"). Doğrudan
-    // gönderilirse kullanıcının gerçek işletmesi ne olursa olsun bu sahte
-    // bilgi profiline çıkarılırdı — burada yalnızca YAZI ALANINI doldurup
-    // kendi bilgileriyle düzenlemesi için bırakıyoruz, otomatik göndermiyoruz.
+    // "profile" chip'i diğerlerinden farklı: bir istek/soru değil, kullanıcının
+    // kendi cümlesiyle dolduracağı bir yönerge/şablon. Doğrudan gönderilirse
+    // kullanıcının gerçek işletmesi yerine bu yönerge metni profiline
+    // çıkarılırdı — burada yalnızca YAZI ALANINI doldurup kullanıcının üzerine
+    // yazması için bırakıyoruz, otomatik göndermiyoruz.
     if (suggestionKey === "profile") {
       setInput(label);
       return;
