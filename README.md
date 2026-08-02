@@ -48,7 +48,8 @@ Kullanıcı asistanla **konuşarak** profilini oluşturur. GravioAI ardından pr
 - ⏰ **Son tarih takibi** — kullanıcı profilini hatırlar, fırsatları proaktif bildirir
 - 🔗 **Kaynağa linkli cevaplar** — her öneri resmî kaynağa bağlanır
 - 🔌 **Modüler konektörler** — yeni program = yeni konektör (KOSGEB, TÜBİTAK, AWS…)
-
+- 🔒 **KVKK Uyumlu Yerel LLM (Gelecek Planı)** — İşletme verilerinin gizliliğini maksimum seviyede korumak amacıyla tamamen yerel (local) LLM modelleriyle çalışma altyapısı
+  
 ## Hedef Kitle
 
 - 🚀 **Erken aşama teknoloji girişimcileri** — bulut kredisi, TÜBİTAK BİGG, hızlandırıcı ve melek yatırım arayanlar (ilk hedef segment)
@@ -56,25 +57,28 @@ Kullanıcı asistanla **konuşarak** profilini oluşturur. GravioAI ardından pr
 - 📈 **Büyüme aşamasındaki KOBİ'ler** — yatırım teşvik belgesi, ihracat ve Ar-Ge merkezi teşvikleri arayanlar
 - 🧮 **Mali müşavirler & danışmanlık firmaları (B2B)** — müşteri portföyü için aracı olarak kullananlar
 
-## Product Backlog URL
 
-🔗 [GravioAI Product Backlog Board](https://haticenurolgun.atlassian.net/jira/software/projects/SCRUM/boards/1)
 
 ## 🧠 Yapay Zekâ Mimarisi
 
 GravioAI "tek bir LLM çağrısı" değil; bir **orkestratör** tarafından yönetilen uzman ajanlardan oluşan **agentic** bir üründür.
 
-```
-                         ┌────────────────────────┐
-        Kullanıcı  ⇄     │  Orkestratör (Planner) │
-                         │ niyet → alt ajan akışı │
-                         └───────────┬────────────┘
-            ┌────────┬───────┬───────┼───────┬────────┬────────┬───────┐
-            ▼        ▼       ▼       ▼       ▼        ▼        ▼       ▼
-         Niyet    Profil   Eşleşt. Uygunluk Başvuru Rapor    Sunum   Hafıza
-         Sınıf-   Çıkarma  Ajanı   Ajanı    Ajanı   Yazıcı   Yazıcı  (Memory)
-         landırıcıAjanı    (RAG)   kural+   form+   Ajanı    Ajanı   profil+
-         → akış   → profil arama   LLM      belge   → analiz → pitch bildirim
+```mermaid
+flowchart TB
+
+    U["👤 Kullanıcı"]
+    O["🧠 Orkestratör (Planner)<br/>Niyet → Alt Ajan Akışı"]
+
+    U <--> O
+
+    O --> N["Niyet Sınıflandırıcı<br/>→ Akış"]
+    O --> P["Profil Çıkarma<br/>→ Profil"]
+    O --> E["Eşleştirme Ajanı (RAG)<br/>→ Arama"]
+    O --> UY["Uygunluk Ajanı<br/>→ Kural + LLM"]
+    O --> B["Başvuru Ajanı<br/>→ Form + Belge"]
+    O --> R["Rapor Yazıcı<br/>→ Analiz"]
+    O --> S["Sunum Yazıcı<br/>→ Pitch"]
+    O --> M["Hafıza (Memory)<br/>→ Profil + Bildirim"]
 ```
 
 | Ajan | Görevi |
@@ -84,8 +88,8 @@ GravioAI "tek bir LLM çağrısı" değil; bir **orkestratör** tarafından yön
 | 🔍 **Eşleştirme Ajanı (RAG)** | Program DB üzerinde anlamsal arama yapar |
 | ✅ **Uygunluk Ajanı** | Program şartlarını profile karşı kural-bazlı + LLM ile değerlendirir |
 | 📝 **Başvuru Ajanı** | Form + iş planı taslağı ve belge listesi üretir |
-|📊 Rapor Yazıcı Ajanı |	Destek programları için detaylı gereksinim analizleri ve değerlendirme raporları oluşturur|
-|📽️ Sunum Yazıcı Ajanı |	Başvuru süreçleri için projelerin sunum taslaklarını hazırlar |
+|📊 **Rapor Yazıcı Ajanı** |	Destek programları için detaylı gereksinim analizleri ve değerlendirme raporları oluşturur|
+|📽️ **Sunum Yazıcı Ajanı** |	Başvuru süreçleri için projelerin sunum taslaklarını hazırlar |
 | 🧠 **Hafıza (Memory)** | Kullanıcı profilini saklar, proaktif bildirim sağlar |
 
 ## 🛠️ Teknoloji Yığını
@@ -101,7 +105,21 @@ GravioAI "tek bir LLM çağrısı" değil; bir **orkestratör** tarafından yön
 
 ---
 
+## Product Backlog URL
+
+🔗 [GravioAI Product Backlog Board](https://haticenurolgun.atlassian.net/jira/software/projects/SCRUM/boards/1)
+
+
+## Demo Video Linki
+
+🔗 
+
+
+
+
+
 <details>
+  
 <summary><h1>🚀 Sprint 1</h1></summary>
 
 <br>
