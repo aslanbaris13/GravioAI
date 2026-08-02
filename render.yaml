@@ -17,7 +17,7 @@ services:
       - key: LLM_PROVIDER
         value: gemini
       - key: LLM_MODEL
-        value: gemini-2.5-flash
+        value: gemini-3.5-flash
       - key: GEMINI_API_KEY
         sync: false
       - key: ANTHROPIC_API_KEY

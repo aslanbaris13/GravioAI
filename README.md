@@ -103,12 +103,18 @@ flowchart TB
 
 | Katman | Teknoloji |
 |---|---|
-| Backend | Python · FastAPI |
-| Frontend | Next.js 14 (App Router) |
+| Backend | Python 3.12 · FastAPI · Pydantic v2 · Uvicorn |
+| Frontend | Next.js 14 (App Router) · React 18 · TypeScript |
 | Veritabanı / RAG | Supabase · PostgreSQL · pgvector |
-| Kuyruk | Celery · Redis |
-| LLM | Sağlayıcı-bağımsız soyutlama katmanı |
-| Dağıtım | Vercel (frontend) · container (backend) |
+| Kimlik doğrulama | Supabase Auth (JWT/JWKS) |
+| LLM | Gemini 3.5 Flash — sağlayıcı-bağımsız katman üzerinden |
+| Embedding | Gemini Embedding (`gemini-embedding-001`) |
+| Veri toplama (ETL) | BeautifulSoup4 · LangChain (text-splitters, experimental) |
+| Belge üretimi | python-docx · python-pptx · pypdf |
+| Hız sınırlama | Bağımsız in-memory sliding-window limiter |
+| Test | pytest + pytest-asyncio (backend) · Vitest (frontend) |
+| CI/CD | GitHub Actions (test + boot smoke test) |
+| Dağıtım | Vercel (frontend) · Render (backend) |
 
 ---
 
