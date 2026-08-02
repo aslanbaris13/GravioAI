@@ -44,7 +44,7 @@ Kullanıcı asistanla **konuşarak** profilini oluşturur. GravioAI ardından pr
 - 🧩 **Çok-ajanlı orkestrasyon** — uzman ajanlar bir orkestratör tarafından yönetilir
 - 🔍 **RAG tabanlı eşleştirme** — pgvector ile anlamsal arama, "sana uygun N destek"
 - ✅ **Uygunluk kontrolü** — kural-bazlı + LLM; eksik koşulları açıkça belirtir
-- 📝 **Başvuru hazırlığı** — başvuru formu taslağı + belge listesi + iş planı taslağı
+- 📝 **Başvuru hazırlığı** — başvuru formu taslağı + belge listesi + iş planı taslağı + şirket sunumu oluşturma
 - ⏰ **Son tarih takibi** — kullanıcı profilini hatırlar, fırsatları proaktif bildirir
 - 🔗 **Kaynağa linkli cevaplar** — her öneri resmî kaynağa bağlanır
 - 🔌 **Modüler konektörler** — yeni program = yeni konektör (KOSGEB, TÜBİTAK, AWS…)
@@ -66,15 +66,15 @@ GravioAI "tek bir LLM çağrısı" değil; bir **orkestratör** tarafından yön
 
 ```
                          ┌────────────────────────┐
-        Kullanıcı  ⇄     │   Orkestratör (Planner)│
-                         │  niyet → alt ajan akışı │
+        Kullanıcı  ⇄     │  Orkestratör (Planner) │
+                         │ niyet → alt ajan akışı │
                          └───────────┬────────────┘
-            ┌────────────────┬───────┼────────┬───────────────────┐
-            ▼                ▼       ▼         ▼                   ▼
-     Profil Çıkarma    Eşleştirme   Uygunluk   Başvuru          Hafıza
-     Ajanı             Ajanı (RAG)  Ajanı      Ajanı            (Memory)
-     → profil          pgvector     kural+LLM  form+belge       profil +
-                       anlamsal arama değerlendirme taslağı       bildirim
+            ┌────────┬───────┬───────┼───────┬────────┬────────┬───────┐
+            ▼        ▼       ▼       ▼       ▼        ▼        ▼       ▼
+         Niyet    Profil   Eşleşt. Uygunluk Başvuru Rapor    Sunum   Hafıza
+         Sınıf-   Çıkarma  Ajanı   Ajanı    Ajanı   Yazıcı   Yazıcı  (Memory)
+         landırıcıAjanı    (RAG)   kural+   form+   Ajanı    Ajanı   profil+
+         → akış   → profil arama   LLM      belge   → analiz → pitch bildirim
 ```
 
 | Ajan | Görevi |
@@ -84,6 +84,8 @@ GravioAI "tek bir LLM çağrısı" değil; bir **orkestratör** tarafından yön
 | 🔍 **Eşleştirme Ajanı (RAG)** | Program DB üzerinde anlamsal arama yapar |
 | ✅ **Uygunluk Ajanı** | Program şartlarını profile karşı kural-bazlı + LLM ile değerlendirir |
 | 📝 **Başvuru Ajanı** | Form + iş planı taslağı ve belge listesi üretir |
+|📊 Rapor Yazıcı Ajanı |	Destek programları için detaylı gereksinim analizleri ve değerlendirme raporları oluşturur|
+|📽️ Sunum Yazıcı Ajanı |	Başvuru süreçleri için projelerin sunum taslaklarını hazırlar |
 | 🧠 **Hafıza (Memory)** | Kullanıcı profilini saklar, proaktif bildirim sağlar |
 
 ## 🛠️ Teknoloji Yığını
@@ -492,6 +494,11 @@ Bu sprint sonunda proje, kullanıcı profilini analiz edebilen, uygun destek pro
 
 <img width="736" height="492" alt="Ekran görüntüsü 2026-07-29 173456" src="https://github.com/user-attachments/assets/d180d645-bbde-4ae1-a4df-4698c612ed3e" />
 
+<img width="1009" height="811" alt="Ekran görüntüsü 2026-08-02 154021" src="https://github.com/user-attachments/assets/0c0654c4-077d-4880-b5b4-e6df78892c13" />
+
+<img width="1030" height="825" alt="Ekran görüntüsü 2026-08-02 153955" src="https://github.com/user-attachments/assets/fd50ea48-a7ee-41cf-b028-c12d44256489" />
+
+
 
 </details>
 
@@ -524,16 +531,28 @@ Bu sprint sonunda proje, kullanıcı profilini analiz edebilen, uygun destek pro
 <br>
 
 ### Tamamlanan Çalışmalar
+✔️ Chat Arayüzü Tasarımının İyileştirilmesi
 
-- ⏳ *(Sprint sonunda eklenecektir)*
+✔️ Chatbot Yanıt Yapısının Geliştirilmesi ve Sonuçların Sohbet Arayüzünde Sunulması
 
-### Devam Eden Çalışmalar
+✔️ Deadline Takip ve Hatırlatma Ajanının Geliştirilmesi
 
-- ⏳ *(Sprint sonunda eklenecektir)*
+✔️ Kullanıcı Giriş ve Oturum Yönetimi Sayfalarının Geliştirilmesi
+
+✔️ Kullanıcı Giriş ve Oturum Yönetimi Sayfalarının Geliştirilmesi
+
+✔️ Veritabanı ve Backend Entegrasyonunun Tamamlanması
+
+✔️ Uçtan Uca Sistem Entegrasyonu ve Fonksiyonel Testlerin Gerçekleştirilmesi
+
+✔️ Demo Senaryolarının Hazırlanması ve Doğrulanması
+
+✔️ Canlıya alma ve dökümantasyon içeriklerinin Hazırlanması
+
 
 ### Alınan Kararlar
 
-> *(Sprint sonunda eklenecektir)*
+Projenin son sprinti olması ve doğrudan değerlendirme aşamasına geçilecek olması sebebiyle, bu noktadan sonra canlı sistemde hiçbir kod değişikliği yapılmayarak demo ortamının dondurulmasına karar verilmiştir. Ayrıca, sprint boyunca bireysel yoğunluklardan kaynaklanan iletişim azlığını telafi etmek ve YZTA Bootcamp jüri değerlendirmesine en iyi şekilde hazırlanmak adına, sunum gününden önce Sena, Barış ve Ferhat ile birlikte tam katılımlı bir soru-cevap ve demo provası gerçekleştirilecektir.
 
 </details>
 
@@ -544,7 +563,7 @@ Bu sprint sonunda proje, kullanıcı profilini analiz edebilen, uygun destek pro
 
 <br>
 
-> *(Sprint sonu değerlendirmesi bu bölüme eklenecektir)*
+Bu sprint'te belirlenen 10 scrum'ın tamamı başarıyla bitirilmiştir. GravioAI'nin uçtan uca entegrasyonu sağlanmış, fonksiyonel testleri yapılmış ve chatbot arayüzü kullanıcı deneyimini artıracak şekilde iyileştirilmiştir. Kullanıcı giriş ve oturum yönetimi gibi temel modüller sisteme entegre edilirken, deadline takip ajanının geliştirilmesiyle projenin yapay zeka odaklı özellikleri güçlendirilmiştir. YZTA Bootcamp 2026 süreci için kritik olan demo senaryolarının doğrulanması, canlıya alma, dökümantasyon ve proje tanıtım videosu aşamaları da tamamlanarak sunuma tam hazır hale gelinmiştir.
 
 </details>
 
@@ -555,8 +574,17 @@ Bu sprint sonunda proje, kullanıcı profilini analiz edebilen, uygun destek pro
 
 <br>
 
-> *(Sprint tamamlandıktan sonra ekip değerlendirmesi, karşılaşılan problemler ve gelecek sprint için alınan aksiyonlar bu bölümde yer alacaktır)*
+Neler İyi Gitti?
 
+Tam Başarı ve Zamanında Teslimat: Planlanan scrumların tamamı hiçbir gecikme yaşanmadan, eksiksiz ve tam zamanında başarıyla tamamlandı. Uçtan uca entegrasyon ve demo hazırlıkları sorunsuz bir şekilde bitirildi.
+
+Neler Geliştirilebilir?
+
+Ekip İçi İletişim: Bireysel görev yoğunluklarının artması nedeniyle bu sprint'te takım içi iletişimimiz normalden daha azdı. Süreçteki tek pürüz bu iletişim kopukluğuydu.
+
+Aksiyon Planı:
+
+Bireysel yoğunlukların yüksek olduğu haftalarda ekipten kopmamak adına, kısa durum güncellemeleri (yazılı asenkron mesajlar veya çok kısa günlük kontroller) yapılarak iletişim akışını canlı tutmaya çalışılacak.
 </details>
 
 </details>
