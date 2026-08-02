@@ -125,7 +125,7 @@ flowchart TB
 
 ## Demo Video Linki
 
-🔗 
+🔗 [GravioAI Demo] (https://hatiicenurolgun.atlassian.net/jira/software/projects/SCRUM/boards/1/reports](https://www.youtube.com/watch?v=F9wjQN7dARk)
 
 
 
