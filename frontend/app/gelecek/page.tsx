@@ -459,6 +459,41 @@ export default function GelecekPage() {
         </div>
       </section>
 
+      {/* ---------------- Yerel/dahili LLM altyapısı ---------------- */}
+      <section style={{ padding: "0 32px 72px" }}>
+        <div
+          style={{
+            maxWidth: 1000,
+            margin: "0 auto",
+            padding: "34px 32px",
+            borderRadius: 20,
+            background: "linear-gradient(150deg,var(--teal-100),var(--sand-200))",
+            border: "1px solid var(--border-subtle)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <Ms name="security" size={24} color="var(--teal-700)" />
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--teal-700)", letterSpacing: ".03em" }}>
+              YAKINDA · GİZLİLİK VE GÜVENLİK
+            </span>
+          </div>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 700, color: "var(--ink-900)", margin: "0 0 12px" }}>
+            Yerel sunucularda çalışan yapay zeka altyapısı
+          </h2>
+          <p style={{ fontSize: 15, color: "var(--ink-900)", lineHeight: 1.7, margin: "0 0 16px", maxWidth: 720 }}>
+            Bugün platformun yapay zeka katmanı bulut tabanlı LLM sağlayıcıları üzerinden çalışıyor.
+            Üretim ölçeğinde, işletmenin paylaştığı hassas bilgilerin (finansal veriler, ticari
+            detaylar) hiçbir zaman GravioAI dışına çıkmaması için bu işlemi kendi dahili
+            sunucularımızda barındırılan açık kaynaklı modellere (Qwen2.5, DeepSeek gibi) taşımayı
+            planlıyoruz.
+          </p>
+          <p style={{ fontSize: 14.5, color: "var(--ink-600)", lineHeight: 1.65, margin: 0, maxWidth: 720 }}>
+            Bu geçiş KVKK uyumluluğunu güçlendirecek, kurumsal ve kamu müşterileri için ek bir güven
+            katmanı sağlayacak ve verilerinin kontrolünü tamamen platformda tutacak.
+          </p>
+        </div>
+      </section>
+
       {/* ---------------- Bitirme projesi girişimleri (örnek) ---------------- */}
       <section style={{ padding: "0 32px 72px" }}>
         <div
