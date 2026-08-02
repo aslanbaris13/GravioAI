@@ -6,7 +6,7 @@ import { toVM } from "@/lib/viewmodel";
 import type { ChatMessage, FollowUp, Program } from "@/lib/types";
 
 const SUGGESTIONS: { key: string; icon: string; label: string }[] = [
-  { key: "profile", icon: "storefront", label: "Düzce'de yeni bir AI yazılım girişimi kurdum, 3 kişiyiz" },
+  { key: "profile", icon: "storefront", label: "İşletmeni birkaç cümleyle tanıt: sektör, şehir, ekip büyüklüğü" },
   { key: "cloud", icon: "cloud", label: "Bulut altyapısı için kredi arıyorum" },
   { key: "arge", icon: "science", label: "Ar-Ge hibesine uygun muyum?" },
   { key: "all", icon: "auto_awesome", label: "Yeni şirketim için tüm destekleri göster" },
@@ -127,11 +127,11 @@ export default function ChatView({
                     <Ms name={s.icon} size={20} color="var(--terracotta-600)" style={{ marginTop: 1 }} />
                     <span>
                       <span style={{ fontSize: 13.5, fontWeight: 500, lineHeight: 1.45, color: "var(--ink-900)" }}>{s.label}</span>
-                      {/* "profile" örneği birebir gönderilmiyor, yazı alanına doluyor —
-                          kullanıcı kendi bilgileriyle düzenlesin diye küçük bir ipucu. */}
+                      {/* "profile" bir soru/istek değil, bir yönerge — otomatik
+                          gönderilmez, yalnızca yazı alanını doldurur. */}
                       {s.key === "profile" && (
                         <span style={{ display: "block", fontSize: 11, color: "var(--ink-400)", marginTop: 3 }}>
-                          Örnek — kendi bilgilerinle düzenle
+                          Yazı alanını doldurur, göndermez
                         </span>
                       )}
                     </span>
