@@ -13,6 +13,12 @@ const CALLBACK_ERRORS: Record<string, string> = {
     "önce aşağıdan giriş yapmayı dene.",
 };
 
+/** Jüri/test için önceden doldurulmuş demo hesabı — bilinçli olarak herkese
+ *  açık: değerlendiren kişi kendi hesap açma sürecine girmeden uygulamayı
+ *  dolu bir profille inceleyebilsin diye. Gerçek bir kullanıcı hesabı değil. */
+const DEMO_EMAIL = "gravioai26@gmail.com";
+const DEMO_PASSWORD = "Test123.";
+
 export default function GirisPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -71,6 +77,29 @@ export default function GirisPage() {
         </>
       }
     >
+      <AuthNotice tone="info">
+        <strong>Demo hesabı</strong> — uygulamayı dolu bir profille incelemek için:
+        <div style={{ marginTop: 4, fontFamily: "var(--font-mono, monospace)" }}>
+          {DEMO_EMAIL} / {DEMO_PASSWORD}
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setEmail(DEMO_EMAIL);
+            setPassword(DEMO_PASSWORD);
+          }}
+          style={{
+            marginTop: 8,
+            fontSize: 12.5,
+            fontWeight: 700,
+            color: "var(--success-700)",
+            textDecoration: "underline",
+          }}
+        >
+          Demo hesabıyla doldur
+        </button>
+      </AuthNotice>
+
       {!isAuthConfigured && (
         <AuthNotice tone="info">
           Supabase anahtarları henüz tanımlı değil, bu yüzden giriş isteği gönderilemiyor.
