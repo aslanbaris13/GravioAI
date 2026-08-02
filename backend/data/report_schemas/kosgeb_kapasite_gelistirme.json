@@ -1,0 +1,88 @@
+{
+  "key": "kosgeb_kapasite_gelistirme",
+  "program_name": "KOSGEB Kapasite Geliştirme Destek Programı",
+  "institution": "KOSGEB",
+  "summary": "KOBİ'lerin üretim, hizmet, nitelikli insan kaynağı, test-analiz, belgelendirme ve kurumsal altyapı kapasitelerini artırmaya yönelik finansman ve geri ödemesiz destek programıdır.",
+  "match_keywords": [
+    "kosgeb kapasite geliştirme",
+    "kapasite geliştirme destek programı",
+    "kosgeb kapasite geliştirme desteği",
+    "kapasite geliştirme hibesi",
+    "kapasite artırımı desteği",
+    "kosgeb kapasite artırımı",
+    "kapasite gelistirme",
+    "kosgeb kapasite"
+  ],
+  "sections": [
+    {
+      "id": "sec_mevcut_durum",
+      "title": "1. İşletmenin Mevcut Durumu ve Kapasite İhtiyacı",
+      "description": "İşletmenin mevcut üretim/hizmet kapasitesi, darboğazları ve geliştirilmesi hedeflenen alanların tanımı.",
+      "required_fields": [
+        {
+          "key": "mevcut_kapasite_ve_darbogazlar",
+          "label": "Mevcut Kapasite ve Gelişim İhtiyacı",
+          "description": "İşletmenin mevcut operasyonel kapasitesi, karşılaşılan altyapı veya personel eksiklikleri ve projenin gerekçesi.",
+          "long_text": true,
+          "char_limit": 4000
+        },
+        {
+          "key": "gelistirme_odak_alani",
+          "label": "Kapasite Geliştirme Odak Alanı",
+          "description": "Destek talep edilen ana alan (Örn: Nitelikli Personel, Makine-Teçhizat Altyapısı, Test-Belgelendirme, Kurumsallaşma vb.).",
+          "long_text": false,
+          "char_limit": 500
+        }
+      ]
+    },
+    {
+      "id": "sec_faaliyet_planlama",
+      "title": "2. Kapasite Geliştirme Faaliyet ve Yatırım Planı",
+      "description": "Proje kapsamında gerçekleştirilecek makine/donanım alımları, danışmanlık veya personel istihdamı faaliyetleri.",
+      "required_fields": [
+        {
+          "key": "faaliyet_ve_alitim_detaylari",
+          "label": "Faaliyet ve Tedarik Detayları",
+          "description": "Alınması planlanan makine, teçhizat, yazılım veya hizmet alımlarının teknik özellikleri ve iş planı.",
+          "long_text": true,
+          "char_limit": 3500
+        }
+      ]
+    },
+    {
+      "id": "sec_butce_planlama",
+      "title": "3. Bütçe ve Harcama Kalemleri",
+      "description": "Destek kapsamında talep edilen hibe/kredi kalemlerinin maliyet dökümü.",
+      "required_fields": [
+        {
+          "key": "proje_butcesi_ve_kalemler",
+          "label": "Bütçe ve Finansman Planı",
+          "description": "Desteklenecek makine, hizmet, yazılım ve personel giderlerinin tutar ve proforma detayları.",
+          "long_text": true,
+          "char_limit": 3000
+        }
+      ]
+    },
+    {
+      "id": "sec_beklenen_kazanimlar",
+      "title": "4. Beklenen Çıktılar ve Performans Göstergeleri",
+      "description": "Proje sonunda işletmenin üretim, verimlilik, ciro veya istihdam artış hedefleri.",
+      "required_fields": [
+        {
+          "key": "kapasite_artis_hedefleri",
+          "label": "Hedeflenen Kapasite ve Verimlilik Artışı",
+          "description": "Proje tamamlandığında elde edilecek kapasite artış oranı (%), hedeflenen ek ciro ve istihdam katma değeri.",
+          "long_text": true,
+          "char_limit": 2500
+        }
+      ]
+    }
+  ],
+  "required_documents": [
+    "KOBİ Beyannamesi (Güncel)",
+    "İmza Sirküleri",
+    "Makine / Teçhizat / Donanım Proforma Faturaları",
+    "Test / Belgelendirme / Hizmet Alımı Fiyat Teklifleri",
+    "Mevcut Kapasite Raporu (Varsa TOBB/Oda Onaylı)"
+  ]
+}
