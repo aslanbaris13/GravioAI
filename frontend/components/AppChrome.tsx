@@ -26,6 +26,8 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
     threads,
     activeThreadId,
     openThread,
+    renameThread,
+    deleteThread,
   } = useAppState();
 
   // Kendi tam sayfa düzeni olan rotalar sidebar kabuğunu almaz.
@@ -114,6 +116,8 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
           void openThread(id);
           go("/chat");
         }}
+        onRenameThread={(id, title) => void renameThread(id, title)}
+        onDeleteThread={(id) => void deleteThread(id)}
       />
       <main style={{ flex: 1, minWidth: 0, position: "relative" }}>{children}</main>
       </div>

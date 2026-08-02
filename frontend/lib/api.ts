@@ -508,6 +508,22 @@ export async function appendThreadMessages(
   );
 }
 
+/** Bir thread'in başlığını değiştirir. */
+export async function renameThread(threadId: string, sessionId: string, title: string): Promise<void> {
+  await apiFetch<{ status: string }>(`/threads/${encodeURIComponent(threadId)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ session_id: sessionId, title }),
+  });
+}
+
+/** Bir thread'i (ve tüm mesajlarını) siler. */
+export async function deleteThread(threadId: string, sessionId: string): Promise<void> {
+  await apiFetch<{ status: string }>(
+    `/threads/${encodeURIComponent(threadId)}?session_id=${encodeURIComponent(sessionId)}`,
+    { method: "DELETE" },
+  );
+}
+
 /**
  * Bir rapor şemasına göre, bölüm bölüm rapor içeriği üretir (Rapor Yazma Ajanı).
  */
