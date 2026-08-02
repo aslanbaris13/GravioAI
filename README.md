@@ -4,9 +4,9 @@
 
 ### _Yüzeyin altındaki fırsatı çıkar_
 
-[![Status](https://img.shields.io/badge/durum-geli%C5%9Ftiriliyor-yellow)]()
+[![Status](https://img.shields.io/badge/Durum-Geli%C5%9Ftiriliyor-yellow)]()
 [![Bootcamp](https://img.shields.io/badge/YZTA-Bootcamp%202026-1f3a5f)]()
-[![Category](https://img.shields.io/badge/kategori-Yapay%20Zek%C3%A2%20%26%20Veri%20Bilimi-blueviolet)]()
+[![Category](https://img.shields.io/badge/Kategori-Yapay%20Zek%C3%A2%20%26%20Veri%20Bilimi-blueviolet)]()
 [![License](https://img.shields.io/badge/lisans-MIT-green)](LICENSE)
 
 </div>
@@ -55,10 +55,6 @@ Kullanıcı asistanla **konuşarak** profilini oluşturur. GravioAI ardından pr
 - 📈 **Büyüme aşamasındaki KOBİ'ler** — yatırım teşvik belgesi, ihracat ve Ar-Ge merkezi teşvikleri arayanlar
 - 🧮 **Mali müşavirler & danışmanlık firmaları (B2B)** — müşteri portföyü için aracı olarak kullananlar
 
-## Product Backlog URL
-
-🔗 GravioAI Proje Yönetim Board'u:
-(https://hatiicenurolgun.atlassian.net/jira/software/projects/SCRUM/summary)
 
 ## 🧠 Yapay Zekâ Mimarisi
 
@@ -100,6 +96,20 @@ GravioAI "tek bir LLM çağrısı" değil; bir **orkestratör** tarafından yön
 | Dağıtım | Vercel (frontend) · container (backend) |
 
 ---
+
+## Product Backlog URL
+
+🔗 GravioAI Proje Yönetim Board'u:
+(https://hatiicenurolgun.atlassian.net/jira/software/projects/SCRUM/summary)
+
+
+## Demo Videosu Youtube Linki 
+
+🔗
+
+
+
+
 
 <details>
 <summary><h1>🚀 Sprint 1</h1></summary>
