@@ -13,7 +13,7 @@
 [![Category](https://img.shields.io/badge/kategori-Yapay%20Zek%C3%A2%20%26%20Veri%20Bilimi-blueviolet)]()
 [![License](https://img.shields.io/badge/lisans-MIT-green)](LICENSE)
 
-🚀 [**Canlı Demo**](https://gravio-ai-roan.vercel.app) · 📚 [**API Dokümantasyonu**](https://gravioai-backend.onrender.com/docs)
+🚀 [**Canlı Demo**](https://gravioai.com.tr) · 📚 [**API Dokümantasyonu**](https://gravioai-backend.onrender.com/docs)
 
 **Developed by**
 [Barış Aslan](https://github.com/aslanbaris13) · [Hatice Nur Olgun](https://github.com/haticenurolgun) · [Sena Cindioğlu](https://github.com/SenaCindioglu) · [Ferhat Güdek](https://github.com/FerhatGudek)
